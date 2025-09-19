@@ -61,9 +61,7 @@ class Question(Model):
         verbose_name_plural = "Вопросы"
 
     def __str__(self) -> str:
-        if parent := self.parent:
-            return f"{self.text[: MAX_LEN_STRING]} (родитель: {parent.id})"
-        return f"{self.text[: MAX_LEN_STRING]} корневая вопрос"
+        return self.text[:MAX_LEN_STRING]
 
 
 class AnswerChoice(Model):
@@ -99,6 +97,7 @@ class AnswerChoice(Model):
                 fields=(
                     "last_question",
                     "next_question",
+                    "answer",
                 ),
             ),
             UniqueConstraint(

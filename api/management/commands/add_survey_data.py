@@ -62,7 +62,9 @@ class Command(BaseCommand):
             questions.append(question)
             logger.info(f"Создан вопрос: {question.text}")
 
-        logger.debug("Затем создаем варианты ответов с ссылками на следующие вопросы")
+        logger.debug(
+            "Затем создаем варианты ответов с ссылками на следующие вопросы"
+        )
         for i, question_data in enumerate(questions_data):
             current_question = questions[i]
 
@@ -81,8 +83,11 @@ class Command(BaseCommand):
                     answer=answer_data["text"],
                 )
                 logger.info(
-                    f'  Создан ответ: {answer_data["text"]} -> {next_question.text if next_question else "КОНЕЦ"}'
+                    f'  Создан ответ: {answer_data["text"]} '
+                    f'-> {next_question.text if next_question else "КОНЕЦ"}'
                 )
 
         logger.info(f"Итого создано: {len(questions)} вопросов")
-        logger.info(f"Итого создано: {AnswerChoice.objects.count()} вариантов ответов")
+        logger.info(
+            f"Итого создано: {AnswerChoice.objects.count()} вариантов ответов"
+        )
