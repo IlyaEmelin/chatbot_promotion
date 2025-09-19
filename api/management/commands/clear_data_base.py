@@ -1,7 +1,10 @@
 import logging
 
 from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
 from django.apps import apps
+
+from .add_survey_data import Command as AddSurveyDataCommand
 
 logger = logging.getLogger(__name__)
 
@@ -12,16 +15,30 @@ EXCLUSION_TABLES = {
     "sessions",
 }
 
+User = get_user_model()
+
+USERNAME = "admin"
+USERNAME_EMAIL = "admin@example.com"
+USERNAME_PASSWORD = "admin123"
+
 
 class Command(BaseCommand):
     help = "Очищает все данные из базы, но оставляет таблицы"
 
-    def handle(self, *args, **options) -> None:
+    def handle(
+        self,
+        *args,
+        add_user=False,
+        add_survey_data=False,
+        **options,
+    ) -> None:
         """
         Очистка записей из базы данных
 
         Args:
             *args: аргументы
+            add_user: добавить пользователя
+            add_survey_data:
             **options: именные аргументы
         """
         models = apps.get_models()
@@ -33,3 +50,17 @@ class Command(BaseCommand):
                 model.objects.all().delete()
                 logger.info(f"Удалено {count} объектов из {label}")
         logger.info("База данных очищена!")
+
+        if add_user:
+            logger.info("Добавление тестового пользователя!")
+            if not User.objects.filter(username=USERNAME).exists():
+                User.objects.create_superuser(
+                    username=USERNAME, email=USERNAME_EMAIL, password=USERNAME_PASSWORD
+                )
+                logger.info(f"Суперпользователь {USERNAME} создан!")
+            else:
+                logger.info(f"Пользователь {USERNAME} уже существует")
+
+        if add_survey_data:
+            add_survey_data_command = AddSurveyDataCommand()
+            add_survey_data_command.handle(*args, **options)

@@ -30,7 +30,7 @@ class Question(Model):
     Вопрос из опросника
     """
 
-    text = TextField(verbose_name="Техт")
+    text = TextField(verbose_name="Текст")
     updated_at = DateTimeField(
         auto_now=True,
         verbose_name="Дата последнего изменения",
@@ -57,13 +57,13 @@ class Question(Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = "Подписка"
-        verbose_name_plural = "Подписки"
+        verbose_name = "Вопрос"
+        verbose_name_plural = "Вопросы"
 
     def __str__(self) -> str:
         if parent := self.parent:
             return f"{self.text[: MAX_LEN_STRING]} (родитель: {parent.id})"
-        return f"{self.text[: MAX_LEN_STRING]} корневая подписка"
+        return f"{self.text[: MAX_LEN_STRING]} корневая вопрос"
 
 
 class AnswerChoice(Model):
@@ -72,12 +72,16 @@ class AnswerChoice(Model):
     last_question = ForeignKey(
         Question,
         on_delete=CASCADE,
-        verbose_name="Преведущий вопрос",
+        verbose_name="Предыдущий вопрос",
+        related_name="last_questions",
     )
     next_question = ForeignKey(
         Question,
         on_delete=CASCADE,
         verbose_name="Следующий вопрос",
+        null=True,
+        blank=True,
+        related_name="next_questions",
     )
     answer = CharField(
         max_length=ANSWER_LEN,
@@ -91,25 +95,32 @@ class AnswerChoice(Model):
         verbose_name_plural = "Варианты ответа"
         constraints = (
             UniqueConstraint(
+                name="unique_last_next_question",
                 fields=(
                     "last_question",
                     "next_question",
-                )
+                ),
             ),
             UniqueConstraint(
+                name="unique_last_question_answer",
                 fields=(
                     "last_question",
                     "answer",
-                )
+                ),
             ),
         )
 
     def __str__(self):
-        return (
-            f"{self.answer[:MAX_LEN_STRING] if self.answer else None} "
-            f"от { str(self.last_question)[:MAX_LEN_STRING]} "
-            f"к {str(self.next_question)[:MAX_LEN_STRING]}"
+        next_q_text = (
+            self.next_question[:MAX_LEN_STRING]
+            if self.next_question
+            else "КОНЕЦ"
         )
+        last_q_text = str(self.last_question)[:MAX_LEN_STRING]
+        answer_text = (
+            self.answer[:MAX_LEN_STRING] if self.answer else "Пользовательский"
+        )
+        return f"{answer_text} от {last_q_text} к {next_q_text}"
 
 
 class Survey(Model):
@@ -127,11 +138,13 @@ class Survey(Model):
         related_name="surveys",
         verbose_name="Пользователь",
     )
-    question = OneToOneField(
+    current_question = ForeignKey(
         Question,
         on_delete=SET_NULL,
-        related_name="survey",
-        verbose_name="Вопрос опроса",
+        related_name="surveys",
+        verbose_name="Текущий вопрос",
+        null=True,
+        blank=True,
     )
     status = CharField(
         max_length=STATUS_LEN,

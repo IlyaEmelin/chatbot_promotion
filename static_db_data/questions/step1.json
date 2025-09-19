@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "text": "Что нужно приобрести?",
+      "answers": [
+        {"text": "Коляска (ТСР)", "next_question_index": 1},
+        {"text": "Приставка", "next_question_index": 1},
+        {"text": "Комплектующие", "next_question_index": 1}
+      ]
+    },
+    {
+      "text": "Есть ли сертификат на ТСР?",
+      "answers": [
+        {"text": "Да", "next_question_index": 2},
+        {"text": "Нет", "next_question_index": 2}
+      ]
+    },
+    {
+      "text": "Есть ли открытые сборы в других фондах?",
+      "answers": [
+        {"text": "Да", "next_question_index": 3},
+        {"text": "Нет", "next_question_index": 3}
+      ]
+    },
+    {
+      "text": "Нужна ли консультационная помощь?",
+      "answers": [
+        {"text": "Да, по ИПРА", "next_question_index": 4},
+        {"text": "Да, по МСЭ", "next_question_index": 4},
+        {"text": "Да, по СФР", "next_question_index": 4},
+        {"text": "Нет", "next_question_index": 4}
+      ]
+    },
+    {
+      "text": "Есть ли возможность продвигать сбор самостоятельно?",
+      "answers": [
+        {"text": "Да", "next_question_index": 5},
+        {"text": "Нет", "next_question_index": 5}
+      ]
+    },
+    {
+      "text": "Хотели бы получать информацию о правильном позиционировании?",
+      "answers": [
+        {"text": "Да", "next_question_index": null},
+        {"text": "Нет", "next_question_index": null}
+      ]
+    }
+  ]
+}
