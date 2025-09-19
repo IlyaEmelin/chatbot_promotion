@@ -25,6 +25,24 @@ USERNAME_PASSWORD = "admin123"
 class Command(BaseCommand):
     help = "Очищает все данные из базы, но оставляет таблицы"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--add_user",
+            action="store_true",
+            help="Добавить тестового пользователя",
+        )
+        parser.add_argument(
+            "--add_survey_data",
+            action="store_true",
+            help="Добавить данные опросов из JSON файла",
+        )
+        parser.add_argument(
+            "--file",
+            type=str,
+            default="survey_data.json",
+            help="Путь к JSON файлу с данными опросов",
+        )
+
     def handle(
         self,
         *args,
@@ -55,7 +73,9 @@ class Command(BaseCommand):
             logger.info("Добавление тестового пользователя!")
             if not User.objects.filter(username=USERNAME).exists():
                 User.objects.create_superuser(
-                    username=USERNAME, email=USERNAME_EMAIL, password=USERNAME_PASSWORD
+                    username=USERNAME,
+                    email=USERNAME_EMAIL,
+                    password=USERNAME_PASSWORD,
                 )
                 logger.info(f"Суперпользователь {USERNAME} создан!")
             else:
