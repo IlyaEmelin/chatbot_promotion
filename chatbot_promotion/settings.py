@@ -13,8 +13,8 @@ env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, "dummy-key-for-dev"),
 )
-environ.Env.read_env(env_file=BASE_DIR.parent / ".env.example")
-environ.Env.read_env(env_file=BASE_DIR.parent / ".env", overwrite=True)
+environ.Env.read_env(env_file=BASE_DIR / ".env.example")
+environ.Env.read_env(env_file=BASE_DIR / ".env", overwrite=True)
 
 
 LOGGING = {
