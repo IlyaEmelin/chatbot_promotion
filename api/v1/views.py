@@ -154,7 +154,7 @@ def update_survey(request: Request) -> Response:
         return Response(
             {
                 "id": survey.id,
-                "question": question.text,
+                "current_question_text": question.text,
                 "answers": [
                     answer_choice.answer
                     for answer_choice in (

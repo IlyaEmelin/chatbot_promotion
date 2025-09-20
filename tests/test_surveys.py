@@ -14,8 +14,10 @@ from questionnaire.models import Survey
 @pytest.mark.django_db
 class TestSurveyCreate:
 
-    def test_create_survey_success(self, user, authenticated_client, question):
-        """Тест успешного создания опроса"""
+    def test_create1_survey_success(
+        self, user, authenticated_client, question
+    ):
+        """Тест 1 успешного создания опроса"""
         url = reverse("create_survey")
         data = {"current_question": question.id}
 
@@ -25,6 +27,33 @@ class TestSurveyCreate:
         assert response.data["id"] is not None
         assert response.data["current_question_text"] == question.text
         assert "answers" in response.data
+        assert response.data["answers"] == []
+
+        # Проверяем, что опрос создался в базе
+        survey = Survey.objects.get(id=response.data["id"])
+        assert survey.user == user
+        assert survey.current_question == question
+        assert survey.status == "draft"
+        assert survey.result == []
+
+    def test_create2_survey_success(
+        self,
+        user,
+        authenticated_client,
+        answer_choice,
+        question,
+    ):
+        """Тест 2 успешного создания опроса"""
+        url = reverse("create_survey")
+        data = {"current_question": question.id}
+
+        response = authenticated_client.post(url, data, format="json")
+
+        assert response.status_code == HTTP_200_OK
+        assert response.data["id"] is not None
+        assert response.data["current_question_text"] == question.text
+        assert "answers" in response.data
+        assert response.data["answers"] == ["test_answer"]
 
         # Проверяем, что опрос создался в базе
         survey = Survey.objects.get(id=response.data["id"])

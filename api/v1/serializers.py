@@ -38,7 +38,7 @@ class SurveyReadSerializer(ModelSerializer):
     def get_answers(self, obj):
         if current_question := obj.current_question:
             return list(
-                current_question.next_answer_choice.all().values_list(
+                current_question.last_answer_choice.all().values_list(
                     "answer",
                     flat=True,
                 )
