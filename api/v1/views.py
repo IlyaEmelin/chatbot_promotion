@@ -147,29 +147,6 @@ def update_survey(request: Request, pk: UUID) -> Response:
             survey.updated_at = next_question.updated_at
 
         survey.save()
-        # survey.objects.update(
-        #     current_question=next_question,
-        #     status="draft" if next_question else "processing",
-        #     result=result,
-        #     questions_version_uuid=(
-        #         UUID(
-        #             survey.questions_version_uuid.int
-        #             ^ next_question.updated_uuid.int
-        #         )
-        #         if next_question
-        #         else survey.questions_version_uuid
-        #     ),
-        #     updated_at=(
-        #         max(next_question.updated_at, survey.updated_at)
-        #         if survey.updated_at
-        #         else (
-        #             next_question.updated_at
-        #             if next_question
-        #             else survey.updated_at
-        #         )
-        #     ),
-        # )
-
         return Response(
             {
                 "id": survey.id,
