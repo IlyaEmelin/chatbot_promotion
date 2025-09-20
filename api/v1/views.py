@@ -18,7 +18,7 @@ from rest_framework.mixins import (
 )
 
 from questionnaire.models import Survey, Question, AnswerChoice
-from .serializers import SurveyCreateSerializer
+from .serializers import SurveyCreateSerializer, SurveyUpdateSerializer
 
 User = get_user_model()
 
@@ -107,7 +107,14 @@ def update_survey(request: Request, pk: UUID) -> Response:
 
     # TODO user == request.user добавить эту проверку в права
     user = User.objects.first()
-    answer = request.data.get("answer")
+    serializer = SurveyUpdateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(
+            {"errors": serializer.errors},
+            status=HTTP_400_BAD_REQUEST,
+        )
+
+    answer = serializer.validated_data.get("answer")
     survey = get_object_or_404(
         Survey,
         pk=pk,

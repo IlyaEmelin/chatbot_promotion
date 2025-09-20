@@ -61,3 +61,13 @@ class SurveyCreateSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data
+
+
+class SurveyUpdateSerializer(ModelSerializer):
+    """Сериализатор для обновления опроса"""
+
+    answer = CharField(required=False, allow_blank=True, allow_null=True)
+
+    class Meta:
+        model = Survey
+        fields = ("answer",)
