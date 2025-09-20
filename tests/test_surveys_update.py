@@ -28,7 +28,7 @@ class TestSurveyUpdate:
         response = authenticated_client.put(url, data, format="json")
 
         assert response.status_code == HTTP_200_OK
-        assert response.data["id"] == survey.id
+        assert response.data["id"] == str(survey.id)
         assert "current_question_text" in response.data
         assert "answers" in response.data
 
@@ -110,7 +110,10 @@ class TestSurveyUpdate:
         response = authenticated_client.put(url, data, format="json")
 
         assert response.status_code == HTTP_200_OK
-        assert "Не переда ответ" in response.data["current_question_text"]
+        assert (
+            "Не передан ответ. Ответе снова.\nТестовый вопрос?"
+            == response.data["current_question_text"]
+        )
 
     def test_update_survey_missing_survey_id(self, authenticated_client):
         """Тест обновления опроса без id"""

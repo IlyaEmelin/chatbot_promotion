@@ -18,7 +18,11 @@ from rest_framework.mixins import (
 )
 
 from questionnaire.models import Survey, Question, AnswerChoice
-from .serializers import SurveyCreateSerializer, SurveyUpdateSerializer
+from .serializers import (
+    SurveyCreateSerializer,
+    SurveyUpdateSerializer,
+    SurveyReadSerializer,
+)
 
 User = get_user_model()
 
@@ -46,7 +50,7 @@ def create_survey(request: Request) -> Response:
             status=HTTP_400_BAD_REQUEST,
         )
 
-    survey = serializer.save(
+    serializer.save(
         user=user,
         status="draft",
         result=[],
@@ -55,40 +59,7 @@ def create_survey(request: Request) -> Response:
         ].updated_uuid,
     )
 
-    response_data = SurveyCreateSerializer(survey).data
-    return Response(response_data)
-
-
-def __get_next_answer_choice(
-    answer: str | None,
-    question: Question,
-) -> tuple[Question, str | None]:
-    """
-
-    Args:
-        answer: ответ полученный на вопрос
-        question: вопрос текущий
-
-    Returns:
-        Question: следующий вопрос
-        str|None: ответ
-    """
-    if not answer:
-        question.text = "Не переда ответ. Ответе снова.\n" + question.text
-        return question, None
-
-    if select_answer_choice := question.last_answer_choice.filter(
-        answer=answer,
-    ).first():
-        return select_answer_choice.next_question, answer
-
-    if select_answer_choice := question.last_answer_choice.filter(
-        answer=None,
-    ).first():
-        return select_answer_choice.next_question, answer
-
-    question.text = "Не корректный ответ. Ответе снова.\n" + question.text
-    return question, None
+    return Response(serializer.data)
 
 
 @api_view(("PUT",))
@@ -96,75 +67,35 @@ def __get_next_answer_choice(
 # TODO @permission_classes((IsAuthenticated, ))
 def update_survey(request: Request, pk: UUID) -> Response:
     """
-    Создает новый опрос для аутентифицированного пользователя
+    Обновляет опрос через SurveyUpdateSerializer
 
     Args:
         request: запрос
+        pk: UUID опроса
 
     Returns:
-
+        Response: ответ с данными обновленного опроса
     """
 
     # TODO user == request.user добавить эту проверку в права
     user = User.objects.first()
-    serializer = SurveyUpdateSerializer(data=request.data)
+
+    # Получаем объект survey
+    survey = get_object_or_404(Survey, pk=pk)
+
+    # Создаем сериализатор с instance и data
+    serializer = SurveyUpdateSerializer(
+        instance=survey,
+        data=request.data,
+        partial=True,  # Разрешаем частичное обновление
+    )
+
     if not serializer.is_valid():
         return Response(
             {"errors": serializer.errors},
             status=HTTP_400_BAD_REQUEST,
         )
 
-    answer = serializer.validated_data.get("answer")
-    survey = get_object_or_404(
-        Survey,
-        pk=pk,
-    )
-    if question := survey.current_question:
-        next_question, answer_text = __get_next_answer_choice(
-            answer,
-            question,
-        )
+    serializer.save()
 
-        result = survey.result or []
-        if answer_text:
-            result.extend(
-                (
-                    question.text,
-                    answer_text,
-                )
-            )
-
-        survey.current_question = next_question
-        survey.status = "draft" if next_question else "processing"
-        survey.result = result
-        if next_question:
-            survey.questions_version_uuid = UUID(
-                int=(
-                    survey.questions_version_uuid.int
-                    ^ next_question.updated_uuid.int
-                )
-            )
-
-        if next_question and survey.updated_at:
-            survey.updated_at = max(
-                next_question.updated_at,
-                survey.updated_at,
-            )
-        else:
-            if next_question:
-                survey.updated_at = next_question.updated_at
-
-        survey.save()
-        return Response(
-            {
-                "id": survey.id,
-                "current_question_text": question.text,
-                "answers": [
-                    answer_choice.answer
-                    for answer_choice in (
-                        question.next_answer_choice.all() or []
-                    )
-                ],
-            }
-        )
-    raise ValidationError("Не задан текущий вопрос")
+    return Response(serializer.data)
