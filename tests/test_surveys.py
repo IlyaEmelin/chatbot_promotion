@@ -4,6 +4,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
+    HTTP_201_CREATED,
     HTTP_401_UNAUTHORIZED,
     HTTP_404_NOT_FOUND,
     HTTP_400_BAD_REQUEST,
@@ -23,7 +24,7 @@ class TestSurveyCreate:
 
         response = authenticated_client.post(url, data, format="json")
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTP_201_CREATED
         assert response.data["id"] is not None
         assert response.data["current_question_text"] == question.text
         assert "answers" in response.data
@@ -49,7 +50,7 @@ class TestSurveyCreate:
 
         response = authenticated_client.post(url, data, format="json")
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTP_201_CREATED
         assert response.data["id"] is not None
         assert response.data["current_question_text"] == question.text
         assert "answers" in response.data
