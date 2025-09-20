@@ -9,7 +9,11 @@ from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    UpdateModelMixin,
+    ListModelMixin,
+)
 
 from questionnaire.models import Survey, Question
 from .serializers import (
@@ -21,7 +25,12 @@ from .serializers import (
 User = get_user_model()
 
 
-class SurveyViewSet(GenericViewSet, CreateModelMixin, UpdateModelMixin):
+class SurveyViewSet(
+    CreateModelMixin,
+    UpdateModelMixin,
+    ListModelMixin,
+    GenericViewSet,
+):
     """
     ViewSet для работы с опросами
     """

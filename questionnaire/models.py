@@ -9,6 +9,7 @@ from django.db.models import (
     CASCADE,
     SET_NULL,
     UniqueConstraint,
+    Index,
 )
 from django.contrib.auth import get_user_model
 from uuid import uuid4
@@ -166,6 +167,8 @@ class Survey(Model):
     class Meta:
         verbose_name = "Опрос"
         verbose_name_plural = "Опросы"
+        ordering = ("-created_at",)
+        indexes = (Index(fields=["created_at"]),)
 
     def __str__(self) -> str:
         return f"Опрос пользователя {self.user} (статус: {self.status})"
