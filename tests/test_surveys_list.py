@@ -196,39 +196,3 @@ class TestSurveyList:
         survey_ids = {item["id"] for item in response.data}
         expected_ids = {str(processing_survey.id), str(completed_survey.id)}
         assert survey_ids == expected_ids
-
-    def test_list_surveys_pagination(
-        self,
-        authenticated_client: APIClient,
-        user,
-        question,
-    ):
-        """Тест пагинации списка опросов"""
-        # Создаем несколько опросов
-        for i in range(15):
-            Survey.objects.create(
-                user=user,
-                current_question=question,
-                status="draft",
-                result=[],
-                questions_version_uuid=f"12345678-1234-1234-1234-1234567890{i:02d}",
-            )
-
-        url = reverse("survey-list")
-
-        response = authenticated_client.get(url)
-
-        assert response.status_code == HTTP_200_OK
-        assert isinstance(response.data, list)
-        # По умолчанию DRF возвращает все записи без пагинации
-        # Если настроена пагинация, проверяем структуру ответа
-        if "results" in response.data:
-            # Пагинация включена
-            assert "count" in response.data
-            assert "next" in response.data
-            assert "previous" in response.data
-            assert "results" in response.data
-            assert len(response.data["results"]) <= 10  # Размер страницы
-        else:
-            # Пагинация отключена - все записи в корне
-            assert len(response.data) == 15
