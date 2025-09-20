@@ -3,7 +3,7 @@ from uuid import UUID
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -21,6 +21,7 @@ from .serializers import (
     SurveyUpdateSerializer,
     SurveyReadSerializer,
 )
+from .filter import SurveyFilterBackend
 
 User = get_user_model()
 
@@ -39,6 +40,7 @@ class SurveyViewSet(
     permission_classes = [AllowAny]
     # TODO: заменить на IsAuthenticated
     # permission_classes = [IsAuthenticated]
+    filter_backends = (SurveyFilterBackend,)
 
     def get_serializer_class(self):
         """
@@ -49,6 +51,24 @@ class SurveyViewSet(
         elif self.action == "update":
             return SurveyUpdateSerializer
         return SurveyReadSerializer
+
+    def get_queryset(self):
+        """
+        Возвращает только опросы текущего пользователя
+        """
+        # TODO если пользователь не IsAuthenticated return queryset.none()
+        queryset = super().get_queryset()
+        if self.request.user.is_authenticated:
+            return (
+                queryset.filter(user=self.request.user)
+                .prefetch_related(
+                    "current_question",
+                )
+                .order_by("-created_at")
+            )
+        return queryset.prefetch_related(
+            "current_question",
+        ).order_by("-created_at")
 
     def create(self, request, *args, **kwargs):
         """
