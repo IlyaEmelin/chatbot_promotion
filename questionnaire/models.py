@@ -4,7 +4,6 @@ from django.db.models import (
     TextField,
     ForeignKey,
     DateTimeField,
-    OneToOneField,
     UUIDField,
     JSONField,
     CASCADE,

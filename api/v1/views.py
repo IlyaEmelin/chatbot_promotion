@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import (
     GenericViewSet,
 )
@@ -17,6 +18,7 @@ from rest_framework.mixins import (
 )
 
 from questionnaire.models import Survey, Question, AnswerChoice
+from .serializers import SurveyCreateSerializer
 
 User = get_user_model()
 
@@ -37,28 +39,24 @@ def create_survey(request: Request) -> Response:
 
     # TODO user = request.user
     user = User.objects.first()
-    question_id = request.data.get("question_id")
-    question = get_object_or_404(
-        Question,
-        pk=question_id,
-    )
-    survey = Survey.objects.create(
-        user=request.user,
-        current_question=question,
+    serializer = SurveyCreateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(
+            {"errors": serializer.errors},
+            status=HTTP_400_BAD_REQUEST,
+        )
+
+    survey = serializer.save(
+        user=user,
         status="draft",
         result=[],
-        questions_version_uuid=question.updated_uuid,
+        questions_version_uuid=serializer.validated_data[
+            "current_question"
+        ].updated_uuid,
     )
-    return Response(
-        {
-            "id": survey.id,
-            "question": question.text,
-            "answers": [
-                answer_choice.answer
-                for answer_choice in (question.last_answer_choice or [])
-            ],
-        }
-    )
+
+    response_data = SurveyCreateSerializer(survey).data
+    return Response(response_data)
 
 
 def __get_next_answer_choice(
@@ -79,28 +77,19 @@ def __get_next_answer_choice(
         question.text = "Не переда ответ. Ответе снова.\n" + question.text
         return question, None
 
-    try:
-        select_answer_choice = next(
-            answer_choice
-            for answer_choice in question.next_answer_choice
-            if answer_choice.answer == answer
-        )
+    if select_answer_choice := question.next_answer_choice.get(
+        answer=answer,
+    ):
         return select_answer_choice.next_question, answer
-    except StopIteration:
-        try:
-            select_answer_choice = next(
-                answer_choice
-                for answer_choice in question.last_answer_choice
-                if answer_choice.answer is None
-            )
-            return select_answer_choice.next_question, answer
-        except StopIteration:
-            pass
+    elif select_answer_choice := question.next_answer_choice.get(
+        answer=None,
+    ):
+        return select_answer_choice.next_question, answer
     question.text = "Не корректный ответ. Ответе снова.\n" + question.text
     return question, None
 
 
-@api_view
+@api_view(("PUT",))
 @permission_classes((AllowAny,))
 # TODO @permission_classes((IsAuthenticated, ))
 def update_survey(request: Request) -> Response:
@@ -168,7 +157,9 @@ def update_survey(request: Request) -> Response:
                 "question": question.text,
                 "answers": [
                     answer_choice.answer
-                    for answer_choice in (question.next_answer_choice or [])
+                    for answer_choice in (
+                        question.next_answer_choice.all() or []
+                    )
                 ],
             }
         )
