@@ -77,14 +77,16 @@ def __get_next_answer_choice(
         question.text = "Не переда ответ. Ответе снова.\n" + question.text
         return question, None
 
-    if select_answer_choice := question.next_answer_choice.get(
+    if select_answer_choice := question.last_answer_choice.filter(
         answer=answer,
-    ):
+    ).first():
         return select_answer_choice.next_question, answer
-    elif select_answer_choice := question.next_answer_choice.get(
+
+    if select_answer_choice := question.last_answer_choice.filter(
         answer=None,
-    ):
+    ).first():
         return select_answer_choice.next_question, answer
+
     question.text = "Не корректный ответ. Ответе снова.\n" + question.text
     return question, None
 
@@ -92,7 +94,7 @@ def __get_next_answer_choice(
 @api_view(("PUT",))
 @permission_classes((AllowAny,))
 # TODO @permission_classes((IsAuthenticated, ))
-def update_survey(request: Request) -> Response:
+def update_survey(request: Request, pk: UUID) -> Response:
     """
     Создает новый опрос для аутентифицированного пользователя
 
@@ -103,15 +105,12 @@ def update_survey(request: Request) -> Response:
 
     """
 
-    # TODO user = request.user
+    # TODO user == request.user добавить эту проверку в права
     user = User.objects.first()
-    survey_id, answer = (
-        request.data.get("survey_id"),
-        request.data.get("answer"),
-    )
+    answer = request.data.get("answer")
     survey = get_object_or_404(
         Survey,
-        pk=survey_id,
+        pk=pk,
     )
     if question := survey.current_question:
         next_question, answer_text = __get_next_answer_choice(
@@ -128,28 +127,48 @@ def update_survey(request: Request) -> Response:
                 )
             )
 
-        survey.objects.update(
-            current_question=next_question,
-            status="draft" if next_question else "processing",
-            result=result,
-            questions_version_uuid=(
-                UUID(
+        survey.current_question = next_question
+        survey.status = "draft" if next_question else "processing"
+        survey.result = result
+        if next_question:
+            survey.questions_version_uuid = UUID(
+                int=(
                     survey.questions_version_uuid.int
                     ^ next_question.updated_uuid.int
                 )
-                if next_question
-                else survey.questions_version_uuid
-            ),
-            updated_at=(
-                max(next_question.updated_at, survey.updated_at)
-                if survey.updated_at
-                else (
-                    next_question.updated_at
-                    if next_question
-                    else survey.updated_at
-                )
-            ),
-        )
+            )
+
+        if next_question and survey.updated_at:
+            survey.updated_at = max(
+                next_question.updated_at,
+                survey.updated_at,
+            )
+        else:
+            survey.updated_at = next_question.updated_at
+
+        survey.save()
+        # survey.objects.update(
+        #     current_question=next_question,
+        #     status="draft" if next_question else "processing",
+        #     result=result,
+        #     questions_version_uuid=(
+        #         UUID(
+        #             survey.questions_version_uuid.int
+        #             ^ next_question.updated_uuid.int
+        #         )
+        #         if next_question
+        #         else survey.questions_version_uuid
+        #     ),
+        #     updated_at=(
+        #         max(next_question.updated_at, survey.updated_at)
+        #         if survey.updated_at
+        #         else (
+        #             next_question.updated_at
+        #             if next_question
+        #             else survey.updated_at
+        #         )
+        #     ),
+        # )
 
         return Response(
             {

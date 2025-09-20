@@ -101,3 +101,66 @@ def survey(user, question) -> Survey:
         result=[],
         questions_version_uuid="32345678-1234-1234-1234-123456789012",
     )
+
+
+@pytest.fixture
+def question_with_custom_answer() -> Question:
+    """Вопрос с вариантом для пользовательского ответа"""
+    question = Question.objects.create(
+        text="Вопрос с пользовательским ответом?",
+        updated_uuid="52345678-1234-1234-1234-123456789012",
+    )
+
+    # Создаем AnswerChoice для пользовательского ответа
+    next_question = Question.objects.create(
+        text="Следующий вопрос после пользовательского",
+        updated_uuid="62345678-1234-1234-1234-123456789012",
+    )
+    AnswerChoice.objects.create(
+        last_question=question,
+        next_question=next_question,
+        answer=None,  # Для пользовательских ответов
+    )
+    return question
+
+
+@pytest.fixture
+def survey_with_custom_answer(user, question_with_custom_answer) -> Survey:
+    """Опрос с вопросом, имеющим пользовательский ответ"""
+    return Survey.objects.create(
+        user=user,
+        current_question=question_with_custom_answer,
+        status="draft",
+        result=[],
+        questions_version_uuid="72345678-1234-1234-1234-123456789012",
+    )
+
+
+@pytest.fixture
+def question_with_final_answer() -> Question:
+    """Вопрос с завершающим ответом"""
+    question = Question.objects.create(
+        text="Финальный вопрос?",
+        updated_uuid="82345678-1234-1234-1234-123456789012",
+    )
+
+    # Создаем AnswerChoice без next_question (конец опроса)
+    AnswerChoice.objects.create(
+        last_question=question,
+        next_question=None,  # Конец опроса
+        answer="final_answer",
+    )
+
+    return question
+
+
+@pytest.fixture
+def survey_with_final_question(user, question_with_final_answer) -> Survey:
+    """Опрос с финальным вопросом"""
+    return Survey.objects.create(
+        user=user,
+        current_question=question_with_final_answer,
+        status="draft",
+        result=[],
+        questions_version_uuid="92345678-1234-1234-1234-123456789012",
+    )
