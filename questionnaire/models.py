@@ -26,9 +26,7 @@ User = get_user_model()
 
 
 class Question(Model):
-    """
-    Вопрос из опросника
-    """
+    """Вопрос из опросника"""
 
     text = TextField(verbose_name="Текст")
     updated_at = DateTimeField(
@@ -71,7 +69,7 @@ class AnswerChoice(Model):
         Question,
         on_delete=CASCADE,
         verbose_name="Предыдущий вопрос",
-        related_name="last_questions",
+        related_name="last_answer_choice",
     )
     next_question = ForeignKey(
         Question,
@@ -79,7 +77,7 @@ class AnswerChoice(Model):
         verbose_name="Следующий вопрос",
         null=True,
         blank=True,
-        related_name="next_questions",
+        related_name="next_answer_choice",
     )
     answer = CharField(
         max_length=ANSWER_LEN,
@@ -92,14 +90,6 @@ class AnswerChoice(Model):
         verbose_name = "Вариант ответа"
         verbose_name_plural = "Варианты ответа"
         constraints = (
-            UniqueConstraint(
-                name="unique_last_next_question",
-                fields=(
-                    "last_question",
-                    "next_question",
-                    "answer",
-                ),
-            ),
             UniqueConstraint(
                 name="unique_last_question_answer",
                 fields=(
@@ -169,8 +159,9 @@ class Survey(Model):
         verbose_name="Дата создания опроса",
     )
     updated_at = DateTimeField(
-        auto_now=True,
-        verbose_name="Дата последнего изменения",
+        verbose_name="Дата последнего изменения ветки опросов",
+        null=True,
+        blank=True,
     )
 
     class Meta:
