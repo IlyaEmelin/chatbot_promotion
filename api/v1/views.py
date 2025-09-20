@@ -144,7 +144,8 @@ def update_survey(request: Request, pk: UUID) -> Response:
                 survey.updated_at,
             )
         else:
-            survey.updated_at = next_question.updated_at
+            if next_question:
+                survey.updated_at = next_question.updated_at
 
         survey.save()
         return Response(

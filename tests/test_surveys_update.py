@@ -151,7 +151,11 @@ class TestSurveyUpdate:
 
         assert response.status_code == HTTP_404_NOT_FOUND
 
-    def test_update_survey_completion(self, authenticated_client, survey):
+    def test_update_survey_completion(
+        self,
+        authenticated_client: APIClient,
+        survey: Survey,
+    ):
         """Тест завершения опроса (когда next_question = None)"""
         # Создаем AnswerChoice без next_question для завершения
         AnswerChoice.objects.create(
@@ -162,7 +166,7 @@ class TestSurveyUpdate:
 
         url = reverse(
             viewname="update_survey",
-            kwargs=survey.id,
+            kwargs={"pk": survey.id},
         )
         data = {"id": str(survey.id), "answer": "final_answer"}
 
@@ -180,7 +184,7 @@ class TestSurveyUpdate:
         """Тест обновления опроса без аутентификации"""
         url = reverse(
             viewname="update_survey",
-            kwargs=survey.id,
+            kwargs={"pk": survey.id},
         )
         data = {"id": str(survey.id), "answer": "test_answer"}
 
@@ -192,7 +196,7 @@ class TestSurveyUpdate:
         """Тест обновления опроса неправильным методом"""
         url = reverse(
             viewname="update_survey",
-            kwargs=survey.id,
+            kwargs={"pk": survey.id},
         )
         data = {"id": str(survey.id), "answer": "test_answer"}
 
