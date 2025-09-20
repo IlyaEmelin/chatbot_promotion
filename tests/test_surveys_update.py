@@ -1,9 +1,10 @@
 # test_surveys_update.py
 import pytest
-from django.urls import reverse, NoReverseMatch
+from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
+    HTTP_405_METHOD_NOT_ALLOWED,
 )
 from questionnaire.models import Survey, Question, AnswerChoice
 from rest_framework.test import APIClient
@@ -16,14 +17,14 @@ class TestSurveyUpdate:
         self,
         authenticated_client: APIClient,
         survey: Survey,
-        answer_choice: Question,
+        answer_choice: AnswerChoice,
     ):
         """Тест успешного обновления опроса с ответом"""
         url = reverse(
-            viewname="update_survey",
+            viewname="survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {"id": str(survey.id), "answer": "test_answer"}
+        data = {"answer": "test_answer"}
 
         response = authenticated_client.put(url, data, format="json")
 
@@ -58,13 +59,10 @@ class TestSurveyUpdate:
         )
 
         url = reverse(
-            "update_survey",
+            "survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {
-            "id": str(survey.id),
-            "answer": "мой_пользовательский_ответ",
-        }
+        data = {"answer": "мой_пользовательский_ответ"}
 
         response = authenticated_client.put(url, data, format="json")
 
@@ -83,15 +81,15 @@ class TestSurveyUpdate:
     ):
         """Тест обновления опроса с невалидным ответом"""
         url = reverse(
-            viewname="update_survey",
+            viewname="survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {"id": str(survey.id), "answer": "invalid_answer"}
+        data = {"answer": "invalid_answer"}
 
         response = authenticated_client.put(url, data, format="json")
 
         assert response.status_code == HTTP_200_OK
-        # Должен вернуть тот же вопрос с сообщением об ошибке
+        # Должен вернуть тот же вопрос
         assert "Не корректный ответ" in response.data["current_question_text"]
 
         # Опрос не должен измениться
@@ -102,10 +100,10 @@ class TestSurveyUpdate:
     def test_update_survey_missing_answer(self, authenticated_client, survey):
         """Тест обновления опроса без ответа"""
         url = reverse(
-            viewname="update_survey",
+            viewname="survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {"id": str(survey.id), "answer": None}
+        data = {"answer": None}
 
         response = authenticated_client.put(url, data, format="json")
 
@@ -115,40 +113,13 @@ class TestSurveyUpdate:
             == response.data["current_question_text"]
         )
 
-    def test_update_survey_missing_survey_id(self, authenticated_client):
-        """Тест обновления опроса без id"""
-        with pytest.raises(NoReverseMatch) as exc_info:
-            url = reverse(
-                viewname="update_survey",
-                kwargs={"pk": None},
-            )
-
-        value_str = str(exc_info.value)
-        assert "with keyword arguments" in value_str
-        assert "not found. 1 pattern(s) tried" in value_str
-
-    def test_update_survey_invalid_survey_id(self, authenticated_client):
-        """Тест обновления опроса с невалидным id"""
-        with pytest.raises(NoReverseMatch) as exc_info:
-            url = reverse(
-                viewname="update_survey",
-                kwargs={"pk": "invalid-uuid"},
-            )
-
-        value_str = str(exc_info.value)
-        assert "with keyword arguments" in value_str
-        assert "not found. 1 pattern(s) tried" in value_str
-
     def test_update_survey_nonexistent_survey(self, authenticated_client):
         """Тест обновления несуществующего опроса"""
         url = reverse(
-            viewname="update_survey",
+            viewname="survey-detail",
             kwargs={"pk": "12345678-1234-1234-1234-123456789999"},
         )
-        data = {
-            "id": "12345678-1234-1234-1234-123456789999",
-            "answer": "test_answer",
-        }
+        data = {"answer": "test_answer"}
 
         response = authenticated_client.put(url, data, format="json")
 
@@ -168,10 +139,10 @@ class TestSurveyUpdate:
         )
 
         url = reverse(
-            viewname="update_survey",
+            viewname="survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {"id": str(survey.id), "answer": "final_answer"}
+        data = {"answer": "final_answer"}
 
         response = authenticated_client.put(url, data, format="json")
 
@@ -186,10 +157,10 @@ class TestSurveyUpdate:
     def test_update_survey_unauthenticated(self, api_client, survey):
         """Тест обновления опроса без аутентификации"""
         url = reverse(
-            viewname="update_survey",
+            viewname="survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {"id": str(survey.id), "answer": "test_answer"}
+        data = {"answer": "test_answer"}
 
         response = api_client.put(url, data, format="json")
 
@@ -198,13 +169,13 @@ class TestSurveyUpdate:
     def test_update_survey_wrong_method(self, authenticated_client, survey):
         """Тест обновления опроса неправильным методом"""
         url = reverse(
-            viewname="update_survey",
+            viewname="survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {"id": str(survey.id), "answer": "test_answer"}
+        data = {"answer": "test_answer"}
 
         # Пробуем POST вместо PUT
         response = authenticated_client.post(url, data, format="json")
 
         # Должен вернуть 405 Method Not Allowed
-        assert response.status_code == 405
+        assert response.status_code == HTTP_405_METHOD_NOT_ALLOWED

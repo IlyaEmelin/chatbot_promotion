@@ -3,10 +3,8 @@ import pytest
 
 from django.urls import reverse
 from rest_framework.status import (
-    HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_401_UNAUTHORIZED,
-    HTTP_404_NOT_FOUND,
     HTTP_400_BAD_REQUEST,
 )
 from questionnaire.models import Survey
@@ -19,7 +17,7 @@ class TestSurveyCreate:
         self, user, authenticated_client, question
     ):
         """Тест 1 успешного создания опроса"""
-        url = reverse("create_survey")
+        url = reverse("survey-list")
         data = {"current_question": question.id}
 
         response = authenticated_client.post(url, data, format="json")
@@ -45,7 +43,7 @@ class TestSurveyCreate:
         question,
     ):
         """Тест 2 успешного создания опроса"""
-        url = reverse("create_survey")
+        url = reverse("survey-list")
         data = {"current_question": question.id}
 
         response = authenticated_client.post(url, data, format="json")
@@ -68,7 +66,7 @@ class TestSurveyCreate:
     )
     def test_create_survey_unauthenticated(self, user, api_client, question):
         """Тест создания опроса без аутентификации"""
-        url = reverse("create_survey")
+        url = reverse("survey-list")
         data = {"current_question": question.id}
 
         response = api_client.post(url, data, format="json")
@@ -77,7 +75,7 @@ class TestSurveyCreate:
 
     def test_create_survey_missing_question_id(self, authenticated_client):
         """Тест создания опроса без question_id"""
-        url = reverse("create_survey")
+        url = reverse("survey-list")
         data = {}
 
         response = authenticated_client.post(url, data, format="json")
@@ -86,7 +84,7 @@ class TestSurveyCreate:
 
     def test_create_survey_invalid_question_id(self, authenticated_client):
         """Тест создания опроса с несуществующим current_question"""
-        url = reverse("create_survey")
+        url = reverse("survey-list")
         data = {"current_question": 123}
 
         response = authenticated_client.post(url, data, format="json")

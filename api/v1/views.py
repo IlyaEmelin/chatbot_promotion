@@ -1,26 +1,17 @@
 from uuid import UUID
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
-from rest_framework.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_201_CREATED,
-)
-from rest_framework.viewsets import (
-    GenericViewSet,
-)
-from rest_framework.mixins import (
-    ListModelMixin,
-    CreateModelMixin,
-    UpdateModelMixin,
-)
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
 
-from questionnaire.models import Survey, Question, AnswerChoice
+from questionnaire.models import Survey, Question
 from .serializers import (
     SurveyCreateSerializer,
     SurveyUpdateSerializer,
@@ -30,75 +21,65 @@ from .serializers import (
 User = get_user_model()
 
 
-@api_view(("POST",))
-@permission_classes((AllowAny,))
-# TODO @permission_classes([IsAuthenticated])
-def create_survey(request: Request) -> Response:
+class SurveyViewSet(GenericViewSet, CreateModelMixin, UpdateModelMixin):
     """
-    Создает новый опрос для аутентифицированного пользователя
-
-    Args:
-        request: запрос
-
-    Returns:
-
+    ViewSet для работы с опросами
     """
 
-    # TODO user = request.user
-    user = User.objects.first()
-    serializer = SurveyCreateSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(
-            {"errors": serializer.errors},
-            status=HTTP_400_BAD_REQUEST,
+    queryset = Survey.objects.all()
+    permission_classes = [AllowAny]
+    # TODO: заменить на IsAuthenticated
+    # permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        """
+        Возвращает соответствующий сериализатор в зависимости от действия
+        """
+        if self.action == "create":
+            return SurveyCreateSerializer
+        elif self.action == "update":
+            return SurveyUpdateSerializer
+        return SurveyReadSerializer
+
+    def create(self, request, *args, **kwargs):
+        """
+        Создает новый опрос для аутентифицированного пользователя
+        """
+        # TODO: user = request.user
+        user = User.objects.first()
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(
+            user=user,
+            status="draft",
+            result=[],
+            questions_version_uuid=serializer.validated_data[
+                "current_question"
+            ].updated_uuid,
         )
 
-    serializer.save(
-        user=user,
-        status="draft",
-        result=[],
-        questions_version_uuid=serializer.validated_data[
-            "current_question"
-        ].updated_uuid,
-    )
+        return Response(serializer.data, status=HTTP_201_CREATED)
 
-    return Response(serializer.data, status=HTTP_201_CREATED)
+    def update(self, request, *args, **kwargs):
+        """
+        Обновляет опрос через SurveyUpdateSerializer
+        """
+        # TODO: user == request.user добавить эту проверку в права
+        user = User.objects.first()
 
+        # Получаем объект survey
+        survey = self.get_object()
 
-@api_view(("PUT",))
-@permission_classes((AllowAny,))
-# TODO @permission_classes((IsAuthenticated, ))
-def update_survey(request: Request, pk: UUID) -> Response:
-    """
-    Обновляет опрос через SurveyUpdateSerializer
-
-    Args:
-        request: запрос
-        pk: UUID опроса
-
-    Returns:
-        Response: ответ с данными обновленного опроса
-    """
-
-    # TODO user == request.user добавить эту проверку в права
-    user = User.objects.first()
-
-    # Получаем объект survey
-    survey = get_object_or_404(Survey, pk=pk)
-
-    # Создаем сериализатор с instance и data
-    serializer = SurveyUpdateSerializer(
-        instance=survey,
-        data=request.data,
-        partial=True,  # Разрешаем частичное обновление
-    )
-
-    if not serializer.is_valid():
-        return Response(
-            {"errors": serializer.errors},
-            status=HTTP_400_BAD_REQUEST,
+        # Создаем сериализатор с instance и data
+        serializer = SurveyUpdateSerializer(
+            instance=survey,
+            data=request.data,
+            partial=True,
         )
 
-    serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-    return Response(serializer.data)
+        return Response(serializer.data)

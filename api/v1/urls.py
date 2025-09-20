@@ -1,8 +1,11 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from .views import create_survey, update_survey
+from .views import SurveyViewSet
+
+router = DefaultRouter()
+router.register(r"surveys", SurveyViewSet, basename="survey")
 
 urlpatterns = [
-    path("surveys/", create_survey, name="create_survey"),
-    path("surveys/<uuid:pk>/", update_survey, name="update_survey"),
+    path("", include(router.urls)),
 ]
