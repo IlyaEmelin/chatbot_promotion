@@ -94,9 +94,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
-AUTHENTICATION_BACKENDS = ('users.backends.EmailBackend',)
+AUTHENTICATION_BACKENDS = ("users.backends.EmailBackend",)
 # Application definition
 
 INSTALLED_APPS = [
@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "questionnaire",
     "api",
+    "telegram_bot",
     "users",
 ]
 
@@ -182,7 +183,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru-ru"
 
 TIME_ZONE = "UTC"
 
@@ -200,3 +201,13 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Настройки для Telegram бота
+TELEGRAM_BOT_TOKEN = env.str(
+    "TELEGRAM_BOT_TOKEN",
+    "your_bot_token_here",
+)
+TELEGRAM_WEBHOOK_URL = env.str(
+    "TELEGRAM_WEBHOOK_URL",
+    "https://yourdomain.com/webhook/",
+)

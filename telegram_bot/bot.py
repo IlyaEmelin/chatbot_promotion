@@ -1,0 +1,41 @@
+import logging
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
+from django.conf import settings
+from .handlers import start_command, help_command, users_command
+
+logger = logging.getLogger(__name__)
+
+
+class TelegramBot:
+    def __init__(self):
+        self.token = settings.TELEGRAM_BOT_TOKEN
+        self.application = Application.builder().token(self.token).build()
+        self.setup_handlers()
+
+    def setup_handlers(self):
+        self.application.add_handler(
+            CommandHandler("start", start_command),
+        )
+        self.application.add_handler(
+            CommandHandler("help", help_command),
+        )
+        self.application.add_handler(
+            CommandHandler("users", users_command),
+        )
+
+    async def process_webhook_update(self, update_data):
+        """Обработка входящего обновления через webhook"""
+        try:
+            update = Update.de_json(update_data, self.application.bot)
+            await self.application.process_update(update)
+        except Exception as e:
+            logger.error("Error processing update: %s", e)
+
+    def run_polling(self):
+        """Запуск бота в режиме polling"""
+        logger.error("Starting bot in polling mode...")
+        self.application.run_polling()
+
+
+bot = TelegramBot()
