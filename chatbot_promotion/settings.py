@@ -94,7 +94,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'users.User'
 
+AUTHENTICATION_BACKENDS = ('users.backends.EmailBackend',)
 # Application definition
 
 INSTALLED_APPS = [
@@ -108,6 +110,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "questionnaire",
     "api",
+    "users",
 ]
 
 MIDDLEWARE = [
