@@ -53,7 +53,7 @@ class TestSurveyUpdate:
             updated_uuid="42345678-1234-1234-1234-123456789012",
         )
         AnswerChoice.objects.create(
-            last_question=question,
+            current_question=question,
             next_question=next_question,
             answer=None,  # Пользовательский ответ
         )
@@ -133,7 +133,7 @@ class TestSurveyUpdate:
         """Тест завершения опроса (когда next_question = None)"""
         # Создаем AnswerChoice без next_question для завершения
         AnswerChoice.objects.create(
-            last_question=survey.current_question,
+            current_question=survey.current_question,
             next_question=None,  # Конец опроса
             answer="final_answer",
         )

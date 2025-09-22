@@ -20,6 +20,7 @@ User = get_user_model()
 USERNAME = "admin"
 USERNAME_EMAIL = "admin@example.com"
 USERNAME_PASSWORD = "admin123"
+USERNAME_TELEGRAM = "Ilya_Emelin"
 
 
 class Command(BaseCommand):
@@ -76,6 +77,7 @@ class Command(BaseCommand):
                     username=USERNAME,
                     email=USERNAME_EMAIL,
                     password=USERNAME_PASSWORD,
+                    telegram_username=USERNAME_TELEGRAM,
                 )
                 logger.info(f"Суперпользователь {USERNAME} создан!")
             else:

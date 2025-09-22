@@ -76,7 +76,7 @@ def answer_choice(question: Question) -> Question:
         updated_uuid="22345678-1234-1234-1234-123456789012",
     )
     return AnswerChoice.objects.create(
-        last_question=question,
+        current_question=question,
         next_question=next_question,
         answer="test_answer",
     )
@@ -117,7 +117,7 @@ def question_with_custom_answer() -> Question:
         updated_uuid="62345678-1234-1234-1234-123456789012",
     )
     AnswerChoice.objects.create(
-        last_question=question,
+        current_question=question,
         next_question=next_question,
         answer=None,  # Для пользовательских ответов
     )
@@ -146,7 +146,7 @@ def question_with_final_answer() -> Question:
 
     # Создаем AnswerChoice без next_question (конец опроса)
     AnswerChoice.objects.create(
-        last_question=question,
+        current_question=question,
         next_question=None,  # Конец опроса
         answer="final_answer",
     )
