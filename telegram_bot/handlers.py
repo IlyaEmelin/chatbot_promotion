@@ -118,15 +118,6 @@ def __get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     return reply_markup
 
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    user = update.effective_user
-
-    await update.message.reply_text(
-        "Привет! Я бот, интегрированный с Django приложением!"
-    )
-
-
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = """
     Доступные команды:
@@ -135,20 +126,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     /users - Количество пользователей
     """
     await update.message.reply_text(help_text)
-
-
-async def users_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Команда пользователей
-
-    Args:
-        update:
-        context:
-
-    Returns:
-
-    """
-    await update.message.reply_text(f"Всего пользователей: {0}")
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):

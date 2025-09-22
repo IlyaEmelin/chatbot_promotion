@@ -3,9 +3,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from django.conf import settings
 from .handlers import (
-    start_command,
     help_command,
-    users_command,
     handle_message,
 )
 
@@ -20,13 +18,7 @@ class TelegramBot:
 
     def setup_handlers(self):
         self.application.add_handler(
-            CommandHandler("start", start_command),
-        )
-        self.application.add_handler(
             CommandHandler("help", help_command),
-        )
-        self.application.add_handler(
-            CommandHandler("users", users_command),
         )
         self.application.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
