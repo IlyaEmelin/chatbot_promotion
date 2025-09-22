@@ -58,7 +58,10 @@ class Command(BaseCommand):
         logger.debug("Сначала создаем все вопросы")
         questions = []
         for i, question_data in enumerate(questions_data):
-            question = Question.objects.create(text=question_data["text"])
+            question = Question.objects.create(
+                text=question_data["text"],
+                type=question_data["type"],
+            )
             questions.append(question)
             logger.info(f"Создан вопрос: {question.text}")
 
