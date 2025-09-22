@@ -18,7 +18,8 @@ from .constant import (
     MAX_LEN_STRING,
     STATUS_CHOICES,
     STATUS_LEN,
-    QUICK_SELECTION_LEN,
+    QUESTION_TYPE_LEN,
+    QUESTION_TYPE,
     ANSWER_LEN,
 )
 
@@ -37,6 +38,12 @@ class Question(Model):
         default=uuid4,
         editable=False,
         verbose_name="UUID последнего изменения",
+    )
+    type = CharField(
+        max_length=QUESTION_TYPE_LEN,
+        choices=QUESTION_TYPE,
+        default="standart",
+        verbose_name="Тип вопроса",
     )
 
     def save(
@@ -149,14 +156,14 @@ class Survey(Model):
         help_text="JSON структура с ответами пользователя на вопросы опроса",
     )
     # UUID версии вопросов (для отслеживания версии анкеты)
+    created_at = DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания опроса",
+    )
     questions_version_uuid = UUIDField(
         default=uuid4,
         editable=False,
         verbose_name="UUID версии вопросов",
-    )
-    created_at = DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата создания опроса",
     )
     updated_at = DateTimeField(
         verbose_name="Дата последнего изменения ветки опросов",

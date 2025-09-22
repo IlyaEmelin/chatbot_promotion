@@ -1,8 +1,9 @@
 AGENT_STATUS_CHOISES = [
-    ('ward', 'Я и есть подопечный'),
-    ('parent', 'Мать/отец'),
-    ('guardian', 'Опекун'),
-    ('relative', 'Опекун'),
+    (None, "Не определен"),
+    ("ward", "Я и есть подопечный"),
+    ("parent", "Мать/отец"),
+    ("guardian", "Опекун"),
+    ("relative", "Опекун"),
 ]
 
 PHONE_MAX_LENGTH = 12

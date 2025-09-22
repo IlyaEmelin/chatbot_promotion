@@ -27,19 +27,28 @@ class User(AbstractUser):
     agent = models.CharField(
         "Контактное лицо",
         max_length=USER_NAME_LENGTH,
+        null=True,
+        blank=True,
     )
     agent_status = models.CharField(
         "Статус контактного лица",
         choices=AGENT_STATUS_CHOISES,
+        null=True,
+        blank=True,
     )
     birthday = models.DateField(
         "Дата рождения",
         validators=[
             birthday_validator,
         ],
+        null=True,
+        blank=True,
     )
     residence = models.CharField(
-        "Город проживания", max_length=RESIDENCE_NAME_LENGTH
+        "Город проживания",
+        max_length=RESIDENCE_NAME_LENGTH,
+        null=True,
+        blank=True,
     )
     phone_number = models.CharField(
         "Номер телефона",
@@ -50,6 +59,8 @@ class User(AbstractUser):
                 message="Укажите номер в формате: +7ХХХХХХХХХХ",
             )
         ],
+        null=True,
+        blank=True,
     )
     telegram_username = models.CharField(
         "Имя пользователя в Телеграм",
@@ -60,6 +71,8 @@ class User(AbstractUser):
                 message="Укажите корректное имя пользователя начиная с @",
             )
         ],
+        null=True,
+        blank=True,
     )
 
     USERNAME_FIELD = "email"
