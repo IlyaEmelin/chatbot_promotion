@@ -72,11 +72,11 @@ class Question(Model):
 class AnswerChoice(Model):
     """Вариант ответа"""
 
-    last_question = ForeignKey(
+    current_question = ForeignKey(
         Question,
         on_delete=CASCADE,
         verbose_name="Предыдущий вопрос",
-        related_name="last_answer_choice",
+        related_name="answers",
     )
     next_question = ForeignKey(
         Question,
@@ -84,7 +84,7 @@ class AnswerChoice(Model):
         verbose_name="Следующий вопрос",
         null=True,
         blank=True,
-        related_name="next_answer_choice",
+        related_name="previous_answers",
     )
     answer = CharField(
         max_length=ANSWER_LEN,
@@ -100,7 +100,7 @@ class AnswerChoice(Model):
             UniqueConstraint(
                 name="unique_last_question_answer",
                 fields=(
-                    "last_question",
+                    "current_question",
                     "answer",
                 ),
             ),
@@ -112,7 +112,7 @@ class AnswerChoice(Model):
             if self.next_question
             else "КОНЕЦ"
         )
-        last_q_text = str(self.last_question)[:MAX_LEN_STRING]
+        last_q_text = str(self.current_question)[:MAX_LEN_STRING]
         answer_text = (
             self.answer[:MAX_LEN_STRING] if self.answer else "Пользовательский"
         )

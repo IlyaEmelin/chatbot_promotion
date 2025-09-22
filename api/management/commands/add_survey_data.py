@@ -9,7 +9,7 @@ from django.conf import settings
 from questionnaire.models import (
     Question,
     AnswerChoice,
-)  # замените your_app_name на имя вашего приложения
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ class Command(BaseCommand):
                 )
 
                 AnswerChoice.objects.create(
-                    last_question=current_question,
+                    current_question=current_question,
                     next_question=next_question,
                     answer=answer_data["text"],
                 )

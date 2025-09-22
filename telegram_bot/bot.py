@@ -1,8 +1,13 @@
 import logging
 from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from django.conf import settings
-from .handlers import start_command, help_command, users_command
+from .handlers import (
+    start_command,
+    help_command,
+    users_command,
+    handle_message,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +27,9 @@ class TelegramBot:
         )
         self.application.add_handler(
             CommandHandler("users", users_command),
+        )
+        self.application.add_handler(
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
         )
 
     async def process_webhook_update(self, update_data):

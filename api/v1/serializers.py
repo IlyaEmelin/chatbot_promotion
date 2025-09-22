@@ -39,7 +39,7 @@ class SurveyReadSerializer(ModelSerializer):
     def get_answers(self, obj):
         if current_question := obj.current_question:
             return list(
-                current_question.last_answer_choice.all().values_list(
+                current_question.answers.all().values_list(
                     "answer",
                     flat=True,
                 )
@@ -82,7 +82,7 @@ class SurveyUpdateSerializer(ModelSerializer):
     def get_answers(self, obj):
         if obj.current_question:
             return list(
-                obj.current_question.last_answer_choice.all().values_list(
+                obj.current_question.answers.all().values_list(
                     "answer", flat=True
                 )
             )
@@ -134,12 +134,12 @@ class SurveyUpdateSerializer(ModelSerializer):
             question.text = "Не передан ответ. Ответе снова.\n" + question.text
             return question, None
 
-        if select_answer_choice := question.last_answer_choice.filter(
+        if select_answer_choice := question.answers.filter(
             answer=answer
         ).first():
             return select_answer_choice.next_question, answer
 
-        if select_answer_choice := question.last_answer_choice.filter(
+        if select_answer_choice := question.answers.filter(
             answer=None
         ).first():
             return select_answer_choice.next_question, answer
