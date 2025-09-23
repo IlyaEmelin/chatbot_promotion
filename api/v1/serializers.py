@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from django.contrib.auth import get_user_model
@@ -17,6 +18,8 @@ from rest_framework.serializers import (
 from questionnaire.models import Survey, Question
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 class QuestionSerializer(ModelSerializer):
@@ -53,11 +56,53 @@ class SurveyReadSerializer(ModelSerializer):
 class SurveyCreateSerializer(ModelSerializer):
     """Сериализатор для создания опроса"""
 
-    restart_question = BooleanField(default=False)
+    restart_question = BooleanField(
+        required=False,
+        default=False,
+    )
 
     class Meta:
         model = Survey
-        fields = ("restart_question",)
+        fields = (
+            "restart_question",
+            "status",
+            "result",
+            "questions_version_uuid",
+        )
+
+    @staticmethod
+    def __get_question_start() -> Question:
+        """
+        Получить стартовый вопрос
+
+        Returns:
+            Question: стартовый вопрос
+        """
+        question_start = Question.objects.filter(type="start_web").first()
+        if not question_start:
+            text = "Не существует стартового вопроса для опроса."
+            logger.error(text)
+            raise ValidationError(text)
+        return question_start
+
+    def create(self, validated_data):
+        restart_question = validated_data.pop("restart_question", False)
+        question_start = self.__get_question_start()
+
+        survey_obj, created = Survey.objects.get_or_create(
+            user=validated_data.get("user"),
+            defaults={
+                "current_question": question_start,
+                "status": "draft",
+                "result": [],
+                "questions_version_uuid": question_start.updated_uuid,
+            },
+        )
+        if created:
+            logger.debug("Создан опрос %", survey_obj)
+        elif restart_question and survey_obj.current_question is None:
+            survey_obj.current_question = question_start
+        return survey_obj
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data

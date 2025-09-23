@@ -70,21 +70,6 @@ class SurveyViewSet(
             "current_question",
         ).order_by("-created_at")
 
-    @staticmethod
-    def __get_question_start() -> Question:
-        """
-        Получить стартовый вопрос
-
-        Returns:
-            Question: стартовый вопрос
-        """
-        question_start = Question.objects.filter(type="start_web").first()
-        if not question_start:
-            text = "Не существует стартового вопроса для опроса."
-            logger.error(text)
-            raise ValidationError(text)
-        return question_start
-
     def create(self, request: Request, *args, **kwargs) -> Response:
         """
         Создает новый опрос для аутентифицированного пользователя
@@ -100,26 +85,10 @@ class SurveyViewSet(
         # TODO: user = request.user
         user = User.objects.first()
 
-        question_start = self.__get_question_start()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        survey_obj, created = Survey.objects.get_or_create(
-            user=user,
-            defaults={
-                "current_question": question_start,
-                "status": "draft",
-                "result": [],
-                "questions_version_uuid": question_start.updated_uuid,
-            },
-        )
-        if created:
-            logger.debug("Создан опрос %", survey_obj)
-        elif (
-            self.request.data.get("restart_question")
-            and survey_obj.current_question is None
-        ):
-            survey_obj.current_question = question_start
-
-        serializer = SurveyReadSerializer(survey_obj)
+        serializer.save(user=user)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
