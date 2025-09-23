@@ -1,13 +1,11 @@
-from uuid import UUID
+import logging
 
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import action
+from openid.extensions.draft.pape2 import Request
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -24,6 +22,7 @@ from .serializers import (
 from .filter import SurveyFilterBackend
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class SurveyViewSet(
@@ -71,9 +70,17 @@ class SurveyViewSet(
             "current_question",
         ).order_by("-created_at")
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args, **kwargs) -> Response:
         """
         Создает новый опрос для аутентифицированного пользователя
+
+        Args:
+            request: запрос для создания опроса
+            *args:
+            **kwargs:
+
+        Returns:
+            Response: ответ на запрос создания
         """
         # TODO: user = request.user
         user = User.objects.first()
@@ -81,15 +88,7 @@ class SurveyViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save(
-            user=user,
-            status="draft",
-            result=[],
-            questions_version_uuid=serializer.validated_data[
-                "current_question"
-            ].updated_uuid,
-        )
-
+        serializer.save(user=user)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):

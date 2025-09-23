@@ -90,6 +90,9 @@ def __get_or_create_survey(question_start: Question, user_obj: User) -> Survey:
         user=user_obj,
         defaults={
             "current_question": question_start,
+            "status": "draft",
+            "result": [],
+            "questions_version_uuid": question_start.updated_uuid,
         },
     )
     if created:
@@ -116,16 +119,6 @@ def __get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
             one_time_keyboard=True,
         )
     return reply_markup
-
-
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    help_text = """
-    Доступные команды:
-    /start - Начать работу
-    /help - Помощь
-    /users - Количество пользователей
-    """
-    await update.message.reply_text(help_text)
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
