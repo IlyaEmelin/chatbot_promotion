@@ -131,7 +131,7 @@ class SurveyUpdateSerializer(ModelSerializer):
     def __get_next_answer_choice(answer, question):
         """Перенесенная логика из views.py"""
         if not answer:
-            question.text = "Не передан ответ. Ответе снова.\n" + question.text
+            question.text = "Не передан ответ. Ответьте снова.\n" + question.text
             return question, None
 
         if select_answer_choice := question.answers.filter(
@@ -144,7 +144,7 @@ class SurveyUpdateSerializer(ModelSerializer):
         ).first():
             return select_answer_choice.next_question, answer
 
-        question.text = "Не корректный ответ. Ответе снова.\n" + question.text
+        question.text = "Некорректный ответ. Ответьте снова.\n" + question.text
         return question, None
 
     def to_representation(self, instance):
