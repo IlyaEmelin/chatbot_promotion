@@ -1,0 +1,19 @@
+.main {
+    background-image: url('https://static.tildacdn.com/tild6134-3964-4238-a438-323361626634/Container_1.png');
+    background-repeat: no-repeat;
+    background-position: top right -68px;
+    height: calc(100vh + 50px);
+    width: 100%;
+}
+
+.image {
+    background-image: url('https://static.tildacdn.com/tild3331-3234-4339-b836-626563636634/_svg.svg');
+    width: 567px;
+    height: 237px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    position: absolute;
+    margin-block-start: 168px;
+    margin-inline-start: 59px;
+}
