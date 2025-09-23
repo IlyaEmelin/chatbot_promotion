@@ -38,6 +38,7 @@ class SurveyViewSet(
 
     queryset = Survey.objects.all()
     permission_classes = [AllowAny]
+    # permission_classes = (IsAuthenticated,)
     # TODO: заменить на IsAuthenticated
     # permission_classes = [IsAuthenticated]
     filter_backends = (SurveyFilterBackend,)
