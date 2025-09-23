@@ -90,6 +90,9 @@ def __get_or_create_survey(question_start: Question, user_obj: User) -> Survey:
         user=user_obj,
         defaults={
             "current_question": question_start,
+            "status": "draft",
+            "result": [],
+            "questions_version_uuid": question_start.updated_uuid,
         },
     )
     if created:

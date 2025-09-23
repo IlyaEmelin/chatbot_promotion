@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib.auth import get_user_model
+from openid.extensions.draft.pape2 import Request
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -84,9 +85,17 @@ class SurveyViewSet(
             raise ValidationError(text)
         return question_start
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args, **kwargs) -> Response:
         """
         Создает новый опрос для аутентифицированного пользователя
+
+        Args:
+            request: запрос для создания опроса
+            *args:
+            **kwargs:
+
+        Returns:
+            Response: ответ на запрос создания
         """
         # TODO: user = request.user
         user = User.objects.first()
@@ -111,18 +120,6 @@ class SurveyViewSet(
             survey_obj.current_question = question_start
 
         serializer = SurveyReadSerializer(survey_obj)
-        # serializer = self.get_serializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-        #
-        # serializer.save(
-        #     user=user,
-        #     status="draft",
-        #     result=[],
-        #     questions_version_uuid=serializer.validated_data[
-        #         "current_question"
-        #     ].updated_uuid,
-        # )
-
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
