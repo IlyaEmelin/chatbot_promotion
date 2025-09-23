@@ -9,6 +9,8 @@ from rest_framework.serializers import (
     ValidationError,
     PrimaryKeyRelatedField,
     SerializerMethodField,
+    BooleanField,
+    SerializerMethodField,
     SlugRelatedField,
 )
 
@@ -51,14 +53,11 @@ class SurveyReadSerializer(ModelSerializer):
 class SurveyCreateSerializer(ModelSerializer):
     """Сериализатор для создания опроса"""
 
-    current_question = PrimaryKeyRelatedField(
-        required=True,
-        queryset=Question.objects.all(),
-    )
+    restart_question = BooleanField(default=False)
 
     class Meta:
         model = Survey
-        fields = ("current_question",)
+        fields = ("restart_question",)
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data
