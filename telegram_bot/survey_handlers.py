@@ -118,16 +118,6 @@ def __get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     return reply_markup
 
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    help_text = """
-    Доступные команды:
-    /start - Начать работу
-    /help - Помощь
-    /users - Количество пользователей
-    """
-    await update.message.reply_text(help_text)
-
-
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка обычных текстовых сообщений"""
     user_message: str = update.message.text

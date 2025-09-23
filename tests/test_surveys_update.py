@@ -5,6 +5,7 @@ from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
     HTTP_405_METHOD_NOT_ALLOWED,
+    HTTP_401_UNAUTHORIZED,
 )
 from questionnaire.models import Survey, Question, AnswerChoice
 from rest_framework.test import APIClient
@@ -90,7 +91,10 @@ class TestSurveyUpdate:
 
         assert response.status_code == HTTP_200_OK
         # Должен вернуть тот же вопрос
-        assert "Не корректный ответ" in response.data["current_question_text"]
+        assert (
+            "Некорректный ответ. Ответьте снова.\nТестовый вопрос?"
+            == response.data["current_question_text"]
+        )
 
         # Опрос не должен измениться
         unchanged_survey = Survey.objects.get(id=survey.id)
@@ -109,7 +113,7 @@ class TestSurveyUpdate:
 
         assert response.status_code == HTTP_200_OK
         assert (
-            "Не передан ответ. Ответе снова.\nТестовый вопрос?"
+            "Не передан ответ. Ответьте снова.\nТестовый вопрос?"
             == response.data["current_question_text"]
         )
 
@@ -164,7 +168,7 @@ class TestSurveyUpdate:
 
         response = api_client.put(url, data, format="json")
 
-        assert response.status_code == HTTP_200_OK  # AllowAny разрешает
+        assert response.status_code == HTTP_401_UNAUTHORIZED
 
     def test_update_survey_wrong_method(self, authenticated_client, survey):
         """Тест обновления опроса неправильным методом"""
