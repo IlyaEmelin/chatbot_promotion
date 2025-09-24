@@ -57,7 +57,7 @@ class TestSurveyList:
         survey1 = Survey.objects.create(
             user=user,
             current_question=question,
-            status="draft",
+            status="new",
             result=[],
             questions_version_uuid="12345678-1234-1234-1234-123456789012",
         )
@@ -95,7 +95,7 @@ class TestSurveyList:
         user_survey = Survey.objects.create(
             user=user,
             current_question=question,
-            status="draft",
+            status="new",
             result=[],
             questions_version_uuid="12345678-1234-1234-1234-123456789012",
         )
@@ -109,7 +109,7 @@ class TestSurveyList:
         other_survey = Survey.objects.create(
             user=other_user,
             current_question=question,
-            status="draft",
+            status="new",
             result=[],
             questions_version_uuid="32345678-1234-1234-1234-123456789012",
         )
@@ -150,7 +150,7 @@ class TestSurveyList:
         draft_survey = Survey.objects.create(
             user=user,
             current_question=question,
-            status="draft",
+            status="new",
             result=[],
             questions_version_uuid="12345678-1234-1234-1234-123456789012",
         )
@@ -176,7 +176,7 @@ class TestSurveyList:
         # Фильтруем по массиву статусов
         response = authenticated_client.get(
             url,
-            {"statuses": ["draft", "processing"]},
+            {"statuses": ["new", "processing"]},
         )
         assert response.status_code == HTTP_200_OK
         assert isinstance(response.data, list)

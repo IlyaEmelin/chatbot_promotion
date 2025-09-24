@@ -7,7 +7,6 @@ QUESTION_TYPE_LEN: Final = 30
 FILE_URL_MAX_LEN = 2048
 
 STATUS_CHOICES = [
-    ("draft", "Черновик"),
     ("new", "Новая"),
     ("waiting_docs", "Ожидает документов"),
     ("processing", "В обработке"),
@@ -16,7 +15,6 @@ STATUS_CHOICES = [
 
 QUESTION_TYPE = [
     ("standart", "Cтандартный"),
-    ("start_web", "Стартовый вопрос для веб"),
-    ("start_telegram", "Стартовый вопрос для телеграм"),
+    ("start", "Стартовый вопрос"),
     ("waiting_docs", "Ожидает документов"),
 ]

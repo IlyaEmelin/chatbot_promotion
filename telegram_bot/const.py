@@ -1,0 +1,2 @@
+START_COMMAND_NAME = "start"
+HELP_COMMAND_NAME = "help"

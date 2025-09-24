@@ -83,7 +83,7 @@ class SurveyCreateSerializer(ModelSerializer):
         Returns:
             Question: стартовый вопрос
         """
-        question_start = Question.objects.filter(type="start_web").first()
+        question_start = Question.objects.filter(type="start").first()
         if not question_start:
             text = "Не существует стартового вопроса для опроса."
             logger.error(text)
@@ -98,7 +98,7 @@ class SurveyCreateSerializer(ModelSerializer):
             user=validated_data.get("user"),
             defaults={
                 "current_question": question_start,
-                "status": "draft",
+                "status": "new",
                 "result": [],
                 "questions_version_uuid": question_start.updated_uuid,
             },
@@ -107,6 +107,9 @@ class SurveyCreateSerializer(ModelSerializer):
             logger.debug("Создан опрос %", survey_obj)
         elif restart_question and survey_obj.current_question is None:
             survey_obj.current_question = question_start
+            survey_obj.status = "new"
+            survey_obj.save()
+
         return survey_obj
 
     def to_representation(self, instance):
@@ -151,7 +154,7 @@ class SurveyUpdateSerializer(ModelSerializer):
                 result.extend((question.text, answer_text))
 
             instance.current_question = next_question
-            instance.status = "draft" if next_question else "processing"
+            instance.status = "new" if next_question else "waiting_docs"
             instance.result = result
 
             if next_question:

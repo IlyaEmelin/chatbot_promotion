@@ -1,9 +1,9 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from openid.extensions.draft.pape2 import Request
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework.serializers import ValidationError
 from rest_framework.status import HTTP_201_CREATED
 from rest_framework.viewsets import GenericViewSet

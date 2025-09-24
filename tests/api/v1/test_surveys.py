@@ -32,7 +32,7 @@ class TestSurveyCreate:
         survey = Survey.objects.get(id=response.data["id"])
         assert survey.user == user
         assert survey.current_question == question
-        assert survey.status == "draft"
+        assert survey.status == "new"
         assert survey.result == []
 
     def test_create2_survey_success(
@@ -58,7 +58,7 @@ class TestSurveyCreate:
         survey = Survey.objects.get(id=response.data["id"])
         assert survey.user == user
         assert survey.current_question == question
-        assert survey.status == "draft"
+        assert survey.status == "new"
         assert survey.result == []
 
     @pytest.mark.skip(
