@@ -11,13 +11,14 @@ from rest_framework.mixins import (
     CreateModelMixin,
     UpdateModelMixin,
     ListModelMixin,
+    DestroyModelMixin,
 )
 
-from questionnaire.models import Survey, Question
+from questionnaire.models import Survey, Question, Document
 from .serializers import (
     SurveyCreateSerializer,
     SurveyUpdateSerializer,
-    SurveyReadSerializer,
+    SurveyReadSerializer, DocumentSerializer,
 )
 from .filter import SurveyFilterBackend
 
@@ -112,3 +113,21 @@ class SurveyViewSet(
         serializer.save()
 
         return Response(serializer.data)
+
+
+class DocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    GenericViewSet,
+):
+    """
+    ViewSet для работы с документами.
+    """
+
+    queryset = Document.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DocumentSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(survey=Survey.objects.get(pk=self.kwargs['survey_pk']))
