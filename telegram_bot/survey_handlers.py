@@ -193,7 +193,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         __, ___, survey_obj = await __get_or_create_survey(user_obj)
         logger.error(f"status: {survey_obj.status}")
-        if not survey_obj.status == "waiting_docs":
+        if survey_obj.status == "new":
             text, answers = await __save_survey_data(survey_obj, user_message)
 
             reply_markup = __get_reply_markup(answers)

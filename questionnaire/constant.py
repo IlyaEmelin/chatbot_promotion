@@ -6,7 +6,6 @@ ANSWER_LEN: Final = 30
 QUESTION_TYPE_LEN: Final = 30
 
 STATUS_CHOICES = [
-    ("draft", "Черновик"),
     ("new", "Новая"),
     ("waiting_docs", "Ожидает документов"),
     ("processing", "В обработке"),

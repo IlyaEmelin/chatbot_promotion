@@ -98,7 +98,7 @@ def survey(user, question) -> Survey:
     return Survey.objects.create(
         user=user,
         current_question=question,
-        status="draft",
+        status="new",
         result=[],
         questions_version_uuid="32345678-1234-1234-1234-123456789012",
     )
@@ -131,7 +131,7 @@ def survey_with_custom_answer(user, question_with_custom_answer) -> Survey:
     return Survey.objects.create(
         user=user,
         current_question=question_with_custom_answer,
-        status="draft",
+        status="new",
         result=[],
         questions_version_uuid="72345678-1234-1234-1234-123456789012",
     )
@@ -161,7 +161,7 @@ def survey_with_final_question(user, question_with_final_answer) -> Survey:
     return Survey.objects.create(
         user=user,
         current_question=question_with_final_answer,
-        status="draft",
+        status="new",
         result=[],
         questions_version_uuid="92345678-1234-1234-1234-123456789012",
     )

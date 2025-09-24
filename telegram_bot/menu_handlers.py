@@ -25,7 +25,10 @@ def __get_default_help_keyboard() -> ReplyKeyboardMarkup:
     )
 
 
-async def help_command(update: Update):
+async def help_command(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
     """
     Команда /help - помощь с кнопкой помощи
 

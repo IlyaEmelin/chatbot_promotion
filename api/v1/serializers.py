@@ -93,7 +93,7 @@ class SurveyCreateSerializer(ModelSerializer):
             user=validated_data.get("user"),
             defaults={
                 "current_question": question_start,
-                "status": "draft",
+                "status": "new",
                 "result": [],
                 "questions_version_uuid": question_start.updated_uuid,
             },
@@ -102,6 +102,9 @@ class SurveyCreateSerializer(ModelSerializer):
             logger.debug("Создан опрос %", survey_obj)
         elif restart_question and survey_obj.current_question is None:
             survey_obj.current_question = question_start
+            survey_obj.status = "new"
+            survey_obj.save()
+
         return survey_obj
 
     def to_representation(self, instance):
