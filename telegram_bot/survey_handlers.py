@@ -92,7 +92,7 @@ def __get_start_question() -> Question | None:
 
 
 @sync_to_async
-def __get_or_create_survey(user_obj: User) -> tuple[
+def __get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
     str,
     list[str | None],
     Survey,
@@ -102,6 +102,7 @@ def __get_or_create_survey(user_obj: User) -> tuple[
 
     Args:
         user_obj: пользователь
+        restart_question: перезапустить опрос
 
     Returns:
         str: текст текущего вопроса
@@ -109,7 +110,7 @@ def __get_or_create_survey(user_obj: User) -> tuple[
         Survey: объект вопроса
     """
     create_serializer = SurveyCreateSerializer(
-        data={"restart_question": True},
+        data={"restart_question": restart_question},
     )
     create_serializer.is_valid(raise_exception=True)
     create_serializer.save(user=user_obj)
@@ -159,7 +160,7 @@ async def start_command(
     )
     try:
         user_obj = await __get_or_create_user(user)
-        text, answers, __ = await __get_or_create_survey(user_obj)
+        text, answers, __ = await __get_or_create_survey(user_obj, True)
         welcome_text += text
         reply_markup = __get_reply_markup(answers)
         await update.message.reply_text(
@@ -191,7 +192,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user_obj = await __get_or_create_user(user)
 
-        __, ___, survey_obj = await __get_or_create_survey(user_obj)
+        __, ___, survey_obj = await __get_or_create_survey(user_obj, False)
         logger.error(f"status: {survey_obj.status}")
         if survey_obj.status == "new":
             text, answers = await __save_survey_data(survey_obj, user_message)
