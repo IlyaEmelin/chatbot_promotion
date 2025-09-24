@@ -7,7 +7,7 @@ from rest_framework.status import (
     HTTP_200_OK,
     HTTP_401_UNAUTHORIZED,
 )
-from questionnaire.models import Survey
+from questionnaire.models import Survey, Question
 from rest_framework.test import APIClient
 
 

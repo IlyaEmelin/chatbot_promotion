@@ -169,6 +169,7 @@ class Survey(Model):
         verbose_name="Дата последнего изменения ветки опросов",
         null=True,
         blank=True,
+        auto_now=True,
     )
 
     class Meta:

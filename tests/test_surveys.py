@@ -18,7 +18,8 @@ class TestSurveyCreate:
     ):
         """Тест 1 успешного создания опроса"""
         url = reverse("survey-list")
-        data = {"current_question": question.id}
+        data = {}
+        # data = {"current_question": question.id}
 
         response = authenticated_client.post(url, data, format="json")
 
@@ -61,9 +62,9 @@ class TestSurveyCreate:
         assert survey.status == "draft"
         assert survey.result == []
 
-    @pytest.mark.skip(
-        reason="Временный пропуск Метод TODO @permission_classes([IsAuthenticated])"
-    )
+    # @pytest.mark.skip(
+    #     reason="Временный пропуск Метод TODO @permission_classes([IsAuthenticated])"
+    # )
     def test_create_survey_unauthenticated(self, user, api_client, question):
         """Тест создания опроса без аутентификации"""
         url = reverse("survey-list")
@@ -73,6 +74,9 @@ class TestSurveyCreate:
 
         assert response.status_code == HTTP_401_UNAUTHORIZED
 
+    @pytest.mark.skip(
+        reason="Пропуск - логика пересмотрена, question_id не требуется"
+    )
     def test_create_survey_missing_question_id(self, authenticated_client):
         """Тест создания опроса без question_id"""
         url = reverse("survey-list")
@@ -82,6 +86,9 @@ class TestSurveyCreate:
 
         assert response.status_code == HTTP_400_BAD_REQUEST
 
+    @pytest.mark.skip(
+        reason="Пропуск - логика пересмотрена, question_id не требуется"
+    )
     def test_create_survey_invalid_question_id(self, authenticated_client):
         """Тест создания опроса с несуществующим current_question"""
         url = reverse("survey-list")

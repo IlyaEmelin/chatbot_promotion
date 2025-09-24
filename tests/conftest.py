@@ -57,7 +57,7 @@ def question() -> Question:
     return Question.objects.create(
         text="Тестовый вопрос?",
         updated_uuid="12345678-1234-1234-1234-123456789012",
-        type="start_web",
+        type='start_web'
     )
 
 
@@ -98,8 +98,8 @@ def survey(user, question) -> Survey:
     return Survey.objects.create(
         user=user,
         current_question=question,
-        status="draft",
-        result=[],
+        # status="draft",
+        # result=[],
         questions_version_uuid="32345678-1234-1234-1234-123456789012",
     )
 

@@ -1,11 +1,13 @@
-import logging
+from uuid import UUID
 
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from openid.extensions.draft.pape2 import Request
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
-from rest_framework.status import HTTP_201_CREATED
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -13,6 +15,7 @@ from rest_framework.mixins import (
     ListModelMixin,
 )
 
+from questionnaire.constant import QUESTION_TYPE, STATUS_CHOICES
 from questionnaire.models import Survey, Question
 from .serializers import (
     SurveyCreateSerializer,
@@ -35,7 +38,7 @@ class SurveyViewSet(
     ViewSet для работы с опросами
     """
 
-    queryset = Survey.objects.all()
+    # queryset = Survey.objects.all()
     # permission_classes = [AllowAny]
     permission_classes = (IsAuthenticated,)
     # TODO: заменить на IsAuthenticated
@@ -56,19 +59,11 @@ class SurveyViewSet(
         """
         Возвращает только опросы текущего пользователя
         """
-        # TODO если пользователь не IsAuthenticated return queryset.none()
-        queryset = super().get_queryset()
         if self.request.user.is_authenticated:
-            return (
-                queryset.filter(user=self.request.user)
-                .prefetch_related(
-                    "current_question",
-                )
-                .order_by("-created_at")
-            )
-        return queryset.prefetch_related(
-            "current_question",
-        ).order_by("-created_at")
+            return Survey.objects.filter(
+                user=self.request.user
+            ).select_related('current_question',).order_by('-created_at')
+        return None
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         """
@@ -82,14 +77,17 @@ class SurveyViewSet(
         Returns:
             Response: ответ на запрос создания
         """
-        # TODO: user = request.user
-        user = User.objects.first()
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        serializer.save(user=user)
-        return Response(serializer.data, status=HTTP_201_CREATED)
+        survey, created = Survey.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'user': request.user,
+                'current_question': Question.objects.filter(
+                    type=QUESTION_TYPE[1][0],
+                ).first() or None,
+            }
+        )
+        status = HTTP_201_CREATED if created else HTTP_202_ACCEPTED
+        return Response(SurveyReadSerializer(survey).data, status=status)
 
     def update(self, request, *args, **kwargs):
         """
