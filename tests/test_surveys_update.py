@@ -1,13 +1,15 @@
 # test_surveys_update.py
+import os
+
 import pytest
 from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
     HTTP_405_METHOD_NOT_ALLOWED,
-    HTTP_401_UNAUTHORIZED,
+    HTTP_401_UNAUTHORIZED, HTTP_201_CREATED,
 )
-from questionnaire.models import Survey, Question, AnswerChoice
+from questionnaire.models import Survey, Question, AnswerChoice, Document
 from rest_framework.test import APIClient
 
 
@@ -74,6 +76,34 @@ class TestSurveyUpdate:
         assert updated_survey.current_question == next_question
         assert len(updated_survey.result) == 2
         assert updated_survey.result[1] == "мой_пользовательский_ответ"
+
+    @pytest.mark.skipif(
+        not os.environ.get('DISK_TOKEN'),
+        reason='Требуется переменная окружения DISK_TOKEN'
+    )
+    def test_update_survey_images(
+        self,
+        authenticated_client,
+        survey,
+    ):
+        """Тест обновления опроса с изображениями"""
+
+        url = reverse('document-list', kwargs={'survey_pk': survey.id,},)
+        data = {
+            'image': 'data:image/png;base64,R0lGODlhAQABA'
+                     'IAAAAAAAP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==',
+        }
+        response = authenticated_client.post(url, data, format="json")
+        assert response.status_code == HTTP_201_CREATED
+        assert len(Document.objects.all()) == 1
+
+        data = {
+            'image': 'data:image/png;base64,R0lGODlhAQAB'
+                     'AIAAAP///wAAACwAAAAAAQABAAACAkQBADs=',
+        }
+        response = authenticated_client.post(url, data, format="json")
+        assert response.status_code == HTTP_201_CREATED
+        assert len(Document.objects.all()) == 2
 
     def test_update_survey_invalid_answer(
         self,

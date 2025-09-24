@@ -1,26 +1,27 @@
 from django.db.models import (
-    Model,
-    CharField,
-    TextField,
-    ForeignKey,
-    DateTimeField,
-    UUIDField,
-    JSONField,
     CASCADE,
-    SET_NULL,
-    UniqueConstraint,
+    CharField,
+    DateTimeField,
+    ForeignKey,
     Index,
+    JSONField,
+    Model,
+    SET_NULL,
+    TextField,
+    UniqueConstraint,
+    UUIDField,
 )
 from django.contrib.auth import get_user_model
 from uuid import uuid4
 
 from .constant import (
+    ANSWER_LEN,
+    FILE_URL_MAX_LEN,
     MAX_LEN_STRING,
     STATUS_CHOICES,
     STATUS_LEN,
-    QUESTION_TYPE_LEN,
     QUESTION_TYPE,
-    ANSWER_LEN,
+    QUESTION_TYPE_LEN,
 )
 
 User = get_user_model()
@@ -179,3 +180,22 @@ class Survey(Model):
 
     def __str__(self) -> str:
         return f"Опрос пользователя {self.user} (статус: {self.status})"
+
+
+class Document(Model):
+    """Документ"""
+
+    image = CharField(
+        max_length=FILE_URL_MAX_LEN,
+        verbose_name='Изображение документа',
+    )
+    survey = ForeignKey(
+        Survey,
+        on_delete=CASCADE,
+        related_name='docs',
+        verbose_name='Опрос',
+    )
+
+    class Meta:
+        verbose_name = 'документ'
+        verbose_name_plural = 'Документы'

@@ -1,7 +1,10 @@
+import base64
 import logging
 from uuid import UUID
 
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
+from rest_framework.fields import ImageField
 from rest_framework.serializers import (
     ModelSerializer,
     UUIDField,
@@ -13,9 +16,11 @@ from rest_framework.serializers import (
     BooleanField,
     SerializerMethodField,
     SlugRelatedField,
+    ImageField,
 )
 
-from questionnaire.models import Survey, Question
+from api.yadisk import upload_file_and_get_url
+from questionnaire.models import Survey, Question, Document
 
 User = get_user_model()
 
@@ -191,3 +196,27 @@ class SurveyUpdateSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data
+
+
+class Base64ImageField(ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+            url = upload_file_and_get_url(data)
+        return url
+
+    def to_representation(self, value):
+        return value
+
+
+class DocumentSerializer(ModelSerializer):
+    """Сериализатор для документов"""
+
+    image = Base64ImageField()
+
+    class Meta:
+        model = Document
+        fields = ('survey', 'image',)
+        read_only_fields = ('survey',)
