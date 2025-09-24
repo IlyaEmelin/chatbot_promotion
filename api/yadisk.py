@@ -1,14 +1,15 @@
-import os
 import urllib
 
+from django.conf import settings
+import environ
 import requests
-from dotenv import load_dotenv
 
+
+env = environ.Env(DISK_TOKEN=(str, "dummy-key-for-dev"),)
+environ.Env.read_env(env_file=settings.BASE_DIR / ".env")
 
 YA_API_HOST = 'https://cloud-api.yandex.net/'
-
-load_dotenv()
-DISK_TOKEN = os.environ.get('DISK_TOKEN')
+DISK_TOKEN = env.str('DISK_TOKEN')
 AUTH_HEADERS = {'Authorization': f'OAuth {DISK_TOKEN}'}
 API_VERSION = 'v1'
 UPLOAD_PATH = 'app:/{}'

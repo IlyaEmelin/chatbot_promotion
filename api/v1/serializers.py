@@ -1,10 +1,10 @@
 import base64
 import logging
+from random import choices
 from uuid import UUID
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from rest_framework.fields import ImageField
 from rest_framework.serializers import (
     ModelSerializer,
     UUIDField,
@@ -206,7 +206,11 @@ class Base64ImageField(ImageField):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+            data = ContentFile(
+                base64.b64decode(imgstr),
+                name=f'{self.parent.context['user']}_'
+                     f'{''.join(choices('123456789', k=10))}.' + ext
+            )
             url = upload_file_and_get_url(data)
         return url
 

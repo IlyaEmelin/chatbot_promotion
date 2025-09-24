@@ -109,6 +109,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     'djoser',
+    'drf_yasg',
     "questionnaire",
     "api",
     "telegram_bot",
@@ -144,6 +145,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "chatbot_promotion.wsgi.application"
 
+SWAGGER_USE_COMPAT_RENDERERS = False
+
 
 DATABASES = {
     "default": {
@@ -161,6 +164,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ],
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
