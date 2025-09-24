@@ -155,7 +155,7 @@ class TestSurveyUpdate:
         # Проверяем, что опрос завершен
         completed_survey = Survey.objects.get(id=survey.id)
         assert completed_survey.current_question is None
-        assert completed_survey.status == "processing"
+        assert completed_survey.status == "waiting_docs"
         assert len(completed_survey.result) == 2
 
     def test_update_survey_unauthenticated(self, api_client, survey):
