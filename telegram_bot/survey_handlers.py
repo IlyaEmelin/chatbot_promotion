@@ -56,7 +56,7 @@ def __save_survey_data(
 
 
 @sync_to_async
-def __get_or_create_user(user: TelegramUser) -> User:
+def _get_or_create_user(user: TelegramUser) -> User:
     """
     Создать найти пользователя
 
@@ -92,7 +92,7 @@ def __get_start_question() -> Question | None:
 
 
 @sync_to_async
-def __get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
+def _get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
     str,
     list[str | None],
     Survey,
@@ -125,7 +125,7 @@ def __get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
 # .instance
 
 
-def __get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
+def _get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     """
     Получить клавиатуру
 
@@ -159,10 +159,10 @@ async def start_command(
         f"Привет, {user.first_name}! 👋\n" "Я бот для проведения опросов!\n\n"
     )
     try:
-        user_obj = await __get_or_create_user(user)
-        text, answers, __ = await __get_or_create_survey(user_obj, True)
+        user_obj = await _get_or_create_user(user)
+        text, answers, __ = await _get_or_create_survey(user_obj, True)
         welcome_text += text
-        reply_markup = __get_reply_markup(answers)
+        reply_markup = _get_reply_markup(answers)
         await update.message.reply_text(
             welcome_text,
             reply_markup=reply_markup,
@@ -190,14 +190,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        user_obj = await __get_or_create_user(user)
+        user_obj = await _get_or_create_user(user)
 
-        __, ___, survey_obj = await __get_or_create_survey(user_obj, False)
+        __, ___, survey_obj = await _get_or_create_survey(user_obj, False)
         logger.error(f"status: {survey_obj.status}")
         if survey_obj.status == "new":
             text, answers = await __save_survey_data(survey_obj, user_message)
 
-            reply_markup = __get_reply_markup(answers)
+            reply_markup = _get_reply_markup(answers)
             if text:
                 await update.message.reply_text(
                     text,

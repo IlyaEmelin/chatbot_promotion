@@ -7,7 +7,7 @@ from .const import START_COMMAND_NAME, HELP_COMMAND_NAME
 logger = logging.getLogger(__name__)
 
 
-def __get_default_help_keyboard() -> ReplyKeyboardMarkup:
+def _get_default_help_keyboard() -> ReplyKeyboardMarkup:
     """
     Клавиатура по умолчанию с кнопкой помощи
 
@@ -55,6 +55,6 @@ async def help_command(
 """
     await update.message.reply_text(
         help_text,
-        reply_markup=__get_default_help_keyboard(),
+        reply_markup=_get_default_help_keyboard(),
         parse_mode="Markdown",  # Для красивого форматирования
     )
