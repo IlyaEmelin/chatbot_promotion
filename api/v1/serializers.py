@@ -78,7 +78,7 @@ class SurveyCreateSerializer(ModelSerializer):
         Returns:
             Question: стартовый вопрос
         """
-        question_start = Question.objects.filter(type="start_web").first()
+        question_start = Question.objects.filter(type="start").first()
         if not question_start:
             text = "Не существует стартового вопроса для опроса."
             logger.error(text)

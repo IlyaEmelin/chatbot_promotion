@@ -57,7 +57,7 @@ def question() -> Question:
     return Question.objects.create(
         text="Тестовый вопрос?",
         updated_uuid="12345678-1234-1234-1234-123456789012",
-        type="start_web",
+        type="start",
     )
 
 

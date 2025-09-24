@@ -15,7 +15,6 @@ STATUS_CHOICES = [
 
 QUESTION_TYPE = [
     ("standart", "Cтандартный"),
-    ("start_web", "Стартовый вопрос для веб"),
-    ("start_telegram", "Стартовый вопрос для телеграм"),
+    ("start", "Стартовый вопрос"),
     ("waiting_docs", "Ожидает документов"),
 ]

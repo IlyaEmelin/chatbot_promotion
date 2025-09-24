@@ -13,7 +13,10 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 from questionnaire.models import Survey, Question
-from api.v1.serializers import SurveyUpdateSerializer
+from api.v1.serializers import (
+    SurveyUpdateSerializer,
+    SurveyCreateSerializer,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -23,23 +26,37 @@ User = get_user_model()
 
 
 @sync_to_async
-def __save_survey_data(serializer: ModelSerializer) -> dict:
+def __save_survey_data(
+    survey_obj: Survey,
+    user_message: str,
+) -> tuple[str, list[None | str]]:
     """
     Сохранить "Опрос" через сериализатор
 
     Args:
-        serializer: сериализатор
+        survey_obj: опрос,
+        user_message: пользовательское сообщение
 
     Returns:
-        dict: сохраненные данные
+        str: Вопрос
+        list[None|str]: варианты ответа
     """
+    serializer = SurveyUpdateSerializer(
+        instance=survey_obj,
+        data={"answer": user_message},
+        partial=True,
+    )
     serializer.is_valid(raise_exception=True)
     serializer.save()
-    return serializer.data
+    data = serializer.data
+    return (
+        data.get("current_question_text"),
+        data.get("answers"),
+    )
 
 
 @sync_to_async
-def __create_user(user: TelegramUser) -> User:
+def __get_or_create_user(user: TelegramUser) -> User:
     """
     Создать найти пользователя
 
@@ -75,29 +92,25 @@ def __get_start_question() -> Question | None:
 
 
 @sync_to_async
-def __get_or_create_survey(question_start: Question, user_obj: User) -> Survey:
+def __get_or_create_survey(user_obj: User) -> SurveyCreateSerializer:
     """
     Получить или создать опрос
 
     Args:
-        question_start: стартовый вопрос
         user_obj: пользователь
 
     Returns:
-        Survey: опрос
+        SurveyCreateSerializer: опрос
     """
-    survey_obj, created = Survey.objects.get_or_create(
-        user=user_obj,
-        defaults={
-            "current_question": question_start,
-            "status": "draft",
-            "result": [],
-            "questions_version_uuid": question_start.updated_uuid,
-        },
+    create_serializer = SurveyCreateSerializer(
+        data={"restart_question": True},
     )
-    if created:
-        logger.debug("Создан опрос %", survey_obj)
-    return survey_obj
+    create_serializer.is_valid(raise_exception=True)
+    create_serializer.save(user=user_obj)
+    return create_serializer
+
+
+# .instance
 
 
 def __get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
@@ -121,6 +134,42 @@ def __get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     return reply_markup
 
 
+async def start_command(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """
+    Команда /start - приветствие с кнопкой помощи
+    """
+    user = update.effective_user
+
+    welcome_text = (
+        f"Привет, {user.first_name}! 👋\n" "Я бот для проведения опросов!\n\n"
+    )
+    try:
+        user_obj = await __get_or_create_user(user)
+        create_serializer = await __get_or_create_survey(user_obj)
+        data = create_serializer.data
+        text, answers = (
+            data.get("current_question_text"),
+            data.get("answers"),
+        )
+        welcome_text += text
+        reply_markup = __get_reply_markup(answers)
+        await update.message.reply_text(
+            welcome_text,
+            reply_markup=reply_markup,
+        )
+    except Exception as e:
+        error_traceback = traceback.format_exc()
+        logger.error(
+            "Ошибка в handle_message: %s\nTraceback:\n%s",
+            str(e),
+            error_traceback,
+        )
+        await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка обычных текстовых сообщений"""
     user_message: str = update.message.text
@@ -134,33 +183,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        user_obj = await __create_user(user)
+        user_obj = await __get_or_create_user(user)
 
-        question_start = await __get_start_question()
-        if not question_start:
-            text = "Не существует стартового вопроса для опроса."
-            logger.error(text)
-            await update.message.reply_text(text)
-            return
+        create_serializer = await __get_or_create_survey(user_obj)
+        survey_obj = create_serializer.instance
 
-        survey_obj = await __get_or_create_survey(question_start, user_obj)
+        text, answers = await __save_survey_data(survey_obj, user_message)
 
-        serializer = SurveyUpdateSerializer(
-            instance=survey_obj,
-            data={"answer": user_message},
-            partial=True,
-        )
-
-        data = await __save_survey_data(serializer)
-
-        text, answers = (
-            data.get("current_question_text"),
-            data.get("answers"),
-        )
         reply_markup = __get_reply_markup(answers)
-
         if not text:
             text = "Опрос пройден!"
+
         await update.message.reply_text(
             text,
             reply_markup=reply_markup,

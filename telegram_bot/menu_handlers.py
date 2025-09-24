@@ -13,35 +13,13 @@ def __get_default_help_keyboard() -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
+        [KeyboardButton("/start")],  # Дополнительная кнопка
         [KeyboardButton("/help")],  # Кнопка помощи
-        [KeyboardButton("Начать опрос")],  # Дополнительная кнопка
     ]
     return ReplyKeyboardMarkup(
         keyboard,
         resize_keyboard=True,
         one_time_keyboard=False,  # Клавиатура остается постоянно
-    )
-
-
-async def start_command(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
-):
-    """
-    Команда /start - приветствие с кнопкой помощи
-    """
-    chat_id = update.effective_chat.id
-    user = update.effective_user
-
-    welcome_text = (
-        f"Привет, {user.first_name}! 👋\n\n"
-        "Я бот для проведения опросов!\n\n"
-        "Для получения списка команд нажмите кнопку 'Помощь' или введите /help"
-    )
-
-    logging.debug("Отправляем сообщение с клавиатурой по умолчанию")
-    await update.message.reply_text(
-        welcome_text, reply_markup=__get_default_help_keyboard()
     )
 
 

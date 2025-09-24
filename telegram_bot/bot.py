@@ -4,10 +4,10 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from django.conf import settings
 from .survey_handlers import (
     handle_message,
+    start_command,
 )
 from .menu_handlers import (
     help_command,
-    start_command,
 )
 
 logger = logging.getLogger(__name__)
