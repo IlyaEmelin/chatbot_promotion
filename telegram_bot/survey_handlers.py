@@ -17,7 +17,7 @@ from api.v1.serializers import (
     SurveyUpdateSerializer,
     SurveyCreateSerializer,
 )
-
+from .menu_handlers import help_command
 
 logger = logging.getLogger(__name__)
 
@@ -192,16 +192,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_obj = await __get_or_create_user(user)
 
         __, ___, survey_obj = await __get_or_create_survey(user_obj)
-        text, answers = await __save_survey_data(survey_obj, user_message)
+        logger.error(f"status: {survey_obj.status}")
+        if not survey_obj.status == "waiting_docs":
+            text, answers = await __save_survey_data(survey_obj, user_message)
 
-        reply_markup = __get_reply_markup(answers)
-        if not text:
-            text = "Опрос пройден!"
+            reply_markup = __get_reply_markup(answers)
+            if text:
+                await update.message.reply_text(
+                    text,
+                    reply_markup=reply_markup,
+                )
+                return
 
-        await update.message.reply_text(
-            text,
-            reply_markup=reply_markup,
-        )
+        await update.message.reply_text("Опрос пройден!")
+        await help_command(update)
+        return
+
     except Exception as e:
         error_traceback = traceback.format_exc()
         logger.error(

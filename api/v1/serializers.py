@@ -146,7 +146,7 @@ class SurveyUpdateSerializer(ModelSerializer):
                 result.extend((question.text, answer_text))
 
             instance.current_question = next_question
-            instance.status = "draft" if next_question else "processing"
+            instance.status = "new" if next_question else "waiting_docs"
             instance.result = result
 
             if next_question:
