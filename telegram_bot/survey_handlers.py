@@ -92,7 +92,11 @@ def __get_start_question() -> Question | None:
 
 
 @sync_to_async
-def __get_or_create_survey(user_obj: User) -> SurveyCreateSerializer:
+def __get_or_create_survey(user_obj: User) -> tuple[
+    str,
+    list[str | None],
+    Survey,
+]:
     """
     Получить или создать опрос
 
@@ -100,14 +104,21 @@ def __get_or_create_survey(user_obj: User) -> SurveyCreateSerializer:
         user_obj: пользователь
 
     Returns:
-        SurveyCreateSerializer: опрос
+        str: текст текущего вопроса
+        list[str|None]: варианта ответа
+        Survey: объект вопроса
     """
     create_serializer = SurveyCreateSerializer(
         data={"restart_question": True},
     )
     create_serializer.is_valid(raise_exception=True)
     create_serializer.save(user=user_obj)
-    return create_serializer
+    data = create_serializer.data
+    return (
+        data.get("current_question_text"),
+        data.get("answers"),
+        create_serializer.instance,
+    )
 
 
 # .instance
@@ -148,12 +159,7 @@ async def start_command(
     )
     try:
         user_obj = await __get_or_create_user(user)
-        create_serializer = await __get_or_create_survey(user_obj)
-        data = create_serializer.data
-        text, answers = (
-            data.get("current_question_text"),
-            data.get("answers"),
-        )
+        text, answers, __ = await __get_or_create_survey(user_obj)
         welcome_text += text
         reply_markup = __get_reply_markup(answers)
         await update.message.reply_text(
@@ -185,9 +191,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user_obj = await __get_or_create_user(user)
 
-        create_serializer = await __get_or_create_survey(user_obj)
-        survey_obj = create_serializer.instance
-
+        __, ___, survey_obj = await __get_or_create_survey(user_obj)
         text, answers = await __save_survey_data(survey_obj, user_message)
 
         reply_markup = __get_reply_markup(answers)

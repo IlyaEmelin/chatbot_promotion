@@ -2,6 +2,8 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
+from .const import START_COMMAND_NAME, HELP_COMMAND_NAME
+
 logger = logging.getLogger(__name__)
 
 
@@ -13,13 +15,13 @@ def __get_default_help_keyboard() -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
-        [KeyboardButton("/start")],  # Дополнительная кнопка
-        [KeyboardButton("/help")],  # Кнопка помощи
+        [KeyboardButton(f"/{START_COMMAND_NAME}")],
+        [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
     ]
     return ReplyKeyboardMarkup(
         keyboard,
         resize_keyboard=True,
-        one_time_keyboard=False,  # Клавиатура остается постоянно
+        one_time_keyboard=False,
     )
 
 
