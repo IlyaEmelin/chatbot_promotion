@@ -4,6 +4,7 @@ MAX_LEN_STRING: Final = 40
 STATUS_LEN: Final = 25
 ANSWER_LEN: Final = 30
 QUESTION_TYPE_LEN: Final = 30
+FILE_URL_MAX_LEN = 2048
 
 STATUS_CHOICES = [
     ("draft", "Черновик"),
