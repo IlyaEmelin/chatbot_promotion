@@ -2,7 +2,7 @@
   "questions": [
     {
       "text": "Что нужно приобрести?",
-      "type": "start_telegram",
+      "type": "start",
       "answers": [
         {"text": "Коляска (ТСР)", "next_question_index": 1},
         {"text": "Приставка", "next_question_index": 1},
