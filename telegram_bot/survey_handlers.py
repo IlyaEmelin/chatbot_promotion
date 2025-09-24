@@ -205,7 +205,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return
 
         await update.message.reply_text("Опрос пройден!")
-        await help_command(update)
+        await help_command(update, context)
         return
 
     except Exception as e:
