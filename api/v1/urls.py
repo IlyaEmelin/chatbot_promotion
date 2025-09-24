@@ -3,6 +3,7 @@ from rest_framework_nested import routers
 
 from .views import SurveyViewSet, DocumentViewSet
 
+
 router = routers.DefaultRouter()
 router.register(r"surveys", SurveyViewSet, basename="survey")
 docs_router = routers.NestedSimpleRouter(router, r"surveys", lookup="survey")
