@@ -7,6 +7,9 @@ from questionnaire.models import Question, AnswerChoice, Survey
 User = get_user_model()
 
 
+TEST_QUESTION_1_TEXT = 'Тестовый вопрос?'
+TEST_QUESTION_2_TEXT = "Следующий вопрос?"
+
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -55,7 +58,7 @@ def question() -> Question:
         Question: первый вопрос
     """
     return Question.objects.create(
-        text="Тестовый вопрос?",
+        text=TEST_QUESTION_1_TEXT,
         updated_uuid="12345678-1234-1234-1234-123456789012",
         type='start_web'
     )
@@ -73,7 +76,7 @@ def answer_choice(question: Question) -> Question:
         Question: второй вопрос
     """
     next_question = Question.objects.create(
-        text="Следующий вопрос?",
+        text=TEST_QUESTION_2_TEXT,
         updated_uuid="22345678-1234-1234-1234-123456789012",
     )
     return AnswerChoice.objects.create(

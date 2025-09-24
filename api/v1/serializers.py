@@ -7,6 +7,7 @@ from rest_framework.serializers import (
     UUIDField,
     IntegerField,
     CharField,
+    ListField,
     ValidationError,
     PrimaryKeyRelatedField,
     SerializerMethodField,
@@ -15,12 +16,16 @@ from rest_framework.serializers import (
     SlugRelatedField,
 )
 
-from questionnaire.models import Survey, Question
+from api.yadisk import upload_files_to_yadisk
+from questionnaire.models import Survey, Question, Document
 
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
+
+EMPTY_ANSWER = 'Не передан ответ. Ответьте снова.\n'
+INCORRECT_ANSWER = 'Некорректный ответ. Ответьте снова.\n'
 
 class QuestionSerializer(ModelSerializer):
     class Meta:
@@ -108,17 +113,29 @@ class SurveyCreateSerializer(ModelSerializer):
         return SurveyReadSerializer(instance, context=self.context).data
 
 
+class DocumentSerializer(ModelSerializer):
+    class Meta:
+        model = Document
+        fields = ('id', 'image', 'survey',)
+
+
+class SurveyImgUploadSerializer(ModelSerializer):
+    images = DocumentSerializer(many=True,)
+    class Meta:
+        model = Survey
+
 class SurveyUpdateSerializer(ModelSerializer):
     """Сериализатор для обновления опроса"""
 
     answer = CharField(required=False, allow_blank=True, allow_null=True)
     current_question_text = SerializerMethodField(read_only=True)
     answers = SerializerMethodField(read_only=True)
+    images = ListField(required=False, allow_empty=True, allow_null=True)
 
     class Meta:
         model = Survey
-        fields = ("answer", "current_question_text", "answers")
-        read_only_fields = ("current_question_text", "answers")
+        fields = ('answer', 'current_question_text', 'answers', 'images',)
+        read_only_fields = ('current_question_text', 'answers',)
 
     def get_current_question_text(self, obj):
         return obj.current_question.text if obj.current_question else None
@@ -127,16 +144,40 @@ class SurveyUpdateSerializer(ModelSerializer):
         if obj.current_question:
             return list(
                 obj.current_question.answers.all().values_list(
-                    "answer", flat=True
+                    'answer', flat=True
                 )
             )
         return []
 
+    @staticmethod
+    def create_documents(survey, urls):
+        Document.objects.bulk_create(
+            Document(
+                survey=survey, image=url,
+            ) for url in urls
+        )
+        # RecipeIngredient.objects.bulk_create(
+        #     RecipeIngredient(
+        #         recipe=recipe, ingredient_id=i[0], amount=i[1],
+        #     ) for i in ingredients_amounts
+        # )
+
     def update(self, instance, validated_data):
-        answer = validated_data.get("answer")
+        answer = validated_data.get('answer')
+        images = validated_data.get('images', [])
         question = instance.current_question
 
         if question:
+            if images:
+                try:
+                    urls = upload_files_to_yadisk(
+                        images,
+                        str(instance.questions_version_uuid)[:12]
+                    )
+                    self.create_documents(instance, urls)
+                    answer = 'Загружены документы'
+                except Exception:
+                    raise
             next_question, answer_text = self.__get_next_answer_choice(
                 answer, question
             )
@@ -146,7 +187,7 @@ class SurveyUpdateSerializer(ModelSerializer):
                 result.extend((question.text, answer_text))
 
             instance.current_question = next_question
-            instance.status = "draft" if next_question else "processing"
+            instance.status = 'draft' if next_question else 'processing'
             instance.result = result
 
             if next_question:
@@ -157,7 +198,7 @@ class SurveyUpdateSerializer(ModelSerializer):
                     )
                 )
 
-            if next_question and instance.updated_at:
+            if next_question and next_question.updated_at and instance.updated_at:
                 instance.updated_at = max(
                     next_question.updated_at, instance.updated_at
                 )
@@ -171,9 +212,7 @@ class SurveyUpdateSerializer(ModelSerializer):
     def __get_next_answer_choice(answer, question):
         """Перенесенная логика из views.py"""
         if not answer:
-            question.text = (
-                "Не передан ответ. Ответьте снова.\n" + question.text
-            )
+            question.text = (EMPTY_ANSWER + question.text)
             return question, None
 
         if select_answer_choice := question.answers.filter(
@@ -186,7 +225,7 @@ class SurveyUpdateSerializer(ModelSerializer):
         ).first():
             return select_answer_choice.next_question, answer
 
-        question.text = "Некорректный ответ. Ответьте снова.\n" + question.text
+        question.text = INCORRECT_ANSWER + question.text
         return question, None
 
     def to_representation(self, instance):

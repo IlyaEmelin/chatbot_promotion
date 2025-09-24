@@ -7,8 +7,12 @@ from rest_framework.status import (
     HTTP_405_METHOD_NOT_ALLOWED,
     HTTP_401_UNAUTHORIZED,
 )
-from questionnaire.models import Survey, Question, AnswerChoice
+
+from api.v1.serializers import EMPTY_ANSWER, INCORRECT_ANSWER
+from questionnaire.models import Survey, Question, AnswerChoice, Document
 from rest_framework.test import APIClient
+
+from tests.conftest import TEST_QUESTION_1_TEXT
 
 
 @pytest.mark.django_db
@@ -47,7 +51,7 @@ class TestSurveyUpdate:
         survey,
         question,
     ):
-        """Тест обновления опроса с пользовательским ответом"""
+        """Тест обновления опроса с изображениями"""
         # Создаем AnswerChoice с answer=None для пользовательского ответа
         next_question = Question.objects.create(
             text="Вопрос после пользовательского ответа",
@@ -75,6 +79,48 @@ class TestSurveyUpdate:
         assert len(updated_survey.result) == 2
         assert updated_survey.result[1] == "мой_пользовательский_ответ"
 
+    def test_update_survey_images(
+        self,
+        authenticated_client,
+        survey,
+        question,
+    ):
+        """Тест обновления опроса с пользовательским ответом"""
+        # Создаем AnswerChoice с answer=None для пользовательского ответа
+        next_question = Question.objects.create(
+            text="Вопрос после пользовательского ответа",
+            updated_uuid="42345678-1234-1234-1234-123456789012",
+        )
+        AnswerChoice.objects.create(
+            current_question=question,
+            next_question=next_question,
+            answer=None,  # Пользовательский ответ
+        )
+
+        url = reverse(
+            "survey-detail",
+            kwargs={"pk": survey.id},
+        )
+        data = {
+            "answer": None,
+            "images": [
+                'data:image/png;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==',
+                'data:image/png;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=',
+            ]
+        }
+
+        response = authenticated_client.put(url, data, format="json")
+
+        assert response.status_code == HTTP_200_OK
+
+        # Проверяем обновление опроса в базе
+        updated_survey = Survey.objects.get(id=survey.id)
+        new_docs = Document.objects.all()
+        assert len(new_docs) == 2
+        # assert updated_survey.current_question == next_question
+        # assert len(updated_survey.result) == 2
+        # assert updated_survey.result[1] == "мой_пользовательский_ответ"
+
     def test_update_survey_invalid_answer(
         self,
         authenticated_client,
@@ -92,7 +138,7 @@ class TestSurveyUpdate:
         assert response.status_code == HTTP_200_OK
         # Должен вернуть тот же вопрос
         assert (
-            "Некорректный ответ. Ответьте снова.\nТестовый вопрос?"
+            INCORRECT_ANSWER + TEST_QUESTION_1_TEXT
             == response.data["current_question_text"]
         )
 
@@ -113,7 +159,7 @@ class TestSurveyUpdate:
 
         assert response.status_code == HTTP_200_OK
         assert (
-            "Не передан ответ. Ответьте снова.\nТестовый вопрос?"
+            EMPTY_ANSWER + TEST_QUESTION_1_TEXT
             == response.data["current_question_text"]
         )
 

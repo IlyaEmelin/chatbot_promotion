@@ -1,13 +1,11 @@
-from uuid import UUID
+import logging
 
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED, HTTP_202_ACCEPTED
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -15,7 +13,7 @@ from rest_framework.mixins import (
     ListModelMixin,
 )
 
-from questionnaire.constant import QUESTION_TYPE, STATUS_CHOICES
+from questionnaire.constant import QUESTION_TYPE
 from questionnaire.models import Survey, Question
 from .serializers import (
     SurveyCreateSerializer,
@@ -94,7 +92,9 @@ class SurveyViewSet(
         Обновляет опрос через SurveyUpdateSerializer
         """
         # TODO: user == request.user добавить эту проверку в права
-        user = User.objects.first()
+        # user = User.objects.first()
+        # if 'images' in request.data:
+        #     images = request.data.pop('images')
 
         # Получаем объект survey
         survey = self.get_object()

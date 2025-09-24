@@ -1,10 +1,11 @@
-import asyncio
+import io, base64
+from PIL import Image
 import os
 import urllib
 
 import requests
+from django.core.files.base import ContentFile
 from dotenv import load_dotenv
-import aiohttp
 
 
 YA_API_HOST = 'https://cloud-api.yandex.net/'
@@ -20,9 +21,16 @@ REQUEST_DOWNLOAD_URL = (f'{YA_API_HOST}'
                         f'{API_VERSION}/disk/resources/download')
 
 
-def upload_files_to_yadisk(files):
-    """Функция постановки задач на загрузку файлов."""
-    [upload_file_and_get_url(file) for file in files]
+def upload_files_to_yadisk(files, filename_prefix):
+    """Функция преобразования и запуска загрузки файлов."""
+    urls = []
+    for i,file in enumerate(files):
+        if isinstance(file, str) and file.startswith('data:image'):
+            format, imgstr = file.split(';base64,')
+            ext = format.split('/')[-1]
+            file = ContentFile(base64.b64decode(imgstr), name=f'{filename_prefix}_{i:02}.' + ext)
+        urls.append(upload_file_and_get_url(file))
+    return urls
 
 
 def upload_file_and_get_url(file):
@@ -31,7 +39,8 @@ def upload_file_and_get_url(file):
         REQUEST_UPLOAD_URL,
         headers=AUTH_HEADERS,
         params={
-            'path': UPLOAD_PATH.format(file.filename),
+            # 'path': UPLOAD_PATH.format(file.filename),
+            'path': UPLOAD_PATH.format(file.name),
             'overwrite': 'True'
         },
     ).json()['href']
@@ -46,4 +55,5 @@ def upload_file_and_get_url(file):
         headers=AUTH_HEADERS,
         params={'path': location, },
     ).json()['href']
-    return dict(filename=file.filename, url=download_url)
+    return download_url
+    # return dict(filename=file.name, url=download_url)

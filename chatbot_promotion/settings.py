@@ -97,7 +97,7 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = "users.User"
 
 # AUTHENTICATION_BACKENDS = ("users.backends.EmailBackend",)
-# # Application definition
+# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
