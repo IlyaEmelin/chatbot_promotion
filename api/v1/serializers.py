@@ -44,9 +44,18 @@ class SurveyReadSerializer(ModelSerializer):
 
     class Meta:
         model = Survey
-        fields = ("id", "current_question_text", "answers")
+        fields = ("id", "current_question_text", "answers", "result")
 
-    def get_answers(self, obj):
+    def get_answers(self, obj) -> list[str | None]:
+        """
+        Варианты ответа
+
+        Args:
+            obj: объект
+
+        Returns:
+            list[str| None]: варианты ответа None произвольный ответ
+        """
         if current_question := obj.current_question:
             return list(
                 current_question.answers.all().values_list(
@@ -203,13 +212,13 @@ class SurveyUpdateSerializer(ModelSerializer):
 
 class Base64ImageField(ImageField):
     def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
+        if isinstance(data, str) and data.startswith("data:image"):
+            format, imgstr = data.split(";base64,")
+            ext = format.split("/")[-1]
             data = ContentFile(
                 base64.b64decode(imgstr),
-                name=f'{self.parent.context['user']}_'
-                     f'{''.join(choices('123456789', k=10))}.' + ext
+                name=f"{self.parent.context['user']}_"
+                f"{''.join(choices('123456789', k=10))}." + ext,
             )
             url = upload_file_and_get_url(data)
         return url
@@ -225,5 +234,8 @@ class DocumentSerializer(ModelSerializer):
 
     class Meta:
         model = Document
-        fields = ('survey', 'image',)
-        read_only_fields = ('survey',)
+        fields = (
+            "survey",
+            "image",
+        )
+        read_only_fields = ("survey",)

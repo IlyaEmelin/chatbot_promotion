@@ -3,7 +3,6 @@ import traceback
 from asgiref.sync import sync_to_async
 
 from django.contrib.auth import get_user_model
-from rest_framework.serializers import ModelSerializer
 from telegram import (
     Update,
     User as TelegramUser,
@@ -95,6 +94,7 @@ def __get_start_question() -> Question | None:
 def _get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
     str,
     list[str | None],
+    list[str],
     Survey,
 ]:
     """
@@ -107,6 +107,7 @@ def _get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
     Returns:
         str: текст текущего вопроса
         list[str|None]: варианта ответа
+        list[str]: данные ответы
         Survey: объект вопроса
     """
     create_serializer = SurveyCreateSerializer(
@@ -118,6 +119,7 @@ def _get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
     return (
         data.get("current_question_text"),
         data.get("answers"),
+        data.get("result"),
         create_serializer.instance,
     )
 
@@ -160,7 +162,7 @@ async def start_command(
     )
     try:
         user_obj = await _get_or_create_user(user)
-        text, answers, __ = await _get_or_create_survey(user_obj, True)
+        text, answers, _, __ = await _get_or_create_survey(user_obj, True)
         welcome_text += text
         reply_markup = _get_reply_markup(answers)
         await update.message.reply_text(
@@ -170,7 +172,44 @@ async def start_command(
     except Exception as e:
         error_traceback = traceback.format_exc()
         logger.error(
-            "Ошибка в handle_message: %s\nTraceback:\n%s",
+            "Ошибка в start_command: %s\nTraceback:\n%s",
+            str(e),
+            error_traceback,
+        )
+        await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
+
+
+async def status_command(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    """
+    Команда статус заявки
+
+    Args:
+        update: Входящее обновление
+        context: контекст обновления
+    """
+    user = update.effective_user
+    try:
+        user_obj = await _get_or_create_user(user)
+        _, __, result, ___ = await _get_or_create_survey(user_obj, False)
+
+        await update.message.reply_text(
+            "Результаты опроса:" if result else "Опрос не пройден"
+        )
+        if result:
+            for i, text in enumerate(result):
+                await update.message.reply_text(
+                    f"✅ Ответ:\n    {text}"
+                    if i % 2
+                    else f"❓ Вопрос:\n    {text}"
+                )
+        await help_command(update, context)
+    except Exception as e:
+        error_traceback = traceback.format_exc()
+        logger.error(
+            "Ошибка в status_command: %s\nTraceback:\n%s",
             str(e),
             error_traceback,
         )
@@ -192,7 +231,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         user_obj = await _get_or_create_user(user)
 
-        __, ___, survey_obj = await _get_or_create_survey(user_obj, False)
+        __, ___, ____, survey_obj = await _get_or_create_survey(
+            user_obj, False
+        )
         logger.error(f"status: {survey_obj.status}")
         if survey_obj.status == "new":
             text, answers = await __save_survey_data(survey_obj, user_message)

@@ -19,7 +19,8 @@ from questionnaire.models import Survey, Question, Document
 from .serializers import (
     SurveyCreateSerializer,
     SurveyUpdateSerializer,
-    SurveyReadSerializer, DocumentSerializer,
+    SurveyReadSerializer,
+    DocumentSerializer,
 )
 from .filter import SurveyFilterBackend
 
@@ -38,10 +39,8 @@ class SurveyViewSet(
     """
 
     queryset = Survey.objects.all()
-    # permission_classes = [AllowAny]
+    # TODO: permission_classes = [AllowAny]
     permission_classes = (IsAuthenticated,)
-    # TODO: заменить на IsAuthenticated
-    # permission_classes = [IsAuthenticated]
     filter_backends = (SurveyFilterBackend,)
 
     def get_serializer_class(self):
@@ -116,8 +115,12 @@ class SurveyViewSet(
         return Response(serializer.data)
 
 
-class DocumentViewSet(CreateModelMixin, DestroyModelMixin,
-    ListModelMixin, GenericViewSet,):
+class DocumentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    GenericViewSet,
+):
     """ViewSet для работы с документами."""
 
     queryset = Document.objects.all()
@@ -128,8 +131,8 @@ class DocumentViewSet(CreateModelMixin, DestroyModelMixin,
         """Добавляем переменную из URL в контекст сериализатора."""
         context = super().get_serializer_context()
         survey = get_object_or_404(Survey, id=self.kwargs.get("survey_pk"))
-        context['user'] = f'{survey.user.username}'
+        context["user"] = f"{survey.user.username}"
         return context
 
     def perform_create(self, serializer):
-        serializer.save(survey=Survey.objects.get(pk=self.kwargs['survey_pk']))
+        serializer.save(survey=Survey.objects.get(pk=self.kwargs["survey_pk"]))
