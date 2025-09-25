@@ -7,7 +7,6 @@
   font-style: normal;
 }
 
-
 :root {
   --bg-color: #fff;
   --text-color: #4e4e4e;
@@ -37,7 +36,7 @@ ul {
   list-style-type: none;
 }
 
-a{
+a {
   text-decoration: none;
   color: inherit;
 }
