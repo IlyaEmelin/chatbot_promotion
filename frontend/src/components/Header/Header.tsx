@@ -11,7 +11,7 @@ export const Header = () => {
             <nav>
                 <ul className={styles.menu}>
                     <li className={clsx(styles.menu__item, styles.menu__item_active)}>
-                        <Link to="#">Создать анкету</Link>
+                        <Link to="/form">Создать анкету</Link>
                     </li>
                     <li className={styles.menu__item}>
                         <Link to="#">Списки анкет</Link>
