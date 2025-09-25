@@ -13,8 +13,8 @@ env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, "dummy-key-for-dev"),
 )
-environ.Env.read_env(env_file=BASE_DIR / ".env.example")
-environ.Env.read_env(env_file=BASE_DIR / ".env", overwrite=True)
+environ.Env.read_env(env_file=BASE_DIR.parent / ".env.example")
+environ.Env.read_env(env_file=BASE_DIR.parent / ".env", overwrite=True)
 
 
 LOGGING = {
@@ -108,8 +108,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
-    'djoser',
-    'drf_yasg',
+    "djoser",
+    "drf_yasg",
     "questionnaire",
     "api",
     "telegram_bot",
