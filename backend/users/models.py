@@ -18,12 +18,33 @@ class User(AbstractUser):
     """Модель для пользователей"""
 
     first_name = models.CharField(
-        _("first name"), max_length=USER_NAME_LENGTH, blank=False
+        _("first name"),
+        max_length=USER_NAME_LENGTH,
+        blank=False,
     )
     last_name = models.CharField(
-        _("last name"), max_length=USER_NAME_LENGTH, blank=False
+        _("last name"),
+        max_length=USER_NAME_LENGTH,
+        blank=False,
     )
-    email = models.EmailField(_("email address"), unique=True)
+    patronymic = models.CharField(
+        "patronymic",
+        max_length=USER_NAME_LENGTH,
+        blank=True,
+        null=True,
+    )
+    full_name = models.CharField(
+        "ФИО контактного лица",
+        max_length=USER_NAME_LENGTH,
+        null=True,
+        blank=True,
+    )
+    email = models.EmailField(
+        _("email address"),
+        unique=False,
+        null=True,
+        blank=True,
+    )
     agent = models.CharField(
         "Контактное лицо",
         max_length=USER_NAME_LENGTH,
@@ -75,13 +96,24 @@ class User(AbstractUser):
         blank=True,
     )
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ("username", "first_name", "last_name")
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = (
+        "email",
+        "first_name",
+        "last_name",
+    )
 
     class Meta:
         verbose_name = "пользователя"
         verbose_name_plural = "Пользователи"
         ordering = ("id",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["email"],
+                name="unique_non_empty_email",
+                condition=models.Q(email__isnull=False) & ~models.Q(email=""),
+            )
+        ]
 
     def __str__(self):
         return self.username

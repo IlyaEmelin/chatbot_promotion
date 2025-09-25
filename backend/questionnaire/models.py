@@ -22,6 +22,7 @@ from .constant import (
     STATUS_LEN,
     QUESTION_TYPE,
     QUESTION_TYPE_LEN,
+    EXTERNAL_TABLE_FIELD_NAME_CHOICES,
 )
 
 User = get_user_model()
@@ -45,6 +46,13 @@ class Question(Model):
         choices=QUESTION_TYPE,
         default="standart",
         verbose_name="Тип вопроса",
+    )
+    external_table_field_name = CharField(
+        max_length=QUESTION_TYPE_LEN,
+        choices=EXTERNAL_TABLE_FIELD_NAME_CHOICES,
+        verbose_name="Имя поля по внешней таблице",
+        null=True,
+        blank=True,
     )
 
     def save(
@@ -187,15 +195,15 @@ class Document(Model):
 
     image = CharField(
         max_length=FILE_URL_MAX_LEN,
-        verbose_name='Изображение документа',
+        verbose_name="Изображение документа",
     )
     survey = ForeignKey(
         Survey,
         on_delete=CASCADE,
-        related_name='docs',
-        verbose_name='Опрос',
+        related_name="docs",
+        verbose_name="Опрос",
     )
 
     class Meta:
-        verbose_name = 'документ'
-        verbose_name_plural = 'Документы'
+        verbose_name = "документ"
+        verbose_name_plural = "Документы"
