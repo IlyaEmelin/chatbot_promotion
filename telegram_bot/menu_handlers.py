@@ -2,7 +2,7 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
-from .const import START_COMMAND_NAME, HELP_COMMAND_NAME
+from .const import START_COMMAND_NAME, HELP_COMMAND_NAME, STATUS_COMMAND_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,7 @@ def _get_default_help_keyboard() -> ReplyKeyboardMarkup:
     """
     keyboard = [
         [KeyboardButton(f"/{START_COMMAND_NAME}")],
+        [KeyboardButton(f"/{STATUS_COMMAND_NAME}")],
         [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
     ]
     return ReplyKeyboardMarkup(
@@ -43,8 +44,9 @@ async def help_command(
     help_text = f"""
 📋 *Доступные команды:*
 
-/start - Пройти(Перепройти) опрос
-/help - Показать это сообщение помощи
+/{START_COMMAND_NAME} - Пройти(Перепройти) опрос
+/{STATUS_COMMAND_NAME} - Получить статус опроса
+/{HELP_COMMAND_NAME} - Показать это сообщение помощи
 
 🔍 *Основные функции:*
 - Прохождение опросов

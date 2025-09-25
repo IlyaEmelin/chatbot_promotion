@@ -1,2 +1,3 @@
 START_COMMAND_NAME = "start"
+STATUS_COMMAND_NAME = "status"
 HELP_COMMAND_NAME = "help"

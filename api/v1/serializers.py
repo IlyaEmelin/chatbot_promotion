@@ -44,7 +44,7 @@ class SurveyReadSerializer(ModelSerializer):
 
     class Meta:
         model = Survey
-        fields = ("id", "current_question_text", "answers")
+        fields = ("id", "current_question_text", "answers", "result")
 
     def get_answers(self, obj) -> list[str | None]:
         """

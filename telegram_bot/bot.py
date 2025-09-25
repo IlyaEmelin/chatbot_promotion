@@ -3,13 +3,18 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from django.conf import settings
 from .survey_handlers import (
-    handle_message,
     start_command,
+    status_command,
+    handle_message,
 )
 from .menu_handlers import (
     help_command,
 )
-from .const import START_COMMAND_NAME, HELP_COMMAND_NAME
+from .const import (
+    START_COMMAND_NAME,
+    STATUS_COMMAND_NAME,
+    HELP_COMMAND_NAME,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +28,9 @@ class TelegramBot:
     def setup_handlers(self):
         self.application.add_handler(
             CommandHandler(START_COMMAND_NAME, start_command),
+        )
+        self.application.add_handler(
+            CommandHandler(STATUS_COMMAND_NAME, status_command)
         )
         self.application.add_handler(
             CommandHandler(HELP_COMMAND_NAME, help_command),
