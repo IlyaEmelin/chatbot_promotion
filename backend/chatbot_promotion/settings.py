@@ -1,21 +1,18 @@
-import os
 import logging
+from os import getenv, path
 from pathlib import Path
-import environ
 
 from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+
+ALLOWED_HOSTS = ['*']
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-env = environ.Env(
-    DEBUG=(bool, False),
-    SECRET_KEY=(str, "dummy-key-for-dev"),
-)
-environ.Env.read_env(env_file=BASE_DIR / ".env.example")
-environ.Env.read_env(env_file=BASE_DIR / ".env", overwrite=True)
-
 
 LOGGING = {
     "version": 1,
@@ -49,7 +46,7 @@ LOGGING = {
         "file": {
             "level": "INFO",
             "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR / "logs", "django.log"),
+            "filename": path.join(BASE_DIR / "logs", "django.log"),
             "formatter": "verbose",
             "filters": ["add_class_method"],
         },
@@ -61,22 +58,22 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "api": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "recipes": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "users": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
     },
@@ -84,15 +81,10 @@ LOGGING = {
 logger = logging.getLogger(__name__)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-e7!ki9r4e26cs!fjblqs!2c+!-0p=6+g8z(fyt&j!zjp+w3lp8"
-)
-SECRET_KEY = env.str("SECRET_KEY", default=get_random_secret_key())
+SECRET_KEY = getenv("SECRET_KEY", default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = getenv('DEBUG', '').lower() == 'true'
 
 AUTH_USER_MODEL = "users.User"
 
@@ -147,13 +139,24 @@ WSGI_APPLICATION = "chatbot_promotion.wsgi.application"
 
 SWAGGER_USE_COMPAT_RENDERERS = False
 
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if getenv('ENABLE_POSTGRES_DB', '').lower() == 'true':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': getenv('POSTGRES_DB'),
+            'USER': getenv('POSTGRES_USER'),
+            'PASSWORD': getenv('POSTGRES_PASSWORD'),
+            'HOST': getenv('DB_HOST'),
+            'PORT': 5432
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -208,11 +211,14 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Настройки для Telegram бота
-TELEGRAM_BOT_TOKEN = env.str(
+TELEGRAM_BOT_TOKEN = getenv(
     "TELEGRAM_BOT_TOKEN",
     "your_bot_token_here",
 )
-TELEGRAM_WEBHOOK_URL = env.str(
+TELEGRAM_WEBHOOK_URL = getenv(
     "TELEGRAM_WEBHOOK_URL",
     "https://yourdomain.com/webhook/",
 )
+
+# Настройки Я.Диска
+DISK_TOKEN = getenv("DISK_TOKEN", "dummy-key-for-dev")

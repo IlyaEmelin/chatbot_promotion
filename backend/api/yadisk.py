@@ -1,15 +1,10 @@
 import urllib
 
-from django.conf import settings
-import environ
 import requests
 
-
-env = environ.Env(DISK_TOKEN=(str, "dummy-key-for-dev"),)
-environ.Env.read_env(env_file=settings.BASE_DIR / ".env")
+from chatbot_promotion.settings import DISK_TOKEN
 
 YA_API_HOST = 'https://cloud-api.yandex.net/'
-DISK_TOKEN = env.str('DISK_TOKEN')
 AUTH_HEADERS = {'Authorization': f'OAuth {DISK_TOKEN}'}
 API_VERSION = 'v1'
 UPLOAD_PATH = 'app:/{}'
@@ -17,7 +12,6 @@ REQUEST_UPLOAD_URL = (f'{YA_API_HOST}'
                       f'{API_VERSION}/disk/resources/upload')
 REQUEST_DOWNLOAD_URL = (f'{YA_API_HOST}'
                         f'{API_VERSION}/disk/resources/download')
-
 
 
 def upload_file_and_get_url(file):
