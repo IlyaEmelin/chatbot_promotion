@@ -7,7 +7,11 @@ from telegram.ext import ContextTypes
 from telegram_bot.bot import TelegramBot
 from telegram_bot.survey_handlers import start_command, handle_message
 from telegram_bot.menu_handlers import help_command
-from telegram_bot.const import START_COMMAND_NAME, HELP_COMMAND_NAME
+from telegram_bot.const import (
+    START_COMMAND_NAME,
+    HELP_COMMAND_NAME,
+    STATUS_COMMAND_NAME,
+)
 
 
 class TestTelegramBot(TestCase):
@@ -53,7 +57,11 @@ class TestTelegramBot(TestCase):
     @pytest.mark.asyncio
     @patch("telegram_bot.survey_handlers._get_or_create_survey")
     @patch("telegram_bot.survey_handlers._get_or_create_user")
-    async def test_start_command_success(self, mock_get_user, mock_get_survey):
+    async def test_start_command_success(
+        self,
+        mock_get_user,
+        mock_get_survey,
+    ):
         """Тест успешного выполнения команды /start"""
         # Arrange
         mock_update = self.create_mock_update()
@@ -63,6 +71,7 @@ class TestTelegramBot(TestCase):
         mock_get_survey.return_value = (
             "Тестовый вопрос",
             ["Ответ 1", "Ответ 2"],
+            [],
             Mock(),
         )
 
@@ -114,7 +123,10 @@ class TestTelegramBot(TestCase):
     @patch("telegram_bot.survey_handlers._get_or_create_survey")
     @patch("telegram_bot.survey_handlers._get_or_create_user")
     async def test_handle_message_new_survey(
-        self, mock_get_user, mock_get_survey, mock_save_data
+        self,
+        mock_get_user,
+        mock_get_survey,
+        mock_save_data,
     ):
         """Тест обработки сообщения для нового опроса"""
         # Arrange
@@ -125,7 +137,7 @@ class TestTelegramBot(TestCase):
         mock_survey.status = "new"
 
         mock_get_user.return_value = Mock()
-        mock_get_survey.return_value = (None, None, mock_survey)
+        mock_get_survey.return_value = (None, None, None, mock_survey)
         mock_save_data.return_value = (
             "Следующий вопрос",
             ["Ответ 1", "Ответ 2"],
@@ -144,7 +156,10 @@ class TestTelegramBot(TestCase):
     @patch("telegram_bot.survey_handlers._get_or_create_survey")
     @patch("telegram_bot.survey_handlers._get_or_create_user")
     async def test_handle_message_completed_survey(
-        self, mock_get_user, mock_get_survey, mock_help
+        self,
+        mock_get_user,
+        mock_get_survey,
+        mock_help,
     ):
         """Тест обработки сообщения для завершенного опроса"""
         # Arrange
@@ -155,7 +170,7 @@ class TestTelegramBot(TestCase):
         mock_survey.status = "completed"
 
         mock_get_user.return_value = Mock()
-        mock_get_survey.return_value = (None, None, mock_survey)
+        mock_get_survey.return_value = (None, None, None, mock_survey)
         mock_help.return_value = None
 
         # Act
@@ -195,12 +210,14 @@ class TestTelegramBot(TestCase):
         handlers = self.bot.application.handlers[0]
 
         # Assert
-        assert len(handlers) == 3  # start, help, message
+        assert len(handlers) == 4  # start, help, status, message
 
         # Проверяем типы обработчиков
         handler_types = [type(handler).__name__ for handler in handlers]
-        assert "CommandHandler" in handler_types
-        assert "MessageHandler" in handler_types
+        assert "CommandHandler" == handler_types[0]
+        assert "CommandHandler" == handler_types[1]
+        assert "CommandHandler" == handler_types[2]
+        assert "MessageHandler" == handler_types[3]
 
     @pytest.mark.asyncio
     @patch("telegram_bot.bot.Application.process_update")
@@ -265,9 +282,10 @@ class TestKeyboardFunctions:
 
         # Assert
         assert keyboard is not None
-        assert len(keyboard.keyboard) == 2
+        assert len(keyboard.keyboard) == 3
         assert f"/{START_COMMAND_NAME}" in str(keyboard.keyboard[0][0])
-        assert f"/{HELP_COMMAND_NAME}" in str(keyboard.keyboard[1][0])
+        assert f"/{STATUS_COMMAND_NAME}" in str(keyboard.keyboard[1][0])
+        assert f"/{HELP_COMMAND_NAME}" in str(keyboard.keyboard[2][0])
 
     def test_get_reply_markup_with_answers(self):
         """Тест создания клавиатуры с ответами"""
@@ -361,7 +379,11 @@ class TestIntegration:
     @patch("telegram_bot.survey_handlers._get_or_create_user")
     @patch("telegram_bot.survey_handlers._get_reply_markup")
     async def test_handle_message_integration(
-        self, mock_markup, mock_get_user, mock_get_survey, mock_save_data
+        self,
+        mock_markup,
+        mock_get_user,
+        mock_get_survey,
+        mock_save_data,
     ):
         """Интеграционный тест обработки сообщения"""
         # Arrange
@@ -372,7 +394,7 @@ class TestIntegration:
         mock_survey.status = "new"
 
         mock_get_user.return_value = Mock()
-        mock_get_survey.return_value = (None, None, mock_survey)
+        mock_get_survey.return_value = (None, None, None, mock_survey)
         mock_save_data.return_value = ("Вопрос", ["Ответ"])
         mock_markup.return_value = Mock()
 
