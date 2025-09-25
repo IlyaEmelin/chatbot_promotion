@@ -11,7 +11,6 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 ALLOWED_HOSTS = ['*']
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOGGING = {
@@ -80,16 +79,11 @@ LOGGING = {
 }
 logger = logging.getLogger(__name__)
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = getenv("SECRET_KEY", default=get_random_secret_key())
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv('DEBUG', '').lower() == 'true'
 
 AUTH_USER_MODEL = "users.User"
-
-# AUTHENTICATION_BACKENDS = ("users.backends.EmailBackend",)
-# # Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -168,10 +162,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -187,30 +177,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LANGUAGE_CODE = 'ru'
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = "ru-ru"
-
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Настройки для Telegram бота
 TELEGRAM_BOT_TOKEN = getenv(
     "TELEGRAM_BOT_TOKEN",
     "your_bot_token_here",
@@ -220,5 +200,4 @@ TELEGRAM_WEBHOOK_URL = getenv(
     "https://yourdomain.com/webhook/",
 )
 
-# Настройки Я.Диска
 DISK_TOKEN = getenv("DISK_TOKEN", "dummy-key-for-dev")
