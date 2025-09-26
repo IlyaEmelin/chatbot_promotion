@@ -2,6 +2,7 @@ import logging
 from asgiref.sync import sync_to_async
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from telegram import (
     Update,
     User as TelegramUser,
@@ -139,7 +140,7 @@ def _get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     """
     reply_markup = None
     if answers:
-        keyboard = [[KeyboardButton(answer)] for answer in answers]
+        keyboard = [[KeyboardButton(answer)] for answer in answers if answer]
         reply_markup = ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True,
@@ -234,9 +235,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         logger.debug(f"Статус опроса: {survey_obj.status}")
         if survey_obj.status == "new":
-            text, answers = await __save_survey_data(
-                user_obj, survey_obj, user_message
-            )
+            try:
+                text, answers = await __save_survey_data(
+                    user_obj,
+                    survey_obj,
+                    user_message,
+                )
+            except ValidationError as exp:
+                text, answers = "\n".join(exp.messages), []
 
             reply_markup = _get_reply_markup(answers)
             if text:

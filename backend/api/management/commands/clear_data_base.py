@@ -20,7 +20,7 @@ User = get_user_model()
 USERNAME = "admin"
 USERNAME_EMAIL = "admin@example.com"
 USERNAME_PASSWORD = "admin123"
-USERNAME_TELEGRAM = "Ilya_Emelin"
+USERNAME_TELEGRAM = "@Ilya_Emelin"
 
 
 class Command(BaseCommand):
