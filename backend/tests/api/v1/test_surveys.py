@@ -61,9 +61,6 @@ class TestSurveyCreate:
         assert survey.status == "new"
         assert survey.result == []
 
-    @pytest.mark.skip(
-        reason="Временный пропуск Метод TODO @permission_classes([IsAuthenticated])"
-    )
     def test_create_survey_unauthenticated(self, user, api_client, question):
         """Тест создания опроса без аутентификации"""
         url = reverse("survey-list")

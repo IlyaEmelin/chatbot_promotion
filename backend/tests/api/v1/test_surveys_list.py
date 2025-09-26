@@ -124,9 +124,6 @@ class TestSurveyList:
         assert response.data[0]["id"] == str(user_survey.id)
         assert response.data[0]["id"] != str(other_survey.id)
 
-    @pytest.mark.skip(
-        reason="Временный пропуск Метод TODO @permission_classes([IsAuthenticated])"
-    )
     def test_list_surveys_unauthenticated(
         self,
         api_client: APIClient,
