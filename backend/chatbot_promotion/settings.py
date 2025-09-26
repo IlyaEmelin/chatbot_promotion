@@ -86,9 +86,6 @@ LOGGING = {
 logger = logging.getLogger(__name__)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-e7!ki9r4e26cs!fjblqs!2c+!-0p=6+g8z(fyt&j!zjp+w3lp8"
-)
 SECRET_KEY = env.str("SECRET_KEY", default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -108,6 +105,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
@@ -119,6 +117,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -127,6 +126,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Или разрешить все origins для разработки (не для продакшена!)
+CORS_ALLOW_ALL_ORIGINS = True  # Только для разработки!
 
 ROOT_URLCONF = "chatbot_promotion.urls"
 

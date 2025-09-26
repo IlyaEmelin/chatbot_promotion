@@ -39,8 +39,8 @@ class SurveyViewSet(
     """
 
     queryset = Survey.objects.all()
-    # TODO: permission_classes = [AllowAny]
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
+    # TODO: permission_classes = (IsAuthenticated,)
     filter_backends = (SurveyFilterBackend,)
 
     def get_serializer_class(self):
@@ -83,17 +83,20 @@ class SurveyViewSet(
         Returns:
             Response: ответ на запрос создания
         """
+        # TODO user = request.user
+        user = User.objects.first()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save(user=request.user)
+        serializer.save(user=user)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         """
         Обновляет опрос через SurveyUpdateSerializer
         """
-
+        # TODO: user = request.user
+        user = User.objects.first()
         # Получаем объект survey
         survey = self.get_object()
 
