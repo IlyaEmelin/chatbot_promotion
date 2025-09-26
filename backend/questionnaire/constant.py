@@ -20,10 +20,12 @@ QUESTION_TYPE = [
 ]
 
 EXTERNAL_TABLE_FIELD_NAME_CHOICES = [
-    ("User.agent", "Контактное лицо"),
     ("User.first_name", "Имя"),
     ("User.last_name", "Фамилия"),
     ("User.patronymic", "Отчество"),
+    ("User.ward_first_name", "Имя"),
+    ("User.ward_last_name", "Фамилия"),
+    ("User.ward_patronymic", "Отчество"),
     ("User.residence", "Город проживания"),
     ("User.phone_number", "Телефонный номер"),
     ("User.email", "Электронная почта"),

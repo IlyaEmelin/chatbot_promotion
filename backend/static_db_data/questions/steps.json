@@ -1,6 +1,7 @@
 {
   "questions": [
     {
+      "_index": 0,
       "text": "Здравствуйте! Добро пожаловать в сервис фонда «Продвижение». Чтобы продолжить, необходимо согласиться с условиями и дать согласие на обработку персональных данных (152-ФЗ)",
       "type": "start",
       "answers": [
@@ -9,6 +10,7 @@
       ]
     },
     {
+      "_index": 1,
       "text": "Отлично! Давайте начнем. Скажите, кто заполняет заявку?",
       "type": "standart",
       "answers": [
@@ -19,91 +21,115 @@
       ]
     },
     {
+      "_index": 2,
       "text": "Контактного лицо. Фамилия:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 3}
-      ]
+         {"text": null, "next_question_index": 3}
+      ],
+      "external_table_field_name": "User.last_name"
     },
     {
+      "_index": 3,
       "text": "Контактного лицо. Имя:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 4}
-      ]
+         {"text": null, "next_question_index": 4}
+      ],
+      "external_table_field_name": "User.first_name"
     },
     {
+      "_index": 4,
       "text": "Контактного лицо. Отчество:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 5}
-      ]
+         {"text": null, "next_question_index": 5}
+      ],
+      "external_table_field_name": "User.patronymic"
     },
     {
+      "_index": 5,
       "text": "Подопечный. Фамилия:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 6}
-      ]
+         {"text": null, "next_question_index": 6}
+      ],
+      "external_table_field_name": "User.ward_last_name"
     },
     {
+      "_index": 6,
       "text": "Подопечный. Имя:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 7}
-      ]
+         {"text": null, "next_question_index": 7}
+      ],
+      "external_table_field_name": "User.ward_first_name"
     },
     {
+      "_index": 7,
       "text": "Подопечный. Отчество:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 8}
-      ]
+         {"text": null, "next_question_index": 8}
+      ],
+      "external_table_field_name": "User.ward_patronymic"
     },
     {
+      "_index": 8,
       "text": "Город проживания:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 9}
-      ]
+         {"text": null, "next_question_index": 9}
+      ],
+      "external_table_field_name": "User.residence"
     },
     {
+      "_index": 9,
       "text": "Телефон (формат +7ХХХХХХХХХХ): ",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 10}
-      ]
+         {"text": null, "next_question_index": 10}
+      ],
+      "external_table_field_name": "User.phone_number"
     },
     {
+      "_index": 10,
       "text": "Email:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 11}
-      ]
+         {"text": null, "next_question_index": 11}
+      ],
+      "external_table_field_name": "User.email"
     },
     {
+      "_index": 11,
       "text": "Никнейм в телеграм (начина с символа @):",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 12}
-      ]
+         {"text": null, "next_question_index": 12}
+      ],
+      "external_table_field_name": "User.telegram_username"
     },
     {
+      "_index": 12,
       "text": "Дата рождения подопечного (в формате ДД.ММ.ГГГГ):",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 13}
-      ]
+         {"text": null, "next_question_index": 13}
+      ],
+      "external_table_field_name": "User.birthday"
     },
     {
-      "text": "Дата рождения подопечного (в формате ДД.ММ.ГГГГ):",
+      "_index": 13,
+      "text": "Подопечному больше 18 лет?",
       "type": "standart",
       "answers": [
-         {"text": "adult", "next_question_index": 14},
-         {"text": "kid", "next_question_index": 31}
+         {"text": "взрослый", "next_question_index": 14},
+         {"text": "ребенок", "next_question_index": 31}
       ]
     },
     {
+      "_index": 14,
       "text": "Что нужно приобрести?",
       "type": "start",
       "answers": [
@@ -114,6 +140,7 @@
       ]
     },
     {
+      "_index": 15,
       "text": "Есть ли сертификат на ТСР?",
       "type": "standart",
       "answers": [
@@ -122,6 +149,7 @@
       ]
     },
     {
+      "_index": 16,
       "text": "Есть ли открытые сборы в других фондах?",
       "type": "standart",
       "answers": [
@@ -130,6 +158,7 @@
       ]
     },
     {
+      "_index": 17,
       "text": "Нужна ли консультационная помощь?",
       "type": "standart",
       "answers": [
@@ -140,6 +169,7 @@
       ]
     },
     {
+      "_index": 18,
       "text": "Есть ли возможность продвигать сбор самостоятельно?",
       "type": "standart",
       "answers": [
@@ -148,6 +178,7 @@
       ]
     },
     {
+      "_index": 19,
       "text": "Хотели бы получать информацию о правильном позиционировании?",
       "type": "standart",
       "answers": [
@@ -156,27 +187,31 @@
       ]
     },
     {
+      "_index": 20,
       "text": "Укажите диагноз:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 21}
+         {"text": null, "next_question_index": 21}
       ]
     },
     {
+      "_index": 21,
       "text": "Опишите текущее состояние здоровья и ограничения:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 22}
+         {"text": null, "next_question_index": 22}
       ]
     },
     {
+      "_index": 22,
       "text": "Когда был поставлен диагноз?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 23}
+         {"text": null, "next_question_index": 23}
       ]
     },
     {
+      "_index": 23,
       "text": "Прописано ли ТСР в медзаключении или ИПРА?",
       "type": "standart",
       "answers": [
@@ -186,55 +221,63 @@
       ]
     },
     {
+      "_index": 24,
       "text": "Есть ли сроки, к которым особенно важно получить помощь?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 25}
+         {"text": null, "next_question_index": 25}
       ]
     },
     {
+      "_index": 25,
       "text": "Расскажите о семье или близких, кто рядом и поддерживает:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 26}
+         {"text": null, "next_question_index": 26}
       ]
     },
     {
+      "_index": 26,
       "text": "Кто вас вдохновляет или поддерживает?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 27}
+         {"text": null, "next_question_index": 27}
       ]
     },
     {
+      "_index": 27,
       "text": "Чем увлекаетесь? Есть ли любимое хобби?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 28}
+         {"text": null, "next_question_index": 28}
       ]
     },
     {
+      "_index": 28,
       "text": "Какие успехи или достижения особенно дороги?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 29}
+         {"text": null, "next_question_index": 29}
       ]
     },
     {
+      "_index": 29,
       "text": "Почему нужна новая коляска/приставка/комплектующее?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 30}
+         {"text": null, "next_question_index": 30}
       ]
     },
     {
+      "_index": 30,
       "text": "Что бы вы хотели сказать людям, которые прочитают вашу историю?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 49}
+         {"text": null, "next_question_index": 49}
       ]
     },
     {
+      "_index": 31,
       "text": "Что нужно приобрести?",
       "type": "start",
       "answers": [
@@ -245,6 +288,7 @@
       ]
     },
     {
+      "_index": 32,
       "text": "Есть ли сертификат на ТСР?",
       "type": "standart",
       "answers": [
@@ -253,6 +297,7 @@
       ]
     },
     {
+      "_index": 33,
       "text": "Есть ли открытые сборы в других фондах?",
       "type": "standart",
       "answers": [
@@ -261,6 +306,7 @@
       ]
     },
     {
+      "_index": 34,
       "text": "Нужна ли консультационная помощь?",
       "type": "standart",
       "answers": [
@@ -271,6 +317,7 @@
       ]
     },
     {
+      "_index": 35,
       "text": "Есть ли возможность продвигать сбор самостоятельно?",
       "type": "standart",
       "answers": [
@@ -279,6 +326,7 @@
       ]
     },
     {
+      "_index": 36,
       "text": "Хотели бы получать информацию о правильном позиционировании?",
       "type": "standart",
       "answers": [
@@ -287,27 +335,31 @@
       ]
     },
     {
+      "_index": 37,
       "text": "Укажите диагноз ребенка:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 38}
+         {"text": null, "next_question_index": 38}
       ]
     },
     {
+      "_index": 38,
       "text": "Опишите текущее состояние здоровья и ограничения:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 39}
+         {"text": null, "next_question_index": 39}
       ]
     },
     {
+      "_index": 39,
       "text": "Когда был поставлен диагноз?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index":40}
+         {"text": null, "next_question_index":40}
       ]
     },
     {
+      "_index": 40,
       "text": "Прописано ли ТСР в медзаключении или ИПРА?",
       "type": "standart",
       "answers": [
@@ -317,69 +369,79 @@
       ]
     },
     {
+      "_index": 41,
       "text": "Есть ли сроки, к которым особенно важно получить помощь (например, реабилитация, учеба)?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 42}
+         {"text": null, "next_question_index": 42}
       ]
     },
     {
+      "_index": 42,
       "text": "Расскажите о семье: кто входит, чем занимаются родители/опекуны:",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 43}
+         {"text": null, "next_question_index": 43}
       ]
     },
     {
+      "_index": 43,
       "text": "Есть ли у ребенка братья/сестры, домашние питомцы?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 44}
+         {"text": null, "next_question_index": 44}
       ]
     },
     {
+      "_index": 44,
       "text": "Какие традиции или важные совместные занятия есть у семьи?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 45}
+         {"text": null, "next_question_index": 45}
       ]
     },
     {
+      "_index": 45,
       "text": "Чем увлекается ребенок, какие хобби или интересы?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 46}
+         {"text": null, "next_question_index": 46}
       ]
     },
     {
+      "_index": 46,
       "text": "Какая мечта у ребенка?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 47}
+         {"text": null, "next_question_index": 47}
       ]
     },
     {
+      "_index": 47,
       "text": "Почему нужна коляска/приставка/комплектующие?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 48}
+         {"text": null, "next_question_index": 48}
       ]
     },
     {
+      "_index": 48,
       "text": "Что бы вы хотели сказать людям, которые прочитают историю вашего ребенка?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 49}
+         {"text": null, "next_question_index": 49}
       ]
     },
     {
+      "_index": 49,
       "text": "Хотите добавить что-то от себя?",
       "type": "standart",
       "answers": [
-         {"text": "None", "next_question_index": 50}
+         {"text": null, "next_question_index": 50}
       ]
     },
     {
+      "_index": 50,
       "text": "Подтверждена ли запись на Госуслугах?",
       "type": "standart",
       "answers": [
@@ -388,6 +450,7 @@
       ]
     },
     {
+      "_index": 51,
       "text": "Для получения электронной подписи и подписания договора вам понадобится подтвержденная запись на госуслугах. Пожалуйста, позаботьтесь об этом заранее",
       "type": "standart",
       "answers": [

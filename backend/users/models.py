@@ -30,26 +30,32 @@ class User(AbstractUser):
         null=True,
     )
     patronymic = models.CharField(
-        "patronymic",
+        "Отчество",
         max_length=USER_NAME_LENGTH,
         blank=True,
         null=True,
     )
-    full_name = models.CharField(
-        "ФИО контактного лица",
+    ward_first_name = models.CharField(
+        "Подопечный. Имя",
         max_length=USER_NAME_LENGTH,
-        null=True,
         blank=True,
+        null=True,
+    )
+    ward_last_name = models.CharField(
+        "Подопечный. Фамилия",
+        max_length=USER_NAME_LENGTH,
+        blank=True,
+        null=True,
+    )
+    ward_patronymic = models.CharField(
+        "Подопечный. Отчество",
+        max_length=USER_NAME_LENGTH,
+        blank=True,
+        null=True,
     )
     email = models.EmailField(
         _("email address"),
         unique=False,
-        null=True,
-        blank=True,
-    )
-    agent = models.CharField(
-        "Контактное лицо",
-        max_length=USER_NAME_LENGTH,
         null=True,
         blank=True,
     )
