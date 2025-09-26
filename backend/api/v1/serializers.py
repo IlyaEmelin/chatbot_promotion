@@ -210,7 +210,7 @@ class SurveyUpdateSerializer(ModelSerializer):
             answer_text: сохраняемое значение
         """
         logger.debug(
-            "Попытка сохранения принятого " "значения во внешнее поле таблицы."
+            "Попытка сохранения принятого значения во внешнее поле таблицы."
         )
         try:
             table_name, field_name = field_name.split(".")
@@ -218,6 +218,13 @@ class SurveyUpdateSerializer(ModelSerializer):
                 user = survey.user
                 if hasattr(User, field_name):
                     try:
+                        logger.debug(
+                            "Сохранение для пользователя %s.\n'%s': '%s'",
+                            str(user),
+                            field_name,
+                            answer_text,
+                        )
+
                         setattr(user, field_name, answer_text)
                         user.full_clean()
                         user.save()
