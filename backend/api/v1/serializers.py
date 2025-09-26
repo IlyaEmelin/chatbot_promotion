@@ -183,7 +183,9 @@ class SurveyUpdateSerializer(ModelSerializer):
             elif next_question:
                 instance.updated_at = next_question.updated_at
 
-            if field_name := next_question.external_table_field_name:
+            if next_question and (
+                field_name := next_question.external_table_field_name
+            ):
                 self.__save_external_field(
                     instance,
                     field_name,
