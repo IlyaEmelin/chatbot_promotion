@@ -60,6 +60,7 @@ class Command(BaseCommand):
         for i, question_data in enumerate(questions_data):
             question = Question.objects.create(
                 text=question_data["text"],
+                type=question_data["type"],
                 external_table_field_name=question_data.get(
                     "external_table_field_name"
                 ),
