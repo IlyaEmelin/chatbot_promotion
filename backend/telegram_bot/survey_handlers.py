@@ -67,8 +67,9 @@ def _get_or_create_user(user: TelegramUser) -> User:
 
     """
     user_obj, created = User.objects.get_or_create(
-        telegram_username=user.username,
+        telegram_username="@" + user.username,
         defaults={
+            "telegram_username": "@" + user.username,
             "first_name": user.first_name or "",
             "last_name": user.last_name or "",
             # TODO При первичной авторизации не задается но потом просят задать
