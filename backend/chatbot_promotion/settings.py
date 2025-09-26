@@ -13,9 +13,11 @@ env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, "dummy-key-for-dev"),
 )
+logging.info("BASE_DIR: %s", BASE_DIR)
+logging.info("Patch (setting) to .env file : %s", BASE_DIR.parent)
 environ.Env.read_env(env_file=BASE_DIR.parent / ".env.example")
 environ.Env.read_env(env_file=BASE_DIR.parent / ".env", overwrite=True)
-
+logging.info("End load .env")
 
 LOGGING = {
     "version": 1,
