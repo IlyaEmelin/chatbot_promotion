@@ -1,4 +1,6 @@
 import logging
+import traceback
+
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from django.conf import settings
@@ -45,7 +47,11 @@ class TelegramBot:
             update = Update.de_json(update_data, self.application.bot)
             await self.application.process_update(update)
         except Exception as e:
-            logger.error("Error processing update: %s", e)
+            logger.error(
+                ("Error processing update: %s\n" "Traceback:\n%s"),
+                e,
+                traceback.format_exc(),
+            )
 
     def run_polling(self):
         """Запуск бота в режиме polling"""

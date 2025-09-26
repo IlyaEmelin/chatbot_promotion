@@ -234,7 +234,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         __, ___, ____, survey_obj = await _get_or_create_survey(
             user_obj, False
         )
-        logger.error(f"status: {survey_obj.status}")
+        logger.debug(f"Статус опроса: {survey_obj.status}")
         if survey_obj.status == "new":
             text, answers = await __save_survey_data(survey_obj, user_message)
 
@@ -251,10 +251,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     except Exception as e:
-        error_traceback = traceback.format_exc()
         logger.error(
             "Ошибка в handle_message: %s\nTraceback:\n%s",
             str(e),
-            error_traceback,
+            traceback.format_exc(),
         )
         await update.message.reply_text("Произошла ошибка. Попробуйте позже.")

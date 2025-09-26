@@ -1,5 +1,6 @@
 import base64
 import logging
+import traceback
 from random import choices
 from uuid import UUID
 
@@ -180,6 +181,20 @@ class SurveyUpdateSerializer(ModelSerializer):
                 )
             elif next_question:
                 instance.updated_at = next_question.updated_at
+
+            if field_name := next_question.external_table_field_name:
+                try:
+                    table_name, field_name = field_name.split(".")
+                except ValueError as exp:
+                    logger.error(
+                        (
+                            "Не корректный формат поля "
+                            "'external_table_field_name' %s\n"
+                            "Traceback:\n%s"
+                        ),
+                        str(exp),
+                        traceback.format_exc(),
+                    )
 
             instance.save()
         return instance
