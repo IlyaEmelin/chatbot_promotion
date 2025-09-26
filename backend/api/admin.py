@@ -203,6 +203,11 @@ class UserAdmin(BaseUserAdmin):
     model = User
     fieldsets = BaseUserAdmin.fieldsets + (
         (None, {"fields": [
+            'patronymic',
+            'ward_first_name',
+            'ward_last_name',
+            'ward_patronymic',
+            'agent_status',
             'birthday',
             'residence',
             'phone_number',
@@ -211,9 +216,9 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
         (None, {"fields": ['email',]}),)
     list_display = (
-        'id',
         'username',
+        'first_name',
+        'last_name',
         'email',
         'telegram_username'
     )
-    list_display_links = ('username',)
