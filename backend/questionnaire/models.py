@@ -117,7 +117,7 @@ class AnswerChoice(Model):
 
     def __str__(self):
         next_q_text = (
-            self.next_question[:MAX_LEN_STRING]
+            str(self.next_question)[:MAX_LEN_STRING]
             if self.next_question
             else "КОНЕЦ"
         )
