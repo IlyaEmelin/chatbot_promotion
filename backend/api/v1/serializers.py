@@ -153,16 +153,23 @@ class SurveyUpdateSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         answer = validated_data.get("answer")
-        question = instance.current_question
-
-        if question:
+        if current_question := instance.current_question:
             next_question, answer_text = self.__get_next_answer_choice(
-                answer, question
+                answer, current_question
             )
 
             result = instance.result or []
             if answer_text:
-                result.extend((question.text, answer_text))
+                result.extend((current_question.text, answer_text))
+
+            if current_question and (
+                field_name := current_question.external_table_field_name
+            ):
+                self.__save_external_field(
+                    instance,
+                    field_name,
+                    answer_text,
+                )
 
             instance.current_question = next_question
             instance.status = "new" if next_question else "waiting_docs"
@@ -182,15 +189,6 @@ class SurveyUpdateSerializer(ModelSerializer):
                 )
             elif next_question:
                 instance.updated_at = next_question.updated_at
-
-            if next_question and (
-                field_name := next_question.external_table_field_name
-            ):
-                self.__save_external_field(
-                    instance,
-                    field_name,
-                    answer_text,
-                )
 
             instance.save()
         return instance
