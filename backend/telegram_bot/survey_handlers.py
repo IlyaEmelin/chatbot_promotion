@@ -1,5 +1,4 @@
 import logging
-import traceback
 from asgiref.sync import sync_to_async
 
 from django.contrib.auth import get_user_model
@@ -170,11 +169,10 @@ async def start_command(
             reply_markup=reply_markup,
         )
     except Exception as e:
-        error_traceback = traceback.format_exc()
         logger.error(
-            "Ошибка в start_command: %s\nTraceback:\n%s",
+            "Ошибка в start_command: %s",
             str(e),
-            error_traceback,
+            exc_info=True,
         )
         await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
 
@@ -207,11 +205,10 @@ async def status_command(
                 )
         await help_command(update, context)
     except Exception as e:
-        error_traceback = traceback.format_exc()
         logger.error(
-            "Ошибка в status_command: %s\nTraceback:\n%s",
+            "Ошибка в status_command: %s",
             str(e),
-            error_traceback,
+            exc_info=True,
         )
         await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
 
@@ -234,7 +231,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         __, ___, ____, survey_obj = await _get_or_create_survey(
             user_obj, False
         )
-        logger.error(f"status: {survey_obj.status}")
+        logger.debug(f"Статус опроса: {survey_obj.status}")
         if survey_obj.status == "new":
             text, answers = await __save_survey_data(survey_obj, user_message)
 
@@ -251,10 +248,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     except Exception as e:
-        error_traceback = traceback.format_exc()
         logger.error(
-            "Ошибка в handle_message: %s\nTraceback:\n%s",
+            "Ошибка в handle_message: %s",
             str(e),
-            error_traceback,
+            exc_info=True,
         )
         await update.message.reply_text("Произошла ошибка. Попробуйте позже.")

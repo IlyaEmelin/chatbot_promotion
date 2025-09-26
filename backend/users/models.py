@@ -20,12 +20,14 @@ class User(AbstractUser):
     first_name = models.CharField(
         _("first name"),
         max_length=USER_NAME_LENGTH,
-        blank=False,
+        blank=True,
+        null=True,
     )
     last_name = models.CharField(
         _("last name"),
         max_length=USER_NAME_LENGTH,
-        blank=False,
+        blank=True,
+        null=True,
     )
     patronymic = models.CharField(
         "patronymic",
@@ -97,11 +99,6 @@ class User(AbstractUser):
     )
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = (
-        "email",
-        "first_name",
-        "last_name",
-    )
 
     class Meta:
         verbose_name = "пользователя"
