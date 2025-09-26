@@ -2,11 +2,15 @@ import os
 from urllib.parse import urlparse
 
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils import timezone
 from django.utils.html import format_html
 
 from questionnaire.constant import STATUS_CHOICES
-from questionnaire.models import Document, Survey
+from questionnaire.models import AnswerChoice, Document, Survey, Question
+
+User = get_user_model()
 
 
 class StatusFilter(admin.SimpleListFilter):
@@ -178,3 +182,43 @@ class DocumentAdmin(admin.ModelAdmin):
                 obj.image,
             )
         return "—"
+    
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    """Вопрос."""
+
+    list_display = ("text", "type")
+
+
+@admin.register(AnswerChoice)
+class AnswerChoiceAdmin(admin.ModelAdmin):
+    """Вопрос."""
+
+    list_display = ("current_question", "next_question", "answer")
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    model = User
+    fieldsets = BaseUserAdmin.fieldsets + (
+        (None, {"fields": [
+            'patronymic',
+            'ward_first_name',
+            'ward_last_name',
+            'ward_patronymic',
+            'agent_status',
+            'birthday',
+            'residence',
+            'phone_number',
+            'telegram_username'
+            ]}),)
+    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+        (None, {"fields": ['email',]}),)
+    list_display = (
+        'username',
+        'first_name',
+        'last_name',
+        'email',
+        'telegram_username'
+    )
