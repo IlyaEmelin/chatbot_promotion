@@ -207,3 +207,6 @@ class Document(Model):
     class Meta:
         verbose_name = "документ"
         verbose_name_plural = "Документы"
+
+    def __str__(self):
+        return f"Документ привязанный к опросу {self.survey}."

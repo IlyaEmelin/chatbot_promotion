@@ -1,11 +1,11 @@
 import base64
 import logging
-import traceback
 from random import choices
 from uuid import UUID
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from django.db import IntegrityError, DatabaseError
 from rest_framework.serializers import (
     ModelSerializer,
     UUIDField,
@@ -22,6 +22,7 @@ from rest_framework.serializers import (
 
 from api.yadisk import upload_file_and_get_url
 from questionnaire.models import Survey, Question, Document
+from users.models import User
 
 User = get_user_model()
 
@@ -183,21 +184,79 @@ class SurveyUpdateSerializer(ModelSerializer):
                 instance.updated_at = next_question.updated_at
 
             if field_name := next_question.external_table_field_name:
-                try:
-                    table_name, field_name = field_name.split(".")
-                except ValueError as exp:
-                    logger.error(
-                        (
-                            "Не корректный формат поля "
-                            "'external_table_field_name' %s\n"
-                            "Traceback:\n%s"
-                        ),
-                        str(exp),
-                        traceback.format_exc(),
-                    )
+                self.__save_external_field(
+                    instance,
+                    field_name,
+                    answer_text,
+                )
 
             instance.save()
         return instance
+
+    @staticmethod
+    def __save_external_field(
+        survey: Survey,
+        field_name: str,
+        answer_text: str,
+    ) -> None:
+        """
+        Сохранение поля во внешние таблицы
+
+        Args:
+            survey: текущий опрос
+            field_name: имя поля для сохранения
+            answer_text: сохраняемое значение
+        """
+        logger.debug(
+            "Попытка сохранения принятого " "значения во внешнее поле таблицы."
+        )
+        try:
+            table_name, field_name = field_name.split(".")
+            if table_name == "User":
+                user = survey.user
+                if hasattr(User, field_name):
+                    try:
+                        setattr(user, field_name, answer_text)
+                        user.full_clean()
+                        user.save()
+                    except ValidationError as e:
+                        logger.error(
+                            "Ошибка валидации %s",
+                            e,
+                            exc_info=True,
+                        )
+                    except IntegrityError as e:
+                        logger.error(
+                            "Ошибка целостности данных %s",
+                            e,
+                            exc_info=True,
+                        )
+                    except DatabaseError as e:
+                        logger.error(
+                            "Ошибка базы данных %s",
+                            e,
+                            exc_info=True,
+                        )
+                else:
+                    logger.error(
+                        f"Поле {field_name} не найдено "
+                        f"в таблице {str(User)}."
+                    )
+            else:
+                logger.error(
+                    f"Не корректное имя модели: {table_name}\n"
+                    "При попытке сохранить поле "
+                    "во внешнюю таблицу.\n"
+                )
+        except ValueError as exp:
+            logger.error(
+                (
+                    "Не корректный формат поля "
+                    "'external_table_field_name' %s\n"
+                ),
+                str(exp),
+                exc_info=True,
+            )
 
     @staticmethod
     def __get_next_answer_choice(answer, question):

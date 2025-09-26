@@ -1,5 +1,4 @@
 import logging
-import traceback
 
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
@@ -48,9 +47,9 @@ class TelegramBot:
             await self.application.process_update(update)
         except Exception as e:
             logger.error(
-                ("Error processing update: %s\n" "Traceback:\n%s"),
+                "Error processing update: %s\n",
                 e,
-                traceback.format_exc(),
+                exc_info=True,
             )
 
     def run_polling(self):

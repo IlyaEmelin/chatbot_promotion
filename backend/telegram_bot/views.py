@@ -1,5 +1,4 @@
 import logging
-import traceback
 import asyncio
 
 from django.http import JsonResponse
@@ -26,8 +25,8 @@ def webhook(request):
         return JsonResponse({"status": "ok"})
     except Exception as e:
         logger.error(
-            "Запуска webhook телеграмм бота %s\nTraceback:\n%s",
+            "Запуска webhook телеграмм бота %s",
             str(e),
-            traceback.format_exc(),
+            exc_info=True,
         )
         return JsonResponse({"status": "error", "message": str(e)})
