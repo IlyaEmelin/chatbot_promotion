@@ -25,6 +25,7 @@ User = get_user_model()
 
 @sync_to_async
 def __save_survey_data(
+    user_obj: User,
     survey_obj: Survey,
     user_message: str,
 ) -> tuple[str, list[None | str]]:
@@ -45,7 +46,7 @@ def __save_survey_data(
         partial=True,
     )
     serializer.is_valid(raise_exception=True)
-    serializer.save()
+    serializer.save(user=user_obj)
     data = serializer.data
     return (
         data.get("current_question_text"),
@@ -233,7 +234,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         logger.debug(f"Статус опроса: {survey_obj.status}")
         if survey_obj.status == "new":
-            text, answers = await __save_survey_data(survey_obj, user_message)
+            text, answers = await __save_survey_data(
+                user_obj, survey_obj, user_message
+            )
 
             reply_markup = _get_reply_markup(answers)
             if text:

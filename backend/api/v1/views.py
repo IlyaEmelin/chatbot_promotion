@@ -83,21 +83,16 @@ class SurveyViewSet(
         Returns:
             Response: ответ на запрос создания
         """
-        # TODO: user = request.user
-        user = User.objects.first()
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save(user=user)
+        serializer.save(user=request.user)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         """
         Обновляет опрос через SurveyUpdateSerializer
         """
-        # TODO: user == request.user добавить эту проверку в права
-        user = User.objects.first()
 
         # Получаем объект survey
         survey = self.get_object()
@@ -110,7 +105,7 @@ class SurveyViewSet(
         )
 
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(user=request.user)
 
         return Response(serializer.data)
 
