@@ -9,7 +9,7 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -81,7 +81,9 @@ logger = logging.getLogger(__name__)
 
 SECRET_KEY = getenv("SECRET_KEY", default=get_random_secret_key())
 
-DEBUG = getenv('DEBUG', '').lower() == 'true'
+DEBUG = getenv("DEBUG", "").lower() == "true"
+# Ya disk token
+DISK_TOKEN = getenv("DISK_TOKEN", "")
 
 AUTH_USER_MODEL = "users.User"
 
@@ -92,11 +94,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'corsheaders',
+    "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
-    'djoser',
-    'drf_yasg',
+    "djoser",
+    "drf_yasg",
     "questionnaire",
     "api",
     "telegram_bot",
@@ -104,7 +106,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -137,22 +139,22 @@ WSGI_APPLICATION = "chatbot_promotion.wsgi.application"
 
 SWAGGER_USE_COMPAT_RENDERERS = False
 
-if getenv('ENABLE_POSTGRES_DB', '').lower() == 'true':
+if getenv("ENABLE_POSTGRES_DB", "").lower() == "true":
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': getenv('POSTGRES_DB'),
-            'USER': getenv('POSTGRES_USER'),
-            'PASSWORD': getenv('POSTGRES_PASSWORD'),
-            'HOST': getenv('DB_HOST'),
-            'PORT': 5432
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": getenv("POSTGRES_DB"),
+            "USER": getenv("POSTGRES_USER"),
+            "PASSWORD": getenv("POSTGRES_PASSWORD"),
+            "HOST": getenv("DB_HOST"),
+            "PORT": 5432,
         }
     }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
@@ -181,9 +183,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = "ru"
 
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -192,7 +194,7 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / 'backend_static'
+STATIC_ROOT = BASE_DIR / "backend_static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -207,4 +209,4 @@ TELEGRAM_WEBHOOK_URL = getenv(
 
 DISK_TOKEN = getenv("DISK_TOKEN", "dummy-key-for-dev")
 
-CSRF_TRUSTED_ORIGINS = getenv('CSRF_TRUSTED', 'http://localhost').split(',')
+CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")
