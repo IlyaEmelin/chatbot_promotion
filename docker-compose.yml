@@ -1,0 +1,52 @@
+volumes:
+  pg_data:
+  static:
+  logs:
+
+services:
+  5_postgres:
+    image: postgres:17
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    env_file: .env
+    restart: unless-stopped
+
+  5_backend:
+    build: ./backend/
+    environment:
+      DB_HOST: 5_postgres
+      ENABLE_POSTGRES_DB: true
+    volumes:
+      - static:/app/backend_static
+      - logs:/app/logs
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - 5_postgres
+
+  5_bot:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile_Bot
+    environment:
+      DB_HOST: 5_postgres
+      ENABLE_POSTGRES_DB: true
+    volumes:
+      - logs:/app/logs
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - 5_backend
+
+  5_gateway:
+    build: ./nginx/production/
+    ports:
+      - '580:80'
+      - '443:443'
+    volumes:
+      - static:/staticfiles/
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - 5_bot

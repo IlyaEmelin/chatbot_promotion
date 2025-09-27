@@ -307,9 +307,7 @@ class Base64ImageField(ImageField):
             except Exception as e:
                 raise ValidationError(DECODE_ERROR.format(e))
             return YandexDiskUploader(
-                environ.Env(
-                    DISK_TOKEN=(str, "no-envfile-key"),
-                ).str("DISK_TOKEN")
+                settings.DISK_TOKEN,
             ).upload_file(data.name, data.read())
 
     def to_representation(self, value):
