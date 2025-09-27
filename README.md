@@ -32,21 +32,37 @@
 
 #### Клонирование репозитория
 
+```bash
 git clone <https://github.com/IlyaEmelin/chatbot_promotion.git>
+```
+```bash
 cd chatbot_promotion
+```
+```bash
+cd backend
+```
 
 #### Запуск сервера
 
-npm run dev
+```bash
+python manage.py runserver
+```
 
 #### API Endpoints
+...
 
 ## Развертывание
 
-через Docker Compose:
+### Docker Compose:
 
-docker-compose up -d
+**Из корневой папки:**
 
-Запуск в production режиме:
+```bash
+sudo docker-compose up -d
+```
 
-docker-compose -f docker-compose.prod.yml up -d
+Запуск в dev режиме:
+
+```bash
+sudo docker compose -f docker-compose-dev.yml up -d
+```
