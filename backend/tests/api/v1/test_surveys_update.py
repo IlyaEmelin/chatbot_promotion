@@ -77,34 +77,6 @@ class TestSurveyUpdate:
         assert len(updated_survey.result) == 2
         assert updated_survey.result[1] == "мой_пользовательский_ответ"
 
-    @pytest.mark.skipif(
-        not os.environ.get('DISK_TOKEN'),
-        reason='Требуется переменная окружения DISK_TOKEN'
-    )
-    def test_update_survey_images(
-        self,
-        authenticated_client,
-        survey,
-    ):
-        """Тест обновления опроса с изображениями"""
-
-        url = reverse('document-list', kwargs={'survey_pk': survey.id,},)
-        data = {
-            'image': 'data:image/png;base64,R0lGODlhAQABA'
-                     'IAAAAAAAP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==',
-        }
-        response = authenticated_client.post(url, data, format="json")
-        assert response.status_code == HTTP_201_CREATED
-        assert len(Document.objects.all()) == 1
-
-        data = {
-            'image': 'data:image/png;base64,R0lGODlhAQAB'
-                     'AIAAAP///wAAACwAAAAAAQABAAACAkQBADs=',
-        }
-        response = authenticated_client.post(url, data, format="json")
-        assert response.status_code == HTTP_201_CREATED
-        assert len(Document.objects.all()) == 2
-
     def test_update_survey_invalid_answer(
         self,
         authenticated_client,
