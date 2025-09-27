@@ -33,7 +33,7 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-DECODE_ERROR = 'Ошибка кодировки изображения - {}'
+DECODE_ERROR = "Ошибка кодировки изображения - {}"
 
 
 class QuestionSerializer(ModelSerializer):
@@ -233,12 +233,6 @@ class SurveyUpdateSerializer(ModelSerializer):
                         setattr(user, field_name, answer_text)
                         user.full_clean()
                         user.save()
-                    except ValidationError as e:
-                        logger.error(
-                            "Ошибка валидации %s",
-                            e,
-                            exc_info=True,
-                        )
                     except IntegrityError as e:
                         logger.error(
                             "Ошибка целостности данных %s",
@@ -248,12 +242,6 @@ class SurveyUpdateSerializer(ModelSerializer):
                     except DatabaseError as e:
                         logger.error(
                             "Ошибка базы данных %s",
-                            e,
-                            exc_info=True,
-                        )
-                    except Exception as e:
-                        logger.error(
-                            "Базовая ошибка %s",
                             e,
                             exc_info=True,
                         )
@@ -307,19 +295,21 @@ class SurveyUpdateSerializer(ModelSerializer):
 
 class Base64ImageField(ImageField):
     def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            file_format, imgstr = data.split(';base64,')
+        if isinstance(data, str) and data.startswith("data:image"):
+            file_format, imgstr = data.split(";base64,")
             try:
                 data = ContentFile(
                     base64.b64decode(imgstr),
-                    name=f'{self.parent.context['user']}'
-                         f'{"".join(choices(digits, k=10))}.'
-                         + file_format.split('/')[-1],
+                    name=f"{self.parent.context['user']}"
+                    f'{"".join(choices(digits, k=10))}.'
+                    + file_format.split("/")[-1],
                 )
             except Exception as e:
                 raise ValidationError(DECODE_ERROR.format(e))
             return YandexDiskUploader(
-                environ.Env(DISK_TOKEN=(str, 'no-envfile-key'),).str('DISK_TOKEN')
+                environ.Env(
+                    DISK_TOKEN=(str, "no-envfile-key"),
+                ).str("DISK_TOKEN")
             ).upload_file(data.name, data.read())
 
     def to_representation(self, value):
@@ -333,5 +323,8 @@ class DocumentSerializer(ModelSerializer):
 
     class Meta:
         model = Document
-        fields = ('survey', 'image',)
-        read_only_fields = ('survey',)
+        fields = (
+            "survey",
+            "image",
+        )
+        read_only_fields = ("survey",)
