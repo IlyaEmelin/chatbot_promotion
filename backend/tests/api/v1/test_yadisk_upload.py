@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 from django.urls import reverse
 from rest_framework import status
@@ -17,7 +19,7 @@ class TestDocumentViewSet:
     detail_view_kwargs = staticmethod(lambda x, y: {'survey_pk': x, 'pk': y})
     list_view_kwargs = staticmethod(lambda x: {'survey_pk': x})
     data_image = staticmethod(lambda x: {'image': x})
-    invalid_pk_kwargs = {'survey_pk': 999}
+    invalid_pk_kwargs = {'survey_pk': uuid4()}
     patch_path = 'api.v1.serializers.YandexDiskUploader'
 
     def test_create_document_with_base64_image(self, client, mock_yandex_disk_uploader, user, survey):
@@ -71,14 +73,14 @@ class TestDocumentViewSet:
         response = client.post(url, data, format='json')
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    # def test_create_document_nonexistent_survey(self, client, user):
-    #     """Тест создания документа для несуществующего опроса"""
-    #     client.force_login(user)
-    #     image_data = f'{self.base64_prefix}{self.base64_image}'
-    #     url = reverse(self.list_view_name, kwargs=self.invalid_pk_kwargs)  # Несуществующий ID
-    #     data = self.data_image(image_data)
-    #     response = client.post(url, data, format='json')
-    #     assert response.status_code == status.HTTP_404_NOT_FOUND
+    def test_create_document_nonexistent_survey(self, client, user):
+        """Тест создания документа для несуществующего опроса"""
+        client.force_login(user)
+        image_data = f'{self.base64_prefix}{self.base64_image}'
+        url = reverse(self.list_view_name, kwargs=self.invalid_pk_kwargs)  # Несуществующий ID
+        data = self.data_image(image_data)
+        response = client.post(url, data, format='json')
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_yandex_disk_uploader_integration(self, client, user, survey, mock_yandex_disk_uploader):
         """Тест интеграции с YandexDiskUploader через mock"""

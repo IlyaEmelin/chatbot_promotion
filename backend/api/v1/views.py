@@ -117,14 +117,6 @@ class SurveyViewSet(
         return Response(serializer.data)
 
 
-# def is_valid_uuid(uuid_string):
-#     try:
-#         uuid_obj = uuid.UUID(uuid_string)
-#         return str(uuid_obj) == uuid_string
-#     except ValueError:
-#         return False
-
-
 class DocumentViewSet(
     CreateModelMixin,
     DestroyModelMixin,
@@ -136,30 +128,6 @@ class DocumentViewSet(
     queryset = Document.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = DocumentSerializer
-
-    # def base_crud(self):
-    #     id = self.kwargs.get('survey_pk')
-    #     if not is_valid_uuid(id):
-    #         raise Http404(f'Опроса с id {id} в базе нет')
-    #     return super().create(request, *args, **kwargs)
-
-
-    # def create(self, request, *args, **kwargs):
-    #     get_object_or_404(Survey, id=self.kwargs.get('survey_pk'))
-    #     return super().create(request, *args, **kwargs)
-
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     id = self.kwargs.get('survey_pk')
-    #     if not is_valid_uuid(id):
-    #         raise Http404(f'Опроса с id {id} в базе нет')
-    #     return super().create(request, *args, **kwargs)
-
-    # def destroy(self, request, *args, **kwargs):
-    #     id = self.kwargs.get('survey_pk')
-    #     if not is_valid_uuid(id):
-    #         raise Http404(f'Опроса с id {id} в базе нет')
-    #     return super().create(request, *args, **kwargs)
 
     def get_serializer_context(self):
         """Добавляем переменную из URL в контекст сериализатора."""
