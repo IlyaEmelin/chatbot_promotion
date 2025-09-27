@@ -259,8 +259,14 @@ class TestSurveyUpdateExternalFields:
         user,
         question,
     ):
-        """Тест последовательного сохранения нескольких полей пользователя через разные вопросы"""
-        # Создаем первый опрос
+        """
+        Тест последовательного сохранения нескольких полей пользователя через разные вопросы
+
+        Args:
+            authenticated_client: аутенфицированный клиент
+            user: пользователь
+            question: вопрос.
+        """
         survey = Survey.objects.create(
             user=user,
             current_question=question,
