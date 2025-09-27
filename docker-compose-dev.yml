@@ -27,7 +27,7 @@ services:
   5_gateway:
     build: ./nginx/dev/
     ports:
-      - '80:80'
+      - '580:80'
     volumes:
       - static:/staticfiles/
     env_file: .env.example
