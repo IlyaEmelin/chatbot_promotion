@@ -1,6 +1,13 @@
+// src/store/surveySlice.ts - ИСПРАВЛЕННАЯ ЛОГИКА ОПЦИЙ
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { surveyAPI } from '../api/surveyAPI';
 import { SurveyState, Message } from '../types';
+
+// Функция для определения, есть ли опции у текущего вопроса
+const hasValidOptions = (answers: string[]): boolean => {
+  // Если answers содержит больше одного элемента и они не null/пустые
+  return answers.length > 1 && answers.some(answer => answer !== null && answer.trim() !== '');
+};
 
 // Async thunks для работы с новым API
 export const startSurveyAsync = createAsyncThunk(
@@ -13,7 +20,7 @@ export const startSurveyAsync = createAsyncThunk(
       // Затем получаем список опросов для получения ID и текущего вопроса
       const surveys = await surveyAPI.getSurveys();
       
-      // Берем последний созданный опрос (или можно по questions_version_uuid)
+      // Берем последний созданный опрос
       const currentSurvey = surveys[surveys.length - 1];
       
       return {
@@ -30,7 +37,16 @@ export const submitAnswerAsync = createAsyncThunk(
   'survey/submitAnswer',
   async ({ surveyId, answer }: { surveyId: string; answer: string }, { rejectWithValue }) => {
     try {
-      return await surveyAPI.submitAnswer(surveyId, answer);
+      const response = await surveyAPI.submitAnswer(surveyId, answer);
+      
+      // После отправки ответа получаем обновленную информацию об опросе
+      const surveys = await surveyAPI.getSurveys();
+      const currentSurvey = surveys.find(s => s.id === surveyId);
+      
+      return {
+        submitResponse: response,
+        updatedSurvey: currentSurvey
+      };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Unknown error');
     }
@@ -104,15 +120,52 @@ const surveySlice = createSlice({
         state.answers = currentSurvey.answers;
         state.result = currentSurvey.result;
         
-        // Восстанавливаем или создаем первое сообщение
-        if (state.messages.length === 0 && currentSurvey.current_question_text) {
-          const welcomeMessage: Message = {
-            id: `question-${Date.now()}`,
+        // Восстанавливаем сообщения из result если есть история
+        if (Array.isArray(currentSurvey.result) && currentSurvey.result.length > 0) {
+          const messages: Message[] = [];
+          
+          // Создаем историю из result (пары вопрос-ответ)
+          for (let i = 0; i < currentSurvey.result.length; i += 2) {
+            if (currentSurvey.result[i]) {
+              // Вопрос
+              messages.push({
+                id: `restored-q-${i}`,
+                text: currentSurvey.result[i],
+                isBot: true,
+                timestamp: new Date(Date.now() - (currentSurvey.result.length - i) * 1000),
+              });
+            }
+            if (currentSurvey.result[i + 1]) {
+              // Ответ
+              messages.push({
+                id: `restored-a-${i}`,
+                text: currentSurvey.result[i + 1],
+                isBot: false,
+                timestamp: new Date(Date.now() - (currentSurvey.result.length - i - 1) * 1000),
+              });
+            }
+          }
+          
+          state.messages = messages;
+        }
+        
+        // Добавляем текущий вопрос, если он есть и не дублируется
+        if (currentSurvey.current_question_text && 
+            !state.messages.some(m => m.text === currentSurvey.current_question_text)) {
+          
+          // Определяем, есть ли опции для выбора
+          const hasOptions = hasValidOptions(currentSurvey.answers);
+          const options = hasOptions ? currentSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : undefined;
+          
+          const currentMessage: Message = {
+            id: `current-${Date.now()}`,
             text: currentSurvey.current_question_text,
             isBot: true,
             timestamp: new Date(),
+            options: options
           };
-          state.messages.push(welcomeMessage);
+          
+          state.messages.push(currentMessage);
         }
       })
       .addCase(startSurveyAsync.rejected, (state, action) => {
@@ -128,10 +181,21 @@ const surveySlice = createSlice({
       .addCase(submitAnswerAsync.fulfilled, (state, action) => {
         state.isLoading = false;
         
-        const response = action.payload;
+        const { submitResponse, updatedSurvey } = action.payload;
+        
+        // Обновляем состояние из обновленного опроса
+        if (updatedSurvey) {
+          state.currentQuestion = updatedSurvey.current_question_text;
+          state.answers = updatedSurvey.answers;
+          state.result = updatedSurvey.result;
+        }
         
         // Проверяем, завершен ли опрос
-        if (!response.current_question_text || response.current_question_text.trim() === '') {
+        const isCompleted = !submitResponse.current_question_text || 
+                           submitResponse.current_question_text.trim() === '' ||
+                           (updatedSurvey && !updatedSurvey.current_question_text);
+        
+        if (isCompleted) {
           state.isCompleted = true;
           const completionMessage: Message = {
             id: `completion-${Date.now()}`,
@@ -142,14 +206,26 @@ const surveySlice = createSlice({
           state.messages.push(completionMessage);
         } else {
           // Добавляем следующий вопрос
-          const newMessage: Message = {
-            id: `question-${Date.now()}`,
-            text: response.current_question_text,
-            isBot: true,
-            timestamp: new Date(),
-          };
-          state.messages.push(newMessage);
-          state.currentQuestion = response.current_question_text;
+          const questionText = updatedSurvey?.current_question_text || submitResponse.current_question_text;
+          
+          if (questionText) {
+            // Определяем, есть ли опции для следующего вопроса
+            const hasOptions = updatedSurvey && hasValidOptions(updatedSurvey.answers);
+            const options = hasOptions && updatedSurvey ? 
+              updatedSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : 
+              undefined;
+            
+            const newMessage: Message = {
+              id: `question-${Date.now()}`,
+              text: questionText,
+              isBot: true,
+              timestamp: new Date(),
+              options: options
+            };
+            
+            state.messages.push(newMessage);
+            state.currentQuestion = questionText;
+          }
         }
       })
       .addCase(submitAnswerAsync.rejected, (state, action) => {
@@ -175,37 +251,49 @@ const surveySlice = createSlice({
           state.answers = lastSurvey.answers;
           state.result = lastSurvey.result;
           
-          // Восстанавливаем сообщения из answers (если это возможно)
-          if (state.messages.length === 0) {
-            // Создаем сообщения на основе полученных данных
+          // Восстанавливаем сообщения из result если есть история
+          if (Array.isArray(lastSurvey.result) && lastSurvey.result.length > 0) {
             const messages: Message[] = [];
             
-            // Если есть ответы, создаем историю
-            if (lastSurvey.answers.length > 0) {
-              lastSurvey.answers.forEach((answer, index) => {
-                if (answer) {
-                  // Добавляем пользовательский ответ
-                  messages.push({
-                    id: `restored-answer-${index}`,
-                    text: answer,
-                    isBot: false,
-                    timestamp: new Date(Date.now() - (lastSurvey.answers.length - index) * 1000),
-                  });
-                }
-              });
-            }
-            
-            // Добавляем текущий вопрос
-            if (lastSurvey.current_question_text) {
-              messages.push({
-                id: `current-${Date.now()}`,
-                text: lastSurvey.current_question_text,
-                isBot: true,
-                timestamp: new Date(),
-              });
+            // Создаем историю из result
+            for (let i = 0; i < lastSurvey.result.length; i += 2) {
+              if (lastSurvey.result[i]) {
+                messages.push({
+                  id: `restored-q-${i}`,
+                  text: lastSurvey.result[i],
+                  isBot: true,
+                  timestamp: new Date(Date.now() - (lastSurvey.result.length - i) * 1000),
+                });
+              }
+              if (lastSurvey.result[i + 1]) {
+                messages.push({
+                  id: `restored-a-${i}`,
+                  text: lastSurvey.result[i + 1],
+                  isBot: false,
+                  timestamp: new Date(Date.now() - (lastSurvey.result.length - i - 1) * 1000),
+                });
+              }
             }
             
             state.messages = messages;
+          }
+          
+          // Добавляем текущий вопрос если он есть
+          if (lastSurvey.current_question_text && 
+              !state.messages.some(m => m.text === lastSurvey.current_question_text)) {
+            
+            const hasOptions = hasValidOptions(lastSurvey.answers);
+            const options = hasOptions ? lastSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : undefined;
+            
+            const currentMessage: Message = {
+              id: `current-${Date.now()}`,
+              text: lastSurvey.current_question_text,
+              isBot: true,
+              timestamp: new Date(),
+              options: options
+            };
+            
+            state.messages.push(currentMessage);
           }
         }
       })

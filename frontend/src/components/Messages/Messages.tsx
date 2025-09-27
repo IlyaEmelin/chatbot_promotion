@@ -14,6 +14,9 @@ export const Messages: React.FC = () => {
   }, [messages, isLoading]);
 
   const lastMessage = messages[messages.length - 1];
+  const shouldShowOptions = lastMessage?.options && 
+                           lastMessage.options.length > 0 && 
+                           !isLoading;
 
   return (
     <div className={styles.container}>
@@ -21,7 +24,7 @@ export const Messages: React.FC = () => {
         <Message key={message.id} message={message} />
       ))}
 
-      {lastMessage?.options && !isLoading && (
+      {shouldShowOptions && (
         <Options options={lastMessage.options} />
       )}
 
