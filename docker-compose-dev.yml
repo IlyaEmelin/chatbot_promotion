@@ -10,7 +10,7 @@ services:
       - 5432:5432
     volumes:
       - pg_data:/var/lib/postgresql/data
-    env_file: .env
+    env_file: .env.example
     restart: unless-stopped
 
   backend:
@@ -21,7 +21,7 @@ services:
     volumes:
       - static:/app/backend_static
       - logs:/app/logs
-    env_file: .env
+    env_file: .env.example
     restart: unless-stopped
     depends_on:
       - postgres
@@ -32,7 +32,7 @@ services:
       - '80:80'
     volumes:
       - static:/staticfiles/
-    env_file: .env
+    env_file: .env.example
     restart: unless-stopped
     depends_on:
       - backend
