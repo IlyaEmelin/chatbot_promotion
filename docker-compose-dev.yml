@@ -6,7 +6,6 @@ volumes:
 services:
   5_postgres:
     image: postgres:17
-    ports:
     volumes:
       - pg_data:/var/lib/postgresql/data
     env_file: .env.example
