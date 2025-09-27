@@ -2,7 +2,13 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
-from .const import START_COMMAND_NAME, HELP_COMMAND_NAME, STATUS_COMMAND_NAME
+from .const import (
+    START_COMMAND_NAME,
+    HELP_COMMAND_NAME,
+    STATUS_COMMAND_NAME,
+    LOAD_COMMAND_NAME,
+    NEXT_STEP_NAME,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +41,7 @@ async def help_command(
 
     Args:
         update:
-        addition_text: дополнительный текст
-
-    Returns:
-
+        context: контекст
     """
 
     help_text = f"""

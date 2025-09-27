@@ -1,3 +1,5 @@
 START_COMMAND_NAME = "start"
 STATUS_COMMAND_NAME = "status"
+LOAD_COMMAND_NAME = "load"
+NEXT_STEP_NAME = "next"
 HELP_COMMAND_NAME = "help"

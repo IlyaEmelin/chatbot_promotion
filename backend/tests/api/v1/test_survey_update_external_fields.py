@@ -244,14 +244,14 @@ class TestSurveyUpdateExternalFields:
         )
 
         url = reverse("survey-detail", kwargs={"pk": survey.id})
-        data = {"answer": "1990-01-01"}
+        data = {"answer": "01.12.2000"}
 
         response = authenticated_client.put(url, data, format="json")
 
         assert response.status_code == HTTP_200_OK
 
         survey.user.refresh_from_db()
-        assert str(survey.user.birthday) == "1990-01-01"
+        assert str(survey.user.birthday) == "01.12.2000"
 
     def test_update_survey_saves_multiple_user_fields_sequential(
         self,
