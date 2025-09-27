@@ -1,8 +1,11 @@
+from idlelib.browser import file_open
+from random import choices
+from string import digits
+from uuid import UUID
 import base64
 import logging
-from random import choices
-from uuid import UUID
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from rest_framework.serializers import (
@@ -18,13 +21,17 @@ from rest_framework.serializers import (
     SlugRelatedField,
     ImageField,
 )
+import environ
 
-from api.yadisk import upload_file_and_get_url
+from api.yadisk import YandexDiskUploader
 from questionnaire.models import Survey, Question, Document
 
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
+
+
+DECODE_ERROR = 'Ошибка кодировки изображения - {}'
 
 
 class QuestionSerializer(ModelSerializer):
@@ -212,16 +219,20 @@ class SurveyUpdateSerializer(ModelSerializer):
 
 class Base64ImageField(ImageField):
     def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith("data:image"):
-            format, imgstr = data.split(";base64,")
-            ext = format.split("/")[-1]
-            data = ContentFile(
-                base64.b64decode(imgstr),
-                name=f"{self.parent.context['user']}_"
-                f"{''.join(choices('123456789', k=10))}." + ext,
-            )
-            url = upload_file_and_get_url(data)
-        return url
+        if isinstance(data, str) and data.startswith('data:image'):
+            file_format, imgstr = data.split(';base64,')
+            try:
+                data = ContentFile(
+                    base64.b64decode(imgstr),
+                    name=f'{self.parent.context['user']}'
+                         f'{"".join(choices(digits, k=10))}.'
+                         + file_format.split('/')[-1],
+                )
+            except Exception as e:
+                raise ValidationError(DECODE_ERROR.format(e))
+            return YandexDiskUploader(
+                environ.Env(DISK_TOKEN=(str, 'no-envfile-key'),).str('DISK_TOKEN')
+            ).upload_file(data.name, data.read())
 
     def to_representation(self, value):
         return value
@@ -234,8 +245,5 @@ class DocumentSerializer(ModelSerializer):
 
     class Meta:
         model = Document
-        fields = (
-            "survey",
-            "image",
-        )
-        read_only_fields = ("survey",)
+        fields = ('survey', 'image',)
+        read_only_fields = ('survey',)
