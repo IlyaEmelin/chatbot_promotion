@@ -6,12 +6,12 @@ from uuid import UUID
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, DatabaseError
+from django.core.exceptions import ValidationError
 from rest_framework.serializers import (
     ModelSerializer,
     UUIDField,
     IntegerField,
     CharField,
-    ValidationError,
     PrimaryKeyRelatedField,
     SerializerMethodField,
     BooleanField,
@@ -261,6 +261,13 @@ class SurveyUpdateSerializer(ModelSerializer):
                             e,
                             exc_info=True,
                         )
+                    except Exception as e:
+                        logger.error(
+                            "Базовая ошибка %s",
+                            e,
+                            exc_info=True,
+                        )
+
                 else:
                     logger.error(
                         f"Поле {field_name} не найдено "
