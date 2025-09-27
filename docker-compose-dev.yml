@@ -1,0 +1,37 @@
+volumes:
+  pg_data:
+  logs:
+
+services:
+  postgres:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    env_file: .env
+    restart: unless-stopped
+
+  backend:
+    build: ./backend/
+    environment:
+      DB_HOST: postgres
+      ENABLE_POSTGRES_DB: true
+    volumes:
+      - static:/app/backend_static
+      - logs:/app/logs
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  gateway:
+    build: ./nginx/dev/
+    ports:
+      - '80:80'
+    volumes:
+      - static:/staticfiles/
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - backend
