@@ -104,41 +104,24 @@ class SurveyCreateSerializer(ModelSerializer):
     def create(self, validated_data):
         restart_question = validated_data.pop("restart_question", False)
         question_start = self.__get_question_start()
-        user = validated_data.get("user")
 
-        # Вместо get_or_create используем фильтрацию и first()
-        existing_survey = Survey.objects.filter(
-            user=user, status__in=["new", "processing"]  # Ищем активные опросы
-        ).first()
+        survey_obj, created = Survey.objects.get_or_create(
+            user=validated_data.get("user"),
+            defaults={
+                "current_question": question_start,
+                "status": "new",
+                "result": [],
+                "questions_version_uuid": question_start.updated_uuid,
+            },
+        )
+        if created:
+            logger.debug("Создан опрос %", survey_obj)
+        elif restart_question and survey_obj.current_question is None:
+            survey_obj.current_question = question_start
+            survey_obj.status = "new"
+            survey_obj.save()
 
-        if existing_survey:
-            if restart_question and existing_survey.current_question is None:
-                # Перезапускаем завершенный опрос
-                existing_survey.current_question = question_start
-                existing_survey.status = "new"
-                existing_survey.result = []
-                existing_survey.questions_version_uuid = (
-                    question_start.updated_uuid
-                )
-                existing_survey.save()
-                logger.debug("Опрос %s перезапущен", existing_survey.id)
-            else:
-                # Возвращаем существующий активный опрос
-                logger.debug(
-                    "Найден существующий опрос %s", existing_survey.id
-                )
-            return existing_survey
-        else:
-            # Создаем новый опрос
-            survey_obj = Survey.objects.create(
-                user=user,
-                current_question=question_start,
-                status="new",
-                result=[],
-                questions_version_uuid=question_start.updated_uuid,
-            )
-            logger.debug("Создан новый опрос %s", survey_obj.id)
-            return survey_obj
+        return survey_obj
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data

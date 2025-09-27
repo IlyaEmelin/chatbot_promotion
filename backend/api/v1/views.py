@@ -108,7 +108,7 @@ class SurveyViewSet(
         )
 
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
+        serializer.save(user=user)
 
         return Response(serializer.data)
 
