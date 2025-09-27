@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from django.utils.translation import gettext_lazy as _
@@ -20,34 +23,42 @@ class User(AbstractUser):
     first_name = models.CharField(
         _("first name"),
         max_length=USER_NAME_LENGTH,
-        blank=False,
+        blank=True,
+        null=True,
     )
     last_name = models.CharField(
         _("last name"),
         max_length=USER_NAME_LENGTH,
-        blank=False,
+        blank=True,
+        null=True,
     )
     patronymic = models.CharField(
-        "patronymic",
+        "Отчество",
         max_length=USER_NAME_LENGTH,
         blank=True,
         null=True,
     )
-    full_name = models.CharField(
-        "ФИО контактного лица",
+    ward_first_name = models.CharField(
+        "Подопечный. Имя",
         max_length=USER_NAME_LENGTH,
-        null=True,
         blank=True,
+        null=True,
+    )
+    ward_last_name = models.CharField(
+        "Подопечный. Фамилия",
+        max_length=USER_NAME_LENGTH,
+        blank=True,
+        null=True,
+    )
+    ward_patronymic = models.CharField(
+        "Подопечный. Отчество",
+        max_length=USER_NAME_LENGTH,
+        blank=True,
+        null=True,
     )
     email = models.EmailField(
         _("email address"),
         unique=False,
-        null=True,
-        blank=True,
-    )
-    agent = models.CharField(
-        "Контактное лицо",
-        max_length=USER_NAME_LENGTH,
         null=True,
         blank=True,
     )
@@ -97,11 +108,6 @@ class User(AbstractUser):
     )
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = (
-        "email",
-        "first_name",
-        "last_name",
-    )
 
     class Meta:
         verbose_name = "пользователя"
@@ -114,6 +120,21 @@ class User(AbstractUser):
                 condition=models.Q(email__isnull=False) & ~models.Q(email=""),
             )
         ]
+
+    def clean(self) -> None:
+        """Кастомная валидация для преобразования формата даты"""
+        super().clean()
+
+        # Если birthday передается как строка в формате DD.MM.YYYY
+        if isinstance(self.birthday, str):
+            try:
+                self.birthday = datetime.strptime(
+                    self.birthday, "%d.%m.%Y"
+                ).date()
+            except ValueError:
+                raise ValidationError(
+                    {"birthday": "Укажите дату в формате ДД.ММ.ГГГГ"}
+                )
 
     def __str__(self):
         return self.username

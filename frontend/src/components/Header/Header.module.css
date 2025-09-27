@@ -1,0 +1,213 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 60px;
+    border-radius: 20px; 
+    height: 70px;
+    width: calc(100% - 200px);
+    margin: 20px 70px;
+    padding: 0 30px;
+    background-color: rgba(255, 255, 255, 0.8); 
+    box-shadow: 0px 4px 12px rgba(15,31,40,0.15);
+    font-weight: 600;
+    text-transform: lowercase;
+    position: fixed;
+    z-index: 100;
+}
+
+.logo {
+    height: 155%;
+    margin-inline-start: -42px;
+    margin-block-start: -2px;
+}
+
+.logo img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.header nav {
+    flex: 1;
+}
+
+.menu {
+    display: flex;
+    justify-content: space-around;
+}
+
+.menu__item {
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.menu__item_active {
+    color: var(--accent-color);
+}
+
+.menu li:hover {
+    color: var(--accent-color);
+}
+
+.menu__item a:focus,
+.menu__item a:focus-visible {
+    color: var(--accent-color);
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 1px;
+}
+
+.button {
+    color: #ffffff;
+    font-family: 'Giphurs', Arial, sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    background-color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 20px;
+    height: 34px;
+    font-size: 12px;
+    padding: 0 16px;
+    transition-duration: 0.2s;
+    transition-property: background-color, color;
+    transition-timing-function: ease-in-out;
+}
+
+.button:hover {
+    background-color: #fff;
+    color: var(--accent-color);
+}
+
+.button:focus,
+.button:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    background-color: #fff;
+    color: var(--accent-color);
+}
+
+.burger,
+.closeMenu {
+    display: none;
+}
+
+@media (max-width: 979px) {
+    .logo {
+        display: none;
+    }
+
+    .header {
+        display: none;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: 100vh;
+        width: 180px;
+        margin: 0;
+        padding: 48px 40px 38px;
+        border-radius: 0;
+        background-color: var(--accent-color); 
+        color: var(--bg-color);
+        box-shadow: none;
+        z-index: 100;
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        font-family: 'Giphurs', Arial, sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        text-transform: lowercase;
+    }
+
+    .header.active {
+        display: flex;
+        transform: translateX(0%);
+    }
+
+    .menu {
+        flex-direction: column;
+        justify-content: start;
+        gap: 20px;
+        margin-bottom: 10px;
+    }
+
+    .menu__item_active {
+        color: var(--bg-color);
+    }
+
+    .button {
+        background-color: var(--bg-color);
+        color: var(--accent-color);
+    }
+
+    .burger {
+        display: block;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+        z-index: 10;
+        min-height: 30px;
+        min-width: 30px;
+    }
+
+    .bar {
+        width: 100%;
+        height: 3px;
+        background-color: var(--accent-color);
+        margin: 5px;
+        transition: .25s ease-in-out;
+    }
+
+    .closeMenu.active {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 24px;
+        height: 24px;
+        z-index: 999;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+    }
+
+    .line {
+        width: 100%;
+        height: 2px;
+        background-color: var(--bg-color);
+        margin: -1px;
+        
+    }
+
+    .line:nth-child(1) {
+        transform: rotate(-45deg);
+        transform-origin: center center;
+    }
+
+    .line:nth-child(2) {
+        transform: rotate(45deg);
+        transform-origin: center center;
+    }
+}
+
+@media (max-width: 640px) {
+    .header {
+        padding: 42px 25px 25px;
+        width: 210px;
+    }
+}
+
+/* @media (max-width: 479px) {
+    .burger {
+        top: 10px;
+        right: 130vw;
+    }
+    
+} */

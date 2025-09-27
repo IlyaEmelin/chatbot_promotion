@@ -1,0 +1,132 @@
+.footer {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    width: calc(100% - 140px);
+    display: flex;
+    gap: 230px;
+    justify-content: start;
+    padding: 33px 70px 107px 70px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 19px;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.copyright {
+    margin: 0;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    align-items: flex-start;
+    color: var(--bg-color);
+    margin-block-start: -3px;
+}
+
+.nav__link {
+    text-decoration: none;
+    color: var(--bg-color);
+}
+
+.nav__link:focus,
+.nav__link:focus-visible {
+    outline: 1px solid var(--bg-color);
+    outline-offset: 4px;
+    border-radius: 1px;
+}
+
+.contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    margin-block-start: 5px;
+}
+
+.button {
+    background-color: var(--bg-color);
+    color: #000000;
+    font-size: 18px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.55;
+    font-weight: 700;
+    border-radius: 30px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 15px 70px;
+    margin-block-start: 10px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.button:hover {
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+}
+
+.button:focus,
+.button:focus-visible {
+    outline: 1px solid var(--bg-color);
+    outline-offset: 4px;
+}
+
+@media (max-width: 979px) {
+    .footer {
+        flex-direction: column;
+        width: calc(100% - 40px);
+        padding: 33px 20px 107px 20px;
+        gap: 50px;
+        font-size: 12px;;
+    }
+
+    .footer div:last-child{
+        order: -5;
+    }
+
+    .copyright {
+        display: none;
+    }
+
+    .button {
+        order: -10;
+        width: fit-content
+    }
+
+    .contacts {
+        order: -9;
+        gap: 0;
+    }
+
+    .contacts a:first-child {
+        order: -8
+    }
+
+    .contacts div {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .contacts div:last-child {
+        order: -1;
+    }
+
+    .contacts div a:last-child {
+        order: -7;
+    }
+
+    .nav {
+        order: -2;
+    }
+
+    .info {
+        order: -1;
+    }
+}

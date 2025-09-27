@@ -75,7 +75,7 @@ class Question(Model):
         verbose_name_plural = "Вопросы"
 
     def __str__(self) -> str:
-        return self.text[:MAX_LEN_STRING]
+        return f"{self.text[:MAX_LEN_STRING-10]} ({self.type})"
 
 
 class AnswerChoice(Model):
@@ -117,7 +117,7 @@ class AnswerChoice(Model):
 
     def __str__(self):
         next_q_text = (
-            self.next_question[:MAX_LEN_STRING]
+            str(self.next_question)[:MAX_LEN_STRING]
             if self.next_question
             else "КОНЕЦ"
         )
@@ -207,3 +207,6 @@ class Document(Model):
     class Meta:
         verbose_name = "документ"
         verbose_name_plural = "Документы"
+
+    def __str__(self):
+        return f"Документ привязанный к опросу {self.survey}."

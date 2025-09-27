@@ -24,5 +24,9 @@ def webhook(request):
 
         return JsonResponse({"status": "ok"})
     except Exception as e:
-        logger.error("Запуска webhook телеграмм бота %s", str(e))
+        logger.error(
+            "Запуска webhook телеграмм бота %s",
+            str(e),
+            exc_info=True,
+        )
         return JsonResponse({"status": "error", "message": str(e)})

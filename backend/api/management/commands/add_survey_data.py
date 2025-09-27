@@ -14,7 +14,7 @@ from questionnaire.models import (
 logger = logging.getLogger(__name__)
 
 _DEFAULT_PATH = os.sep.join(("static_db_data", "questions"))
-_DEFAULT_FILE_NAME = "step1.json"
+_DEFAULT_FILE_NAME = "steps.json"
 
 
 class Command(BaseCommand):
@@ -61,6 +61,9 @@ class Command(BaseCommand):
             question = Question.objects.create(
                 text=question_data["text"],
                 type=question_data["type"],
+                external_table_field_name=question_data.get(
+                    "external_table_field_name"
+                ),
             )
             questions.append(question)
             logger.info(f"Создан вопрос: {question.text}")

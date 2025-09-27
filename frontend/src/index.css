@@ -1,0 +1,42 @@
+@font-face {
+  font-family: 'Giphurs';
+  src: url('../public/giphurs/fonts/variable/Giphurs[wght].ttf') format('truetype'),
+    url('../public/giphurs/fonts/variable/Giphurs[wght].woff') format('woff'),
+    url('../public/giphurs/fonts/variable/Giphurs[wght].woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+}
+
+:root {
+  --bg-color: #fff;
+  --text-color: #4e4e4e;
+  --accent-color: #404fdb;
+ 
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style-type: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

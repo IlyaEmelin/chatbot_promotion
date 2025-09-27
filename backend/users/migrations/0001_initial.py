@@ -29,7 +29,10 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "password",
+                    models.CharField(max_length=128, verbose_name="password"),
+                ),
                 (
                     "last_login",
                     models.DateTimeField(
@@ -78,12 +81,15 @@ class Migration(migrations.Migration):
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
+                        default=django.utils.timezone.now,
+                        verbose_name="date joined",
                     ),
                 ),
                 (
                     "first_name",
-                    models.CharField(max_length=150, verbose_name="first name"),
+                    models.CharField(
+                        max_length=150, verbose_name="first name"
+                    ),
                 ),
                 (
                     "last_name",
@@ -92,7 +98,9 @@ class Migration(migrations.Migration):
                 (
                     "email",
                     models.EmailField(
-                        max_length=254, unique=True, verbose_name="email address"
+                        max_length=254,
+                        unique=True,
+                        verbose_name="email address",
                     ),
                 ),
                 (
@@ -121,9 +129,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "birthday",
-                    models.DateField(
+                    models.CharField(
                         blank=True,
                         null=True,
+                        max_length=50,
                         validators=[users.validators.birthday_validator],
                         verbose_name="Дата рождения",
                     ),

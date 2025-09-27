@@ -1,8 +1,8 @@
 import logging
-import traceback
 from asgiref.sync import sync_to_async
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from telegram import (
     Update,
     User as TelegramUser,
@@ -26,6 +26,7 @@ User = get_user_model()
 
 @sync_to_async
 def __save_survey_data(
+    user_obj: User,
     survey_obj: Survey,
     user_message: str,
 ) -> tuple[str, list[None | str]]:
@@ -46,7 +47,7 @@ def __save_survey_data(
         partial=True,
     )
     serializer.is_valid(raise_exception=True)
-    serializer.save()
+    serializer.save(user=user_obj)
     data = serializer.data
     return (
         data.get("current_question_text"),
@@ -66,8 +67,9 @@ def _get_or_create_user(user: TelegramUser) -> User:
 
     """
     user_obj, created = User.objects.get_or_create(
-        telegram_username=user.username,
+        telegram_username="@" + user.username,
         defaults={
+            "telegram_username": "@" + user.username,
             "first_name": user.first_name or "",
             "last_name": user.last_name or "",
             # TODO При первичной авторизации не задается но потом просят задать
@@ -139,7 +141,7 @@ def _get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     """
     reply_markup = None
     if answers:
-        keyboard = [[KeyboardButton(answer)] for answer in answers]
+        keyboard = [[KeyboardButton(answer)] for answer in answers if answer]
         reply_markup = ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True,
@@ -170,11 +172,10 @@ async def start_command(
             reply_markup=reply_markup,
         )
     except Exception as e:
-        error_traceback = traceback.format_exc()
         logger.error(
-            "Ошибка в start_command: %s\nTraceback:\n%s",
+            "Ошибка в start_command: %s",
             str(e),
-            error_traceback,
+            exc_info=True,
         )
         await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
 
@@ -207,11 +208,10 @@ async def status_command(
                 )
         await help_command(update, context)
     except Exception as e:
-        error_traceback = traceback.format_exc()
         logger.error(
-            "Ошибка в status_command: %s\nTraceback:\n%s",
+            "Ошибка в status_command: %s",
             str(e),
-            error_traceback,
+            exc_info=True,
         )
         await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
 
@@ -234,9 +234,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         __, ___, ____, survey_obj = await _get_or_create_survey(
             user_obj, False
         )
-        logger.error(f"status: {survey_obj.status}")
+        logger.debug(f"Статус опроса: {survey_obj.status}")
         if survey_obj.status == "new":
-            text, answers = await __save_survey_data(survey_obj, user_message)
+            try:
+                text, answers = await __save_survey_data(
+                    user_obj,
+                    survey_obj,
+                    user_message,
+                )
+            except ValidationError as exp:
+                text, answers = "\n".join(exp.messages), []
 
             reply_markup = _get_reply_markup(answers)
             if text:
@@ -251,10 +258,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     except Exception as e:
-        error_traceback = traceback.format_exc()
         logger.error(
-            "Ошибка в handle_message: %s\nTraceback:\n%s",
+            "Ошибка в handle_message: %s",
             str(e),
-            error_traceback,
+            exc_info=True,
         )
         await update.message.reply_text("Произошла ошибка. Попробуйте позже.")
