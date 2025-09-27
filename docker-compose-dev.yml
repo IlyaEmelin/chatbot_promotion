@@ -11,7 +11,7 @@ services:
     env_file: .env.example
     restart: unless-stopped
 
-  backend:
+  5_backend:
     build: ./backend/
     environment:
       DB_HOST: 5_postgres
@@ -24,7 +24,7 @@ services:
     depends_on:
       - 5_postgres
 
-  gateway:
+  5_gateway:
     build: ./nginx/dev/
     ports:
       - '80:80'

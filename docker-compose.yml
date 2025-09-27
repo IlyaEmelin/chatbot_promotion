@@ -24,7 +24,7 @@ services:
     depends_on:
       - 5_postgres
 
-  gateway:
+  5_gateway:
     build: ./nginx/production/
     ports:
       - '80:80'
