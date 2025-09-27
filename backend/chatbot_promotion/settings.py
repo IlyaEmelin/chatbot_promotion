@@ -202,3 +202,5 @@ TELEGRAM_WEBHOOK_URL = getenv(
 )
 
 DISK_TOKEN = getenv("DISK_TOKEN", "dummy-key-for-dev")
+
+CSRF_TRUSTED_ORIGINS = getenv('CSRF_TRUSTED', 'http://localhost').split(',')
