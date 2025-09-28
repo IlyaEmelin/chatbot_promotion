@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.serializers import ValidationError
-from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from rest_framework.status import HTTP_201_CREATED
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -20,6 +20,7 @@ from rest_framework.mixins import (
 
 from questionnaire.constant import STATUS_CHOICES
 from questionnaire.models import Survey, Question, Document
+from .permissions import AuthorOnly
 from .serializers import (
     SurveyCreateSerializer,
     SurveyUpdateSerializer,
@@ -43,25 +44,18 @@ class SurveyViewSet(
     """
 
     queryset = Survey.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated, AuthorOnly,)
     # TODO: permission_classes = (IsAuthenticated,)
     filter_backends = (SurveyFilterBackend,)
 
     @action(('patch',), detail=True,
-            permission_classes=(IsAuthenticated,),)
+            permission_classes=(IsAuthenticated, AuthorOnly,),)
     def processing(self, request, pk):
         """Метод смены статуса опроса на <В обработке>."""
-        try:
-            survey = self.get_object()
-            survey.status = STATUS_CHOICES[2][0]
-            survey.save()
-            serializer = self.get_serializer(survey)
-            return Response(serializer.data)
-        except Survey.DoesNotExist:
-            return Response(
-                {'error': f'В базе нет опроса с id {pk}'},
-                status=HTTP_404_NOT_FOUND
-            )
+        survey = self.get_object()
+        survey.status = STATUS_CHOICES[2][0]
+        survey.save()
+        return Response(self.get_serializer(survey).data)
 
     def get_serializer_class(self):
         """
@@ -142,7 +136,7 @@ class DocumentViewSet(
     """ViewSet для работы с документами."""
 
     queryset = Document.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, AuthorOnly,)
     serializer_class = DocumentSerializer
 
     def get_serializer_context(self):
