@@ -144,7 +144,10 @@ def __save_survey_data(
     """
     serializer = SurveyUpdateSerializer(
         instance=survey_obj,
-        data={"answer": user_message},
+        data={
+            "answer": user_message,
+            "add_telegram": False,
+        },
         partial=True,
     )
     serializer.is_valid(raise_exception=True)
@@ -170,6 +173,7 @@ def _get_or_create_user(user: TelegramUser) -> User:
     user_obj, created = User.objects.get_or_create(
         telegram_username="@" + user.username,
         defaults={
+            "username": user.username,
             "telegram_username": "@" + user.username,
             "first_name": user.first_name or "",
             "last_name": user.last_name or "",
