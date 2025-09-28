@@ -1,5 +1,4 @@
 START_COMMAND_NAME = "start"
 STATUS_COMMAND_NAME = "status"
-LOAD_COMMAND_NAME = "load"
 PROCESSING_COMMAND = "processing"
 HELP_COMMAND_NAME = "help"
