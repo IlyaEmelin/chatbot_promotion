@@ -49,7 +49,7 @@ class SurveyViewSet(
 
     @action(('patch',), detail=True,
             permission_classes=(IsAuthenticated,),)
-    def processing(self, request, id):
+    def processing(self, request, pk):
         """Метод смены статуса опроса на <В обработке>."""
         try:
             survey = self.get_object()
@@ -59,7 +59,7 @@ class SurveyViewSet(
             return Response(serializer.data)
         except Survey.DoesNotExist:
             return Response(
-                {'error': f'В базе нет опроса с id {id}'},
+                {'error': f'В базе нет опроса с id {pk}'},
                 status=HTTP_404_NOT_FOUND
             )
 
