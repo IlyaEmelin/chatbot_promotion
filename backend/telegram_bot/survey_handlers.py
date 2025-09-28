@@ -91,7 +91,7 @@ async def telegram_file_to_base64_image_field(file: File) -> str:
     return data_uri
 
 
-async def __save_document(
+async def _save_document(
     survey_obj: Survey,
     document_file,
 ) -> tuple[bool, int | None]:
@@ -364,7 +364,7 @@ async def load_document_command(
             await load_command(update, context)
             return
 
-        result, file_id = await __save_document(survey_obj, photo)
+        result, file_id = await _save_document(survey_obj, photo)
 
         await load_command(
             update,

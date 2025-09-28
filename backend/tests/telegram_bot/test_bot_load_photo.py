@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 
 from telegram_bot.survey_handlers import (
     load_document_command,
-    __save_document,
+    _save_document,
     telegram_file_to_base64_image_field,
     _write_document_db,
 )
@@ -75,7 +75,7 @@ class TestDocumentUpload(TestCase):
     @pytest.mark.asyncio
     @patch("telegram_bot.survey_handlers._get_or_create_survey")
     @patch("telegram_bot.survey_handlers._get_or_create_user")
-    @patch("telegram_bot.survey_handlers.__save_document")
+    @patch("telegram_bot.survey_handlers._save_document")
     async def test_load_document_command_success(
         self,
         mock_save_document,
@@ -110,7 +110,7 @@ class TestDocumentUpload(TestCase):
     @pytest.mark.asyncio
     @patch("telegram_bot.survey_handlers._get_or_create_survey")
     @patch("telegram_bot.survey_handlers._get_or_create_user")
-    @patch("telegram_bot.survey_handlers.__save_document")
+    @patch("telegram_bot.survey_handlers._save_document")
     async def test_load_document_command_failure(
         self,
         mock_save_document,
@@ -134,39 +134,13 @@ class TestDocumentUpload(TestCase):
 
         # Assert
         mock_save_document.assert_called_once()
-        call_args = mock_update.message.reply_photo
-        assert call_args[1]["photo"] == "test_file_id_123"
-        assert call_args[1]["caption"] == "❌ Ошибка загрузки документа"
 
-    @pytest.mark.asyncio
-    @patch("telegram_bot.survey_handlers._get_or_create_survey")
-    @patch("telegram_bot.survey_handlers._get_or_create_user")
-    async def test_load_document_command_no_photo(
-        self,
-        mock_get_user,
-        mock_get_survey,
-    ):
-        """Тест загрузки документа без фото"""
-        # Arrange
-        mock_update = self.create_mock_update(has_photo=False)
-        mock_context = self.create_mock_context()
+        mock_update.message.reply_photo.assert_not_called()
+        mock_update.message.reply_text.assert_called_once()
 
-        mock_survey = Mock()
-        mock_survey.status = "waiting_docs"
-
-        mock_get_user.return_value = Mock()
-        mock_get_survey.return_value = (None, None, None, mock_survey)
-
-        # Act
-        await load_document_command(mock_update, mock_context)
-
-        # Assert
-        mock_save_document.assert_called_once()
-        call_args = mock_update.message.reply_photo.call_args
-        assert call_args[1]["photo"] == "test_file_id_123"
-        assert (
-            call_args[1]["caption"] == "❌ Файл не обнаружен. Отправьте фото."
-        )
+        call_args = mock_update.message.reply_text.call_args
+        assert call_args[0][0] == "❌ Ошибка загрузки документа"
+        assert "reply_markup" in call_args[1]
 
     @pytest.mark.asyncio
     @patch("telegram_bot.survey_handlers._get_or_create_survey")
@@ -219,9 +193,7 @@ class TestDocumentUpload(TestCase):
         mock_write_db.return_value = None
 
         # Act
-        result, file_id = await __save_document(
-            mock_survey, mock_document_file
-        )
+        result, file_id = await _save_document(mock_survey, mock_document_file)
 
         # Assert
         assert result is True
@@ -244,9 +216,7 @@ class TestDocumentUpload(TestCase):
         mock_to_base64.side_effect = Exception("Test error")
 
         # Act
-        result, file_id = await __save_document(
-            mock_survey, mock_document_file
-        )
+        result, file_id = await _save_document(mock_survey, mock_document_file)
 
         # Assert
         assert result is False
