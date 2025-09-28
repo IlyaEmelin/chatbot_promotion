@@ -7,7 +7,7 @@ from .const import (
     HELP_COMMAND_NAME,
     STATUS_COMMAND_NAME,
     LOAD_COMMAND_NAME,
-    NEXT_STEP_NAME,
+    PROCESSING_COMMAND,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ def _load_documents_keyboard() -> ReplyKeyboardMarkup:
     """
     keyboard = [
         [KeyboardButton(f"/{LOAD_COMMAND_NAME}")],
-        [KeyboardButton(f"/{NEXT_STEP_NAME}")],
+        [KeyboardButton(f"/{PROCESSING_COMMAND}")],
         [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
     ]
     return ReplyKeyboardMarkup(
@@ -107,7 +107,7 @@ async def load_command(
 
 Команды:
 /{LOAD_COMMAND_NAME} - загрузить еще документы
-/{NEXT_STEP_NAME} - закончить загрузку документов
+/{PROCESSING_COMMAND} - закончить загрузку документов
 /{HELP_COMMAND_NAME} - помощь
 """
         reply_markup = _load_documents_keyboard()

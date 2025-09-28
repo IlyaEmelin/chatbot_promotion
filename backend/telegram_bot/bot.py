@@ -7,6 +7,7 @@ from .survey_handlers import (
     start_command,
     status_command,
     load_document_command,
+    processing_command,
     handle_message,
 )
 from .menu_handlers import help_command
@@ -14,8 +15,7 @@ from .const import (
     START_COMMAND_NAME,
     STATUS_COMMAND_NAME,
     HELP_COMMAND_NAME,
-    LOAD_COMMAND_NAME,
-    NEXT_STEP_NAME,
+    PROCESSING_COMMAND,
 )
 
 logger = logging.getLogger(__name__)
@@ -36,6 +36,9 @@ class TelegramBot:
         )
         self.application.add_handler(
             CommandHandler(HELP_COMMAND_NAME, help_command),
+        )
+        self.application.add_handler(
+            CommandHandler(PROCESSING_COMMAND, processing_command),
         )
         self.application.add_handler(
             MessageHandler(
