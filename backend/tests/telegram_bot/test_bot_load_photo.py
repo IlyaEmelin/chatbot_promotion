@@ -12,7 +12,6 @@ from telegram_bot.survey_handlers import (
 )
 from telegram_bot.menu_handlers import load_command
 from telegram_bot.const import (
-    LOAD_COMMAND_NAME,
     PROCESSING_COMMAND,
     HELP_COMMAND_NAME,
 )
@@ -326,7 +325,6 @@ class TestDocumentUpload(TestCase):
         mock_update.message.reply_text.assert_called_once()
         args, kwargs = mock_update.message.reply_text.call_args
         assert "Загрузка документов" in args[0]
-        assert LOAD_COMMAND_NAME in args[0]
         assert PROCESSING_COMMAND in args[0]
         assert HELP_COMMAND_NAME in args[0]
 

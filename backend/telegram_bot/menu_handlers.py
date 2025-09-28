@@ -6,7 +6,6 @@ from .const import (
     START_COMMAND_NAME,
     HELP_COMMAND_NAME,
     STATUS_COMMAND_NAME,
-    LOAD_COMMAND_NAME,
     PROCESSING_COMMAND,
 )
 
@@ -73,7 +72,6 @@ def _load_documents_keyboard() -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
-        [KeyboardButton(f"/{LOAD_COMMAND_NAME}")],
         [KeyboardButton(f"/{PROCESSING_COMMAND}")],
         [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
     ]
@@ -106,7 +104,6 @@ async def load_command(
 📋 *Загрузка документов*
 
 Команды:
-/{LOAD_COMMAND_NAME} - загрузить еще документы
 /{PROCESSING_COMMAND} - закончить загрузку документов
 /{HELP_COMMAND_NAME} - помощь
 """
