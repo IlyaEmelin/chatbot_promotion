@@ -16,7 +16,7 @@ from telegram import (
 )
 from telegram.ext import ContextTypes
 
-from questionnaire.models import Survey, Question
+from questionnaire.models import Survey, Question, Document
 from api.v1.serializers import (
     SurveyUpdateSerializer,
     SurveyCreateSerializer,
@@ -239,6 +239,21 @@ def _get_or_create_survey(
     )
 
 
+@sync_to_async
+def _get_survey_documents(survey_obj: Survey) -> list[Document]:
+    """
+    Получить документы опроса
+
+    Args:
+        survey_obj: объект опроса
+
+    Returns:
+        list: список документов
+    """
+    documents = survey_obj.docs.all()
+    return list(documents)
+
+
 def _get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     """
     Получить клавиатуру
@@ -316,6 +331,15 @@ async def status_command(
                     if i % 2
                     else f"❓ Вопрос:\n    {text}"
                 )
+
+        logger.debug("Добавляем отображение документов")
+        if documents := await _get_survey_documents(survey):
+            await update.message.reply_text("📎 Прикрепленные документы:")
+            for select_doc in (doc for doc in documents if doc.image):
+                try:
+                    await update.message.reply_photo(photo=select_doc.image)
+                except Exception as e:
+                    logger.error(f"Не удалось отправить фото: {e}")
 
         status_text = {
             "new": "🆕 Новая",
