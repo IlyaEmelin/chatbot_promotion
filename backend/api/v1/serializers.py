@@ -126,6 +126,7 @@ class SurveyCreateSerializer(ModelSerializer):
         elif restart_question and survey_obj.current_question is None:
             survey_obj.current_question = question_start
             survey_obj.status = "new"
+            survey_obj.result = []
             survey_obj.save()
 
         return survey_obj
@@ -140,10 +141,19 @@ class SurveyUpdateSerializer(ModelSerializer):
     answer = CharField(required=False, allow_blank=True, allow_null=True)
     current_question_text = SerializerMethodField(read_only=True)
     answers = SerializerMethodField(read_only=True)
+    add_telegram = BooleanField(
+        required=False,
+        default=True,
+    )
 
     class Meta:
         model = Survey
-        fields = ("answer", "current_question_text", "answers")
+        fields = (
+            "answer",
+            "current_question_text",
+            "answers",
+            "add_telegram",
+        )
         read_only_fields = ("current_question_text", "answers")
 
     def get_current_question_text(self, obj):
@@ -160,12 +170,25 @@ class SurveyUpdateSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         answer = validated_data.get("answer")
+        add_telegram = validated_data.pop("add_telegram", True)
+
         if current_question := instance.current_question:
             next_question, answer_text = self.__get_next_answer_choice(
                 answer, current_question
             )
 
             result = instance.result or []
+            if (
+                not add_telegram
+                and next_question
+                and next_question.external_table_field_name
+                == "User.telegram_username"
+            ):
+                logger.debug(
+                    "Пропуск вопроса @username для телеграм, в телеграм боте."
+                )
+                next_question = next_question.answers.first().next_question
+
             if answer_text:
                 result.extend((current_question.text, answer_text))
 
@@ -268,8 +291,21 @@ class SurveyUpdateSerializer(ModelSerializer):
             )
 
     @staticmethod
-    def __get_next_answer_choice(answer, question):
-        """Перенесенная логика из views.py"""
+    def __get_next_answer_choice(
+        answer: str | None,
+        question: Question,
+    ) -> tuple[Question, str | None]:
+        """
+        Получить следующий вопрос
+
+        Args:
+            answer: текст ответа
+            question: текущий вопрос
+
+        Returns:
+            Question: следующий вопрос
+            str | None: текст ответа
+        """
         if not answer:
             question.text = (
                 "Не передан ответ. Ответьте снова.\n" + question.text
