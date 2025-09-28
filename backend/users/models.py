@@ -68,7 +68,7 @@ class User(AbstractUser):
         null=True,
         blank=True,
     )
-    birthday = models.DateField(
+    birthday = models.CharField(
         "Дата рождения",
         validators=[
             birthday_validator,
@@ -120,21 +120,6 @@ class User(AbstractUser):
                 condition=models.Q(email__isnull=False) & ~models.Q(email=""),
             )
         ]
-
-    def clean(self) -> None:
-        """Кастомная валидация для преобразования формата даты"""
-        super().clean()
-
-        # Если birthday передается как строка в формате DD.MM.YYYY
-        if isinstance(self.birthday, str):
-            try:
-                self.birthday = datetime.strptime(
-                    self.birthday, "%d.%m.%Y"
-                ).date()
-            except ValueError:
-                raise ValidationError(
-                    {"birthday": "Укажите дату в формате ДД.ММ.ГГГГ"}
-                )
 
     def __str__(self):
         return self.username

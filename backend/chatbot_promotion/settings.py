@@ -1,23 +1,17 @@
-import os
 import logging
+from os import getenv, path
 from pathlib import Path
-import environ
 
 from django.core.management.utils import get_random_secret_key
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env(
-    DEBUG=(bool, False),
-    SECRET_KEY=(str, "dummy-key-for-dev"),
-)
-logging.info("BASE_DIR: %s", BASE_DIR)
-logging.info("Patch (setting) to .env file : %s", BASE_DIR.parent)
-environ.Env.read_env(env_file=BASE_DIR.parent / ".env.example")
-environ.Env.read_env(env_file=BASE_DIR.parent / ".env", overwrite=True)
-logging.info("End load .env")
+ALLOWED_HOSTS = ["*"]
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOGGING = {
     "version": 1,
@@ -51,7 +45,7 @@ LOGGING = {
         "file": {
             "level": "INFO",
             "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR / "logs", "django.log"),
+            "filename": path.join(BASE_DIR / "logs", "django.log"),
             "formatter": "verbose",
             "filters": ["add_class_method"],
         },
@@ -63,40 +57,35 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "api": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "recipes": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "users": {
             "handlers": ["console", "file"],
-            "level": env.str("LOGGING_LEVEL", "INFO"),
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
     },
 }
 logger = logging.getLogger(__name__)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env.str("SECRET_KEY", default=get_random_secret_key())
+SECRET_KEY = getenv("SECRET_KEY", default=get_random_secret_key())
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = getenv("DEBUG", "").lower() == "true"
+# Ya disk token
+DISK_TOKEN = getenv("DISK_TOKEN", "")
 
 AUTH_USER_MODEL = "users.User"
-
-# AUTHENTICATION_BACKENDS = ("users.backends.EmailBackend",)
-# # Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -105,8 +94,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
     "corsheaders",
+    "rest_framework",
     "rest_framework.authtoken",
     "djoser",
     "drf_yasg",
@@ -127,13 +116,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
-# Или разрешить все origins для разработки (не для продакшена!)
-CORS_ALLOW_ALL_ORIGINS = True  # Только для разработки!
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "chatbot_promotion.urls"
 
@@ -156,13 +139,24 @@ WSGI_APPLICATION = "chatbot_promotion.wsgi.application"
 
 SWAGGER_USE_COMPAT_RENDERERS = False
 
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if getenv("ENABLE_POSTGRES_DB", "").lower() == "true":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": getenv("POSTGRES_DB"),
+            "USER": getenv("POSTGRES_USER"),
+            "PASSWORD": getenv("POSTGRES_PASSWORD"),
+            "HOST": getenv("DB_HOST"),
+            "PORT": 5432,
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -173,10 +167,6 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny",
     ],
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -193,35 +183,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LANGUAGE_CODE = "ru"
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = "ru-ru"
-
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "static/"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+STATIC_ROOT = BASE_DIR / "backend_static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Настройки для Telegram бота
-TELEGRAM_BOT_TOKEN = env.str(
+TELEGRAM_BOT_TOKEN = getenv(
     "TELEGRAM_BOT_TOKEN",
     "your_bot_token_here",
 )
-TELEGRAM_WEBHOOK_URL = env.str(
+TELEGRAM_WEBHOOK_URL = getenv(
     "TELEGRAM_WEBHOOK_URL",
     "https://yourdomain.com/webhook/",
 )
+
+DISK_TOKEN = getenv("DISK_TOKEN", "dummy-key-for-dev")
+
+CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")

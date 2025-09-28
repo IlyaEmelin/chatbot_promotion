@@ -210,14 +210,16 @@ class TestTelegramBot(TestCase):
         handlers = self.bot.application.handlers[0]
 
         # Assert
-        assert len(handlers) == 4  # start, help, status, message
+        assert len(handlers) == 6  # start, help, status, message
 
         # Проверяем типы обработчиков
         handler_types = [type(handler).__name__ for handler in handlers]
         assert "CommandHandler" == handler_types[0]
         assert "CommandHandler" == handler_types[1]
         assert "CommandHandler" == handler_types[2]
-        assert "MessageHandler" == handler_types[3]
+        assert "CommandHandler" == handler_types[3]
+        assert "MessageHandler" == handler_types[4]
+        assert "MessageHandler" == handler_types[5]
 
     @pytest.mark.asyncio
     @patch("telegram_bot.bot.Application.process_update")

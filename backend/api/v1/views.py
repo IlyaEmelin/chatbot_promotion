@@ -1,6 +1,8 @@
 import logging
+import uuid
 
 from django.contrib.auth import get_user_model
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -108,7 +110,7 @@ class SurveyViewSet(
         )
 
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
+        serializer.save(user=user)
 
         return Response(serializer.data)
 
@@ -128,9 +130,9 @@ class DocumentViewSet(
     def get_serializer_context(self):
         """Добавляем переменную из URL в контекст сериализатора."""
         context = super().get_serializer_context()
-        survey = get_object_or_404(Survey, id=self.kwargs.get("survey_pk"))
-        context["user"] = f"{survey.user.username}"
+        survey = get_object_or_404(Survey, id=self.kwargs.get('survey_pk'))
+        context['user'] = survey.user.username
         return context
 
     def perform_create(self, serializer):
-        serializer.save(survey=Survey.objects.get(pk=self.kwargs["survey_pk"]))
+        serializer.save(survey=Survey.objects.get(pk=self.kwargs['survey_pk']))

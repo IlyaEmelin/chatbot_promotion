@@ -1,8 +1,11 @@
+from idlelib.browser import file_open
+from random import choices
+from string import digits
+from uuid import UUID
 import base64
 import logging
-from random import choices
-from uuid import UUID
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, DatabaseError
@@ -19,14 +22,18 @@ from rest_framework.serializers import (
     SlugRelatedField,
     ImageField,
 )
+import environ
 
-from api.yadisk import upload_file_and_get_url
+from api.yadisk import YandexDiskUploader
 from questionnaire.models import Survey, Question, Document
 from users.models import User
 
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
+
+
+DECODE_ERROR = "Ошибка кодировки изображения - {}"
 
 
 class QuestionSerializer(ModelSerializer):
@@ -104,41 +111,24 @@ class SurveyCreateSerializer(ModelSerializer):
     def create(self, validated_data):
         restart_question = validated_data.pop("restart_question", False)
         question_start = self.__get_question_start()
-        user = validated_data.get("user")
 
-        # Вместо get_or_create используем фильтрацию и first()
-        existing_survey = Survey.objects.filter(
-            user=user, status__in=["new", "processing"]  # Ищем активные опросы
-        ).first()
+        survey_obj, created = Survey.objects.get_or_create(
+            user=validated_data.get("user"),
+            defaults={
+                "current_question": question_start,
+                "status": "new",
+                "result": [],
+                "questions_version_uuid": question_start.updated_uuid,
+            },
+        )
+        if created:
+            logger.debug("Создан опрос %", survey_obj)
+        elif restart_question and survey_obj.current_question is None:
+            survey_obj.current_question = question_start
+            survey_obj.status = "new"
+            survey_obj.save()
 
-        if existing_survey:
-            if restart_question and existing_survey.current_question is None:
-                # Перезапускаем завершенный опрос
-                existing_survey.current_question = question_start
-                existing_survey.status = "new"
-                existing_survey.result = []
-                existing_survey.questions_version_uuid = (
-                    question_start.updated_uuid
-                )
-                existing_survey.save()
-                logger.debug("Опрос %s перезапущен", existing_survey.id)
-            else:
-                # Возвращаем существующий активный опрос
-                logger.debug(
-                    "Найден существующий опрос %s", existing_survey.id
-                )
-            return existing_survey
-        else:
-            # Создаем новый опрос
-            survey_obj = Survey.objects.create(
-                user=user,
-                current_question=question_start,
-                status="new",
-                result=[],
-                questions_version_uuid=question_start.updated_uuid,
-            )
-            logger.debug("Создан новый опрос %s", survey_obj.id)
-            return survey_obj
+        return survey_obj
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data
@@ -243,12 +233,6 @@ class SurveyUpdateSerializer(ModelSerializer):
                         setattr(user, field_name, answer_text)
                         user.full_clean()
                         user.save()
-                    except ValidationError as e:
-                        logger.error(
-                            "Ошибка валидации %s",
-                            e,
-                            exc_info=True,
-                        )
                     except IntegrityError as e:
                         logger.error(
                             "Ошибка целостности данных %s",
@@ -258,12 +242,6 @@ class SurveyUpdateSerializer(ModelSerializer):
                     except DatabaseError as e:
                         logger.error(
                             "Ошибка базы данных %s",
-                            e,
-                            exc_info=True,
-                        )
-                    except Exception as e:
-                        logger.error(
-                            "Базовая ошибка %s",
                             e,
                             exc_info=True,
                         )
@@ -318,15 +296,19 @@ class SurveyUpdateSerializer(ModelSerializer):
 class Base64ImageField(ImageField):
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
-            format, imgstr = data.split(";base64,")
-            ext = format.split("/")[-1]
-            data = ContentFile(
-                base64.b64decode(imgstr),
-                name=f"{self.parent.context['user']}_"
-                f"{''.join(choices('123456789', k=10))}." + ext,
-            )
-            url = upload_file_and_get_url(data)
-        return url
+            file_format, imgstr = data.split(";base64,")
+            try:
+                data = ContentFile(
+                    base64.b64decode(imgstr),
+                    name=f"{self.parent.context['user']}"
+                    f'{"".join(choices(digits, k=10))}.'
+                    + file_format.split("/")[-1],
+                )
+            except Exception as e:
+                raise ValidationError(DECODE_ERROR.format(e))
+            return YandexDiskUploader(
+                settings.DISK_TOKEN,
+            ).upload_file(data.name, data.read())
 
     def to_representation(self, value):
         return value
