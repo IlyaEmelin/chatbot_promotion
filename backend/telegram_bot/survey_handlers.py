@@ -23,11 +23,6 @@ from api.v1.serializers import (
     DocumentSerializer,
 )
 from .menu_handlers import help_command, load_command
-from .const import (
-    LOAD_COMMAND_NAME,
-    NEXT_STEP_NAME,
-    HELP_COMMAND_NAME,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +86,7 @@ async def telegram_file_to_base64_image_field(file: File) -> str:
     return data_uri
 
 
-async def __save_document(
+async def _save_document(
     survey_obj: Survey,
     document_file,
 ) -> tuple[bool, int | None]:
@@ -196,6 +191,18 @@ def __get_start_question() -> Question | None:
 
 
 @sync_to_async
+def _change_processing(survey_obj: Survey) -> None:
+    """
+    Выставление статуса <В обработке>
+
+    Args:
+        survey_obj: объект опроса
+    """
+    survey_obj.status = "processing"
+    survey_obj.save()
+
+
+@sync_to_async
 def _get_or_create_survey(
     user_obj: User,
     restart_question: bool,
@@ -297,7 +304,7 @@ async def status_command(
     user = update.effective_user
     try:
         user_obj = await _get_or_create_user(user)
-        _, __, result, ___ = await _get_or_create_survey(user_obj, False)
+        _, __, result, survey = await _get_or_create_survey(user_obj, False)
 
         await update.message.reply_text(
             "Результаты опроса:" if result else "Опрос не пройден"
@@ -309,6 +316,17 @@ async def status_command(
                     if i % 2
                     else f"❓ Вопрос:\n    {text}"
                 )
+
+        status_text = {
+            "new": "🆕 Новая",
+            "waiting_docs": "📎 Ожидает документы",
+            "processing": "⏳ В обработке",
+            "completed": "✅ Завершена",
+        }.get(survey.status, "❌ Ошибка")
+
+        await update.message.reply_text(
+            f"Текущий статус заявки: {status_text}"
+        )
         await help_command(update, context)
     except Exception as e:
         logger.error(
@@ -364,7 +382,7 @@ async def load_document_command(
             await load_command(update, context)
             return
 
-        result, file_id = await __save_document(survey_obj, photo)
+        result, file_id = await _save_document(survey_obj, photo)
 
         await load_command(
             update,
@@ -380,6 +398,47 @@ async def load_document_command(
         )
         await update.message.reply_text(
             "❌ Произошла ошибка при загрузке документа. Попробуйте позже."
+        )
+        await load_command(update, context)
+
+
+async def processing_command(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+) -> None:
+    """
+    Загрузка смена статуса в процессе
+
+    Args:
+        update: обновление от Telegram
+        context: контекст
+    """
+    try:
+        user: TelegramUser = update.effective_user
+        user_obj = await _get_or_create_user(user)
+
+        __, ___, ____, survey_obj = await _get_or_create_survey(
+            user_obj, False
+        )
+        logger.debug("Проверяем статус опроса")
+        if survey_obj.status != "waiting_docs":
+            await update.message.reply_text(
+                "❌ Сначала завершите опрос, затем сменяйте статус.\n"
+                "Используйте /start для начала опроса."
+            )
+            return
+        logger.debug("Обработка смена статуса")
+        await _change_processing(survey_obj)
+        await update.message.reply_text("✅ Ваша заявка принята")
+        await help_command(update, context)
+    except Exception as e:
+        logger.error(
+            "Ошибка в processing_command: %s",
+            str(e),
+            exc_info=True,
+        )
+        await update.message.reply_text(
+            "❌ Произошла ошибка при смене статуса. Попробуйте позже."
         )
         await load_command(update, context)
 
