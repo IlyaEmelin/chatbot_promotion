@@ -1,4 +1,7 @@
 import logging
+import base64
+import imghdr
+
 from asgiref.sync import sync_to_async
 
 from django.contrib.auth import get_user_model
@@ -9,6 +12,7 @@ from telegram import (
     User as TelegramUser,
     KeyboardButton,
     ReplyKeyboardMarkup,
+    File,
 )
 from telegram.ext import ContextTypes
 
@@ -45,13 +49,46 @@ def _write_document_db(
     """
     serializer = DocumentSerializer(
         data={
-            "survey": survey_obj.id,
             "image": content_file,
         },
         context={"user": survey_obj.user},
     )
     serializer.is_valid(raise_exception=True)
-    serializer.save()
+    serializer.save(survey=survey_obj)
+
+
+async def telegram_file_to_base64_image_field(file: File) -> str:
+    """
+    Преобразует Telegram File в строку для Base64ImageField
+    Возвращает строку в формате: data:image/jpeg;base64,{base64_data}
+    """
+    # Скачиваем файл как байты
+    file_bytes = await file.download_as_bytearray()
+
+    # Определяем тип изображения
+    image_format = imghdr.what(None, h=file_bytes)
+    if not image_format:
+        # Если imghdr не определил, пробуем по расширению
+        image_format = "jpeg"  # значение по умолчанию
+
+    # Маппинг форматов для MIME типов
+    mime_types = {
+        "jpeg": "image/jpeg",
+        "jpg": "image/jpeg",
+        "png": "image/png",
+        "gif": "image/gif",
+        "bmp": "image/bmp",
+        "webp": "image/webp",
+    }
+
+    mime_type = mime_types.get(image_format, "image/jpeg")
+
+    # Кодируем в base64
+    base64_data = base64.b64encode(file_bytes).decode("utf-8")
+
+    # Формируем data URI
+    data_uri = f"data:{mime_type};base64,{base64_data}"
+    return data_uri
 
 
 async def __save_document(survey_obj: Survey, document_file) -> bool:
@@ -67,12 +104,14 @@ async def __save_document(survey_obj: Survey, document_file) -> bool:
     """
     try:
         file = await document_file.get_file()
-        file_bytes = await file.download_as_bytearray()
-
-        file_name = f"survey_{document_file.file_id}.jpg"
-        content_file = ContentFile(file_bytes, name=file_name)
-
-        await _write_document_db(survey_obj, content_file)
+        base64_string = await telegram_file_to_base64_image_field(file)
+        # file_bytes = await file.download_as_bytearray()
+        #
+        # file_name = f"survey_{document_file.file_id}.jpg"
+        # content_file = ContentFile(file_bytes, name=file_name)
+        #
+        # base64_string = base64.b64encode(file_bytes).decode("utf-8")
+        await _write_document_db(survey_obj, base64_string)
         logger.debug(
             f"Документ сохранен для опроса %s",
             survey_obj.id,
