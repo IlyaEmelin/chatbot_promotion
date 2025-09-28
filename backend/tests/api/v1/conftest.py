@@ -74,7 +74,22 @@ def question() -> Question:
 
 
 @pytest.fixture
-def answer_choice(question: Question) -> Question:
+def next_question() -> Question:
+    """
+    Следующий вопрос
+
+    Returns:
+        Question: следующий вопрос
+    """
+
+    return Question.objects.create(
+        text="Следующий вопрос",
+        updated_uuid="42345678-1234-1234-1234-123456789013",
+    )
+
+
+@pytest.fixture
+def answer_choice(question: Question, next_question: Question) -> Question:
     """
     Второй вопрос
 
@@ -84,10 +99,6 @@ def answer_choice(question: Question) -> Question:
     Returns:
         Question: второй вопрос
     """
-    next_question = Question.objects.create(
-        text="Следующий вопрос?",
-        updated_uuid="22345678-1234-1234-1234-123456789012",
-    )
     return AnswerChoice.objects.create(
         current_question=question,
         next_question=next_question,

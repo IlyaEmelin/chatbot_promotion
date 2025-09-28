@@ -16,7 +16,7 @@ class TestSurveyCreate:
     def test_create1_survey_success(
         self, user, authenticated_client, question
     ):
-        """Тест 1 успешного создания опроса"""
+        """Тест 1 успешного создания опроса."""
         url = reverse("survey-list")
         data = {"current_question": question.id}
 
@@ -42,7 +42,7 @@ class TestSurveyCreate:
         answer_choice,
         question,
     ):
-        """Тест 2 успешного создания опроса"""
+        """Тест 2 успешного создания опроса."""
         url = reverse("survey-list")
         data = {"current_question": question.id}
 
@@ -62,7 +62,7 @@ class TestSurveyCreate:
         assert survey.result == []
 
     def test_create_survey_unauthenticated(self, user, api_client, question):
-        """Тест создания опроса без аутентификации"""
+        """Тест создания опроса без аутентификации."""
         url = reverse("survey-list")
         data = {"current_question": question.id}
 

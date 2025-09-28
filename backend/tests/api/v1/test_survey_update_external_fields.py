@@ -8,24 +8,27 @@ from users.models import User
 
 @pytest.mark.django_db
 class TestSurveyUpdateExternalFields:
-    """Тесты для проверки сохранения полей пользователя через external_table_field_name"""
+    """
+    Тесты для проверки сохранения полей пользователя через
+    external_table_field_name.
+    """
 
     def test_update_survey_saves_user_first_name(
         self,
         authenticated_client,
         survey,
         question,
+        next_question
     ):
-        """Тест сохранения имени пользователя через external_table_field_name"""
-        # Создаем вопрос с external_table_field_name для сохранения в User.first_name
+        """
+        Тест сохранения имени пользователя через external_table_field_name.
+        """
+        # Создаем вопрос с external_table_field_name для сохранения в User
+        # first_name
         question.external_table_field_name = "User.first_name"
         question.save()
 
         # Создаем AnswerChoice для перехода к следующему вопросу
-        next_question = Question.objects.create(
-            text="Следующий вопрос",
-            updated_uuid="42345678-1234-1234-1234-123456789012",
-        )
         AnswerChoice.objects.create(
             current_question=question,
             next_question=next_question,
