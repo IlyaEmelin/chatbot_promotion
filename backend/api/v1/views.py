@@ -4,11 +4,12 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.serializers import ValidationError
-from rest_framework.status import HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -17,6 +18,7 @@ from rest_framework.mixins import (
     DestroyModelMixin,
 )
 
+from questionnaire.constant import STATUS_CHOICES
 from questionnaire.models import Survey, Question, Document
 from .serializers import (
     SurveyCreateSerializer,
@@ -44,6 +46,22 @@ class SurveyViewSet(
     permission_classes = (AllowAny,)
     # TODO: permission_classes = (IsAuthenticated,)
     filter_backends = (SurveyFilterBackend,)
+
+    @action(('patch',), detail=True,
+            permission_classes=(IsAuthenticated,),)
+    def processing(self, request, pk):
+        """Метод смены статуса опроса на <В обработке>."""
+        try:
+            survey = self.get_object()
+            survey.status = STATUS_CHOICES[2][0]
+            survey.save()
+            serializer = self.get_serializer(survey)
+            return Response(serializer.data)
+        except Survey.DoesNotExist:
+            return Response(
+                {'error': f'В базе нет опроса с id {pk}'},
+                status=HTTP_404_NOT_FOUND
+            )
 
     def get_serializer_class(self):
         """
