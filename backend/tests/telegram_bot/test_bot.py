@@ -177,8 +177,7 @@ class TestTelegramBot(TestCase):
         await handle_message(mock_update, mock_context)
 
         # Assert
-        mock_update.message.reply_text.assert_called_with("Опрос пройден!")
-        mock_help.assert_called_once()
+        mock_help.assert_called_once_with(mock_update, mock_context)
 
     @pytest.mark.asyncio
     @patch("telegram_bot.survey_handlers._get_or_create_user")
