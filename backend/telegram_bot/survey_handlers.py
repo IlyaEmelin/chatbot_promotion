@@ -22,7 +22,7 @@ from api.v1.serializers import (
     SurveyCreateSerializer,
     DocumentSerializer,
 )
-from .menu_handlers import help_command
+from .menu_handlers import help_command, load_command
 from .const import (
     LOAD_COMMAND_NAME,
     NEXT_STEP_NAME,
@@ -91,7 +91,10 @@ async def telegram_file_to_base64_image_field(file: File) -> str:
     return data_uri
 
 
-async def __save_document(survey_obj: Survey, document_file) -> bool:
+async def __save_document(
+    survey_obj: Survey,
+    document_file,
+) -> tuple[bool, int | None]:
     """
     Сохранить документ из Telegram
 
@@ -101,28 +104,23 @@ async def __save_document(survey_obj: Survey, document_file) -> bool:
 
     Returns:
         bool: успешность загрузки
+        int: файл id
     """
     try:
         file = await document_file.get_file()
         base64_string = await telegram_file_to_base64_image_field(file)
-        # file_bytes = await file.download_as_bytearray()
-        #
-        # file_name = f"survey_{document_file.file_id}.jpg"
-        # content_file = ContentFile(file_bytes, name=file_name)
-        #
-        # base64_string = base64.b64encode(file_bytes).decode("utf-8")
         await _write_document_db(survey_obj, base64_string)
         logger.debug(
             f"Документ сохранен для опроса %s",
             survey_obj.id,
         )
-        return True
+        return True, document_file.file_id
     except Exception as e:
         logger.error(
             f"Ошибка при сохранении документа: {str(e)}",
             exc_info=True,
         )
-        return False
+        return False, None
 
 
 @sync_to_async
@@ -198,7 +196,10 @@ def __get_start_question() -> Question | None:
 
 
 @sync_to_async
-def _get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
+def _get_or_create_survey(
+    user_obj: User,
+    restart_question: bool,
+) -> tuple[
     str,
     list[str | None],
     list[str],
@@ -228,25 +229,6 @@ def _get_or_create_survey(user_obj: User, restart_question: bool) -> tuple[
         data.get("answers"),
         data.get("result"),
         create_serializer.instance,
-    )
-
-
-def _load_documents_keyboard() -> ReplyKeyboardMarkup:
-    """
-    Клавиатура загрузки документов
-
-    Returns:
-        ReplyKeyboardMarkup: клавиатура с кнопкой помощи
-    """
-    keyboard = [
-        [KeyboardButton(f"/{LOAD_COMMAND_NAME}")],
-        [KeyboardButton(f"/{NEXT_STEP_NAME}")],
-        [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
-    ]
-    return ReplyKeyboardMarkup(
-        keyboard,
-        resize_keyboard=True,
-        one_time_keyboard=False,
     )
 
 
@@ -368,39 +350,27 @@ async def load_document_command(
             return
 
         logger.debug("Обработка фото")
-        documents_to_save = []
+        photo = None
         if update.message.photo:
             logger.debug(
                 "Берем фото самого высокого качества (последнее в списке)"
             )
-            documents_to_save.append(update.message.photo[-1])
-        elif update.message.document:
-            logger.debug("Обработка документов")
-            documents_to_save.append(update.message.document)
+            photo = update.message.photo[-1]
 
-        if not documents_to_save:
+        if not photo:
             await update.message.reply_text(
-                "❌ Файл не обнаружен. Отправьте фото или документ."
+                "❌ Файл не обнаружен. Отправьте фото."
             )
+            await load_command(update, context)
             return
 
-        success_count = 0
-        for document in documents_to_save:
-            success_count += await __save_document(survey_obj, document)
+        result, file_id = await __save_document(survey_obj, photo)
 
-        help_text = f"""
-📋 *Загрузка документов*
-✅ Загружено: {success_count} документ(ов)
-
-Команды:
-/{LOAD_COMMAND_NAME} - загрузить еще документы
-/{NEXT_STEP_NAME} - закончить загрузку документов
-/{HELP_COMMAND_NAME} - помощь
-"""
-        await update.message.reply_text(
-            help_text,
-            reply_markup=_load_documents_keyboard(),
-            parse_mode="Markdown",
+        await load_command(
+            update,
+            context,
+            load_result=result,
+            photo_file_id=file_id,
         )
     except Exception as e:
         logger.error(
@@ -411,6 +381,7 @@ async def load_document_command(
         await update.message.reply_text(
             "❌ Произошла ошибка при загрузке документа. Попробуйте позже."
         )
+        await load_command(update, context)
 
 
 async def handle_message(
@@ -437,7 +408,7 @@ async def handle_message(
         logger.debug(f"Статус опроса: {survey_obj.status}")
         match survey_obj.status:
             case "new":
-                # Опрос
+                logger.debug("Опрос")
                 try:
                     text, answers = await __save_survey_data(
                         user_obj,
@@ -454,13 +425,13 @@ async def handle_message(
                         reply_markup=reply_markup,
                     )
                     return
+                else:
+                    await load_command(update, context)
             case "waiting_docs":
-                # Загрузка документов
-                for select_document in update.message.document:
-                    await __save_document(survey_obj, select_document)
-
-        await update.message.reply_text("Опрос пройден!")
-        await help_command(update, context)
+                logger.debug("Загрузка документов")
+                await load_command(update, context)
+            case _:
+                await help_command(update, context)
         return
 
     except Exception as e:

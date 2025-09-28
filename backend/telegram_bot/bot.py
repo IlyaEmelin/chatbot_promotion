@@ -38,11 +38,8 @@ class TelegramBot:
             CommandHandler(HELP_COMMAND_NAME, help_command),
         )
         self.application.add_handler(
-            CommandHandler(LOAD_COMMAND_NAME, load_document_command),
-        )
-        self.application.add_handler(
             MessageHandler(
-                filters.PHOTO | filters.Document.IMAGE | filters.Document.ALL,
+                filters.PHOTO | filters.Document.IMAGE,
                 load_document_command,
             )
         )
