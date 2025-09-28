@@ -3,9 +3,10 @@ from urllib.parse import urlparse
 
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.http import FileResponse
 from django.utils import timezone
 from django.utils.html import format_html
+from openpyxl import Workbook
 
 from questionnaire.constant import STATUS_CHOICES
 from questionnaire.models import AnswerChoice, Document, Survey, Question
@@ -61,24 +62,63 @@ class SurveyAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "user_info",
-        "status_badge",
-        "current_question",
+        "status",
         "documents_count",
         "created_at_formatted",
     )
-    list_filter = (StatusFilter, "created_at", "current_question")
-    search_fields = ("user__email", "user__phone", "created_at")
+    list_filter = (StatusFilter, "created_at")
+    search_fields = ("user__email", "user__phone_number", "created_at")
     readonly_fields = (
         "id",
         "user_info",
+        "result",
+        "current_question",
         "created_at",
         "updated_at",
         "questions_version_uuid",
-        "result_display",
         "documents_list",
     )
+    exclude = ("user",)
     list_select_related = ("user", "current_question")
     inlines = (DocumentInline,)
+    actions = ['download_servey']
+
+    @admin.action(description='Скачать результаты опроса в формате Excel')
+    def download_servey(self, request, queryset):
+
+        group_by_uuid = {}
+        for servey in queryset:
+            servey_result = {'UUID опроса': str(servey.id)}
+            servey_result.update({
+                servey.result[i]: servey.result[i+1] for i in range(
+                    0, len(servey.result)-1, 2)
+                })
+            group_by_uuid.setdefault(
+                servey.questions_version_uuid, []
+            ).append(servey_result)
+
+        servey_report = Workbook()
+        for uuid, results in group_by_uuid.items():
+            sheet = servey_report.create_sheet('Mysheet')
+            sheet.title = f'{uuid}'
+            column = 1
+            for question in results[0].keys():
+                sheet.cell(row=1, column=column, value=question)
+                column += 1
+            row = 2
+            column = 1
+            for result in results:
+                column = 1
+                for answer in result.values():
+                    sheet.cell(row=row, column=column, value=answer)
+                    column += 1
+
+        servey_report.save('temporary_files/servey_report.xlsx')
+
+        response = FileResponse(
+            open('temporary_files/servey_report.xlsx', 'rb')
+        )
+        return response
 
     @admin.display(description="Пользователь")
     def user_info(self, obj):
@@ -92,23 +132,23 @@ class SurveyAdmin(admin.ModelAdmin):
             phone,
         )
 
-    @admin.display(description="Статус")
-    def status_badge(self, obj):
-        status_colors = {
-            "draft": "gray",
-            "new": "blue",
-            "waiting_docs": "orange",
-            "processing": "purple",
-            "completed": "green",
-        }
-        color = status_colors.get(obj.status, "gray")
-        return format_html(
-            '<span style="background-color: {}; color: '
-            "white; padding: 4px 8px; border-radius: "
-            '12px; font-size: 12px;">{}</span>',
-            color,
-            obj.get_status_display(),
-        )
+    # @admin.display(description="Статус")
+    # def status_badge(self, obj):
+    #     status_colors = {
+    #         "draft": "gray",
+    #         "new": "blue",
+    #         "waiting_docs": "orange",
+    #         "processing": "purple",
+    #         "completed": "green",
+    #     }
+    #     color = status_colors.get(obj.status, "gray")
+    #     return format_html(
+    #         '<span style="background-color: {}; color: '
+    #         "white; padding: 4px 8px; border-radius: "
+    #         '12px; font-size: 12px;">{}</span>',
+    #         color,
+    #         obj.get_status_display(),
+    #     )
 
     @admin.display(description="Создана")
     def created_at_formatted(self, obj):
@@ -118,16 +158,16 @@ class SurveyAdmin(admin.ModelAdmin):
     def documents_count(self, obj):
         return obj.docs.count()
 
-    @admin.display(description="Результаты опроса")
-    def result_display(self, obj):
-        if obj.result:
-            return format_html(
-                '<pre style="background: #f5f5f5; padding: 10px; '
-                "border-radius: 5px; max-height: 300px; "
-                'overflow: auto;">{}</pre>',
-                str(obj.result),
-            )
-        return "Нет данных"
+    # @admin.display(description="Результаты опроса")
+    # def result_display(self, obj):
+    #     if obj.result:
+    #         return format_html(
+    #             '<pre style="background: #f5f5f5; padding: 10px; '
+    #             "border-radius: 5px; max-height: 300px; "
+    #             'overflow: auto;">{}</pre>',
+    #             str(obj.result),
+    #         )
+    #     return "Нет данных"
 
     @admin.display(description="Загруженные документы")
     def documents_list(self, obj):
@@ -182,7 +222,7 @@ class DocumentAdmin(admin.ModelAdmin):
                 obj.image,
             )
         return "—"
-    
+
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -199,22 +239,44 @@ class AnswerChoiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(admin.ModelAdmin):
     model = User
-    fieldsets = BaseUserAdmin.fieldsets + (
-        (None, {"fields": [
-            'patronymic',
-            'ward_first_name',
-            'ward_last_name',
-            'ward_patronymic',
-            'agent_status',
-            'birthday',
-            'residence',
-            'phone_number',
-            'telegram_username'
-            ]}),)
-    add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        (None, {"fields": ['email',]}),)
+    fieldsets = (
+        (None, {
+            'fields': (
+                'username',
+                'password'
+            )
+        }),
+        ('Персональная информация', {
+            'fields': (
+                'first_name',
+                'last_name',
+                'patronymic',
+                'email',
+                'phone_number',
+                'telegram_username',
+                'residence'
+            )
+        }),
+        ('Подопечный', {
+            'fields': (
+                'agent_status',
+                'ward_first_name',
+                'ward_last_name',
+                'ward_patronymic',
+                'birthday',
+            )
+        }),
+        ('Статус', {
+            'fields': (
+                'is_active',
+                'is_superuser',
+                'date_joined',
+                'last_login'
+            )
+        })
+    )
     list_display = (
         'username',
         'first_name',
