@@ -1,16 +1,16 @@
 # test_surveys_update.py
-import os
-
 import pytest
+
 from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
     HTTP_405_METHOD_NOT_ALLOWED,
-    HTTP_401_UNAUTHORIZED, HTTP_201_CREATED,
+    HTTP_401_UNAUTHORIZED,
 )
-from questionnaire.models import Survey, Question, AnswerChoice, Document
 from rest_framework.test import APIClient
+
+from questionnaire.models import Survey, Question, AnswerChoice
 
 
 @pytest.mark.django_db

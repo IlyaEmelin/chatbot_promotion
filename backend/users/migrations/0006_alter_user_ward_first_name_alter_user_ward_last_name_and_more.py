@@ -14,7 +14,10 @@ class Migration(migrations.Migration):
             model_name="user",
             name="ward_first_name",
             field=models.CharField(
-                blank=True, max_length=150, null=True, verbose_name="Подопечный. Имя"
+                blank=True,
+                max_length=150,
+                null=True,
+                verbose_name="Подопечный. Имя",
             ),
         ),
         migrations.AlterField(

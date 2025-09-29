@@ -14,16 +14,20 @@ class TestSurveyProcessing:
     """Тесты для метода processing SurveyViewSet"""
 
     other_user_data = {
-        'username': 'otheruser',
-        'email': 'other@example.com',
-        'password': 'otherpass123',
+        "username": "otheruser",
+        "email": "other@example.com",
+        "password": "otherpass123",
     }
+
     @staticmethod
     def get_url(survey_id):
-        return reverse(
-            viewname='survey-detail',
-            kwargs={'pk': survey_id},
-        ) + 'processing/'
+        return (
+            reverse(
+                viewname="survey-detail",
+                kwargs={"pk": survey_id},
+            )
+            + "processing/"
+        )
 
     @pytest.mark.django_db
     def test_processing_success(self, authenticated_client, survey):
@@ -64,7 +68,7 @@ class TestSurveyProcessing:
 
     @pytest.mark.django_db
     def test_processing_already_in_progress(
-            self, authenticated_client, survey
+        self, authenticated_client, survey
     ):
         """Тест изменения статуса опроса, который уже в обработке"""
         survey.status = STATUS_CHOICES[2][0]
@@ -77,14 +81,14 @@ class TestSurveyProcessing:
 
     @pytest.mark.django_db
     def test_processing_different_users_surveys(
-            self, authenticated_client, question
+        self, authenticated_client, question
     ):
         """Тест, что пользователь может изменять только свои опросы"""
         other_user = User.objects.create_user(**self.other_user_data)
         other_user_survey = Survey.objects.create(
             user=other_user,
             current_question=question,
-            status='new',
+            status="new",
             result=[],
             questions_version_uuid=uuid.uuid4(),
         )

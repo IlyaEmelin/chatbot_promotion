@@ -25,14 +25,20 @@ class Migration(migrations.Migration):
             model_name="user",
             name="first_name",
             field=models.CharField(
-                blank=True, max_length=150, null=True, verbose_name="first name"
+                blank=True,
+                max_length=150,
+                null=True,
+                verbose_name="first name",
             ),
         ),
         migrations.AlterField(
             model_name="user",
             name="last_name",
             field=models.CharField(
-                blank=True, max_length=150, null=True, verbose_name="last name"
+                blank=True,
+                max_length=150,
+                null=True,
+                verbose_name="last name",
             ),
         ),
     ]

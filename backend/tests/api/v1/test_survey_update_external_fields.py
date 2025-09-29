@@ -3,7 +3,6 @@ import pytest
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK
 from questionnaire.models import Survey, Question, AnswerChoice
-from users.models import User
 
 
 @pytest.mark.django_db
@@ -14,11 +13,7 @@ class TestSurveyUpdateExternalFields:
     """
 
     def test_update_survey_saves_user_first_name(
-        self,
-        authenticated_client,
-        survey,
-        question,
-        next_question
+        self, authenticated_client, survey, question, next_question
     ):
         """
         Тест сохранения имени пользователя через external_table_field_name.
@@ -263,7 +258,8 @@ class TestSurveyUpdateExternalFields:
         question,
     ):
         """
-        Тест последовательного сохранения нескольких полей пользователя через разные вопросы
+        Тест последовательного сохранения нескольких полей
+            пользователя через разные вопросы
 
         Args:
             authenticated_client: аутенфицированный клиент
@@ -378,7 +374,7 @@ class TestSurveyUpdateExternalFields:
         assert response.status_code == HTTP_200_OK
 
         survey.user.refresh_from_db()
-        assert survey.user.residence == None
+        assert survey.user.residence is None
 
     def test_update_survey_external_field_none_value(
         self,

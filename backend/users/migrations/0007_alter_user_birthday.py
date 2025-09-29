@@ -7,7 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("users", "0006_alter_user_ward_first_name_alter_user_ward_last_name_and_more"),
+        (
+            "users",
+            (
+                "0006_alter_user_ward_first_name_"
+                "alter_user_ward_last_name_and_more"
+            ),
+        ),
     ]
 
     operations = [

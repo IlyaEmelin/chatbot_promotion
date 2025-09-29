@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_401_UNAUTHORIZED,
-    HTTP_400_BAD_REQUEST,
 )
 from questionnaire.models import Survey
 
