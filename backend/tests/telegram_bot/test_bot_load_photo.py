@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from unittest.mock import Mock, patch, AsyncMock
 from django.test import TestCase
 from telegram import Update, Message, User, Chat, PhotoSize
 from telegram.ext import ContextTypes
@@ -350,6 +350,7 @@ class TestDocumentUpload(TestCase):
         )
 
         # Assert
-        # Не должны вызываться get_user и get_survey, так как survey_obj предоставлен
+        # Не должны вызываться get_user и get_survey,
+        # так как survey_obj предоставлен
         mock_get_user.assert_not_called()
         mock_get_survey.assert_not_called()

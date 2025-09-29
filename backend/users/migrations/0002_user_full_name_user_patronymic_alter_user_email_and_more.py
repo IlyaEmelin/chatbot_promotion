@@ -25,21 +25,28 @@ class Migration(migrations.Migration):
             model_name="user",
             name="patronymic",
             field=models.CharField(
-                blank=True, max_length=150, null=True, verbose_name="patronymic"
+                blank=True,
+                max_length=150,
+                null=True,
+                verbose_name="patronymic",
             ),
         ),
         migrations.AlterField(
             model_name="user",
             name="email",
             field=models.EmailField(
-                blank=True, max_length=254, null=True, verbose_name="email address"
+                blank=True,
+                max_length=254,
+                null=True,
+                verbose_name="email address",
             ),
         ),
         migrations.AddConstraint(
             model_name="user",
             constraint=models.UniqueConstraint(
                 condition=models.Q(
-                    ("email__isnull", False), models.Q(("email", ""), _negated=True)
+                    ("email__isnull", False),
+                    models.Q(("email", ""), _negated=True),
                 ),
                 fields=("email",),
                 name="unique_non_empty_email",

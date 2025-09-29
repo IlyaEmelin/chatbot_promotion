@@ -6,7 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("users", "0002_user_full_name_user_patronymic_alter_user_email_and_more"),
+        (
+            "users",
+            "0002_user_full_name_user_patronymic_alter_user_email_and_more",
+        ),
     ]
 
     operations = [
@@ -20,6 +23,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="user",
             name="last_name",
-            field=models.CharField(max_length=150, null=True, verbose_name="last name"),
+            field=models.CharField(
+                max_length=150,
+                null=True,
+                verbose_name="last name",
+            ),
         ),
     ]
