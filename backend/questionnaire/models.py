@@ -210,3 +210,25 @@ class Document(Model):
 
     def __str__(self):
         return f"Документ привязанный к опросу {self.survey}."
+
+
+class Comment(Model):
+    """Комментарий"""
+
+    image = CharField(
+        max_length=FILE_URL_MAX_LEN,
+        verbose_name="Изображение документа",
+    )
+    survey = ForeignKey(
+        Survey,
+        on_delete=CASCADE,
+        related_name="docs",
+        verbose_name="Опрос",
+    )
+
+    class Meta:
+        verbose_name = "документ"
+        verbose_name_plural = "Документы"
+
+    def __str__(self):
+        return f"Документ привязанный к опросу {self.survey}."
