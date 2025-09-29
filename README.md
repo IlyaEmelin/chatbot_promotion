@@ -60,9 +60,3 @@ python manage.py runserver
 ```bash
 sudo docker-compose up -d
 ```
-
-Запуск в dev режиме:
-
-```bash
-sudo docker compose -f docker-compose-dev.yml up -d
-```

@@ -39,10 +39,10 @@ services:
       - 5_backend
 
   5_gateway:
-    build: ./nginx/production/
+    build: ./nginx/
     ports:
       - '580:80'
-      - '443:443'
+      - '5443:443'
     volumes:
       - static:/staticfiles/
       - /etc/letsencrypt:/etc/letsencrypt:ro
