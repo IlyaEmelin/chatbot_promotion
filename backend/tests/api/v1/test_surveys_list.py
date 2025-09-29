@@ -5,7 +5,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
-    HTTP_401_UNAUTHORIZED,
+    HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN,
 )
 from questionnaire.models import Survey
 from rest_framework.test import APIClient
@@ -20,7 +20,7 @@ class TestSurveyList:
         authenticated_client: APIClient,
         survey: Survey,
     ):
-        """Тест успешного получения списка опросов"""
+        """Тест успешного получения списка опросов админом"""
         url = reverse("survey-list")
 
         response = authenticated_client.get(url)
