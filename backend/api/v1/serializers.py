@@ -115,10 +115,15 @@ class SurveyCreateSerializer(ModelSerializer):
         )
         if created:
             logger.debug("Создан опрос %", survey_obj)
-        elif restart_question and survey_obj.current_question is None:
+        elif (
+            restart_question
+            and survey_obj.current_question is None
+            and survey_obj.status in ("processing", "completed")
+        ):
             survey_obj.current_question = question_start
             survey_obj.status = "new"
             survey_obj.result = []
+            survey_obj.docs.all().delete()
             survey_obj.save()
 
         return survey_obj
