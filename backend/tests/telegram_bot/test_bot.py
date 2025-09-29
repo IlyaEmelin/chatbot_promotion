@@ -1,7 +1,14 @@
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from django.test import TestCase
-from telegram import Update, Message, User, Chat
+from telegram import (
+    Update,
+    Message,
+    User,
+    Chat,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+)
 from telegram.ext import ContextTypes
 
 from telegram_bot.bot import TelegramBot
@@ -300,7 +307,15 @@ class TestKeyboardFunctions:
 
         # Assert
         assert markup is not None
-        assert len(markup.keyboard) == 3
+        assert markup == ReplyKeyboardMarkup(
+            [
+                [KeyboardButton("Ответ 1")],
+                [KeyboardButton("Ответ 2")],
+                [KeyboardButton("Ответ 3")],
+            ],
+            one_time_keyboard=True,
+            resize_keyboard=True,
+        )
 
     def test_get_reply_markup_empty_answers(self):
         """Тест создания клавиатуры без ответов"""
@@ -310,7 +325,11 @@ class TestKeyboardFunctions:
         markup = _get_reply_markup([])
 
         # Assert
-        assert markup is None
+        assert markup == ReplyKeyboardMarkup(
+            [],
+            one_time_keyboard=True,
+            resize_keyboard=True,
+        )
 
 
 class TestConstants:
