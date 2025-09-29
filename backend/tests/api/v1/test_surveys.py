@@ -1,7 +1,8 @@
 # test_surveys.py
-import pytest
+from pytest import mark, raises
 
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_401_UNAUTHORIZED,
@@ -10,7 +11,7 @@ from rest_framework.status import (
 from questionnaire.models import Survey
 
 
-@pytest.mark.django_db
+@mark.django_db
 class TestSurveyCreate:
 
     def test_create1_survey_success(
@@ -18,7 +19,7 @@ class TestSurveyCreate:
     ):
         """Тест 1 успешного создания опроса."""
         url = reverse("survey-list")
-        data = {"current_question": question.id}
+        data = {}
 
         response = authenticated_client.post(url, data, format="json")
 
@@ -44,7 +45,7 @@ class TestSurveyCreate:
     ):
         """Тест 2 успешного создания опроса."""
         url = reverse("survey-list")
-        data = {"current_question": question.id}
+        data = {}
 
         response = authenticated_client.post(url, data, format="json")
 
@@ -64,7 +65,7 @@ class TestSurveyCreate:
     def test_create_survey_unauthenticated(self, user, api_client, question):
         """Тест создания опроса без аутентификации."""
         url = reverse("survey-list")
-        data = {"current_question": question.id}
+        data = {}
 
         response = api_client.post(url, data, format="json")
 
@@ -75,15 +76,10 @@ class TestSurveyCreate:
         url = reverse("survey-list")
         data = {}
 
-        response = authenticated_client.post(url, data, format="json")
+        with raises(ValidationError) as exp:
+            authenticated_client.post(url, data, format="json")
 
-        assert response.status_code == HTTP_400_BAD_REQUEST
-
-    def test_create_survey_invalid_question_id(self, authenticated_client):
-        """Тест создания опроса с несуществующим current_question"""
-        url = reverse("survey-list")
-        data = {"current_question": 123}
-
-        response = authenticated_client.post(url, data, format="json")
-
-        assert response.status_code == HTTP_400_BAD_REQUEST
+        assert (
+            exp.value.message == "Не существует стартового вопроса для опроса."
+        )
+        assert exp.type == ValidationError
