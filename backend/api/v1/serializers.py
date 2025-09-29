@@ -1,4 +1,3 @@
-from idlelib.browser import file_open
 from random import choices
 from string import digits
 from uuid import UUID
