@@ -6,7 +6,11 @@ from .views import SurveyViewSet, DocumentViewSet
 
 router = routers.DefaultRouter()
 router.register(r"surveys", SurveyViewSet, basename="survey")
-docs_router = routers.NestedSimpleRouter(router, r"surveys", lookup="survey")
+docs_router = routers.NestedSimpleRouter(
+    router,
+    parent_prefix=r"surveys",
+    lookup="survey",
+)
 docs_router.register(r"docs", DocumentViewSet, basename="document")
 
 

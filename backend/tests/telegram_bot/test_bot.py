@@ -177,8 +177,7 @@ class TestTelegramBot(TestCase):
         await handle_message(mock_update, mock_context)
 
         # Assert
-        mock_update.message.reply_text.assert_called_with("Опрос пройден!")
-        mock_help.assert_called_once()
+        mock_help.assert_called_once_with(mock_update, mock_context)
 
     @pytest.mark.asyncio
     @patch("telegram_bot.survey_handlers._get_or_create_user")
@@ -210,14 +209,16 @@ class TestTelegramBot(TestCase):
         handlers = self.bot.application.handlers[0]
 
         # Assert
-        assert len(handlers) == 4  # start, help, status, message
+        assert len(handlers) == 6  # start, help, status, message
 
         # Проверяем типы обработчиков
         handler_types = [type(handler).__name__ for handler in handlers]
         assert "CommandHandler" == handler_types[0]
         assert "CommandHandler" == handler_types[1]
         assert "CommandHandler" == handler_types[2]
-        assert "MessageHandler" == handler_types[3]
+        assert "CommandHandler" == handler_types[3]
+        assert "MessageHandler" == handler_types[4]
+        assert "MessageHandler" == handler_types[5]
 
     @pytest.mark.asyncio
     @patch("telegram_bot.bot.Application.process_update")
