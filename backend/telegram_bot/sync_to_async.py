@@ -1,3 +1,4 @@
+import logging
 from asgiref.sync import sync_to_async
 
 from django.contrib.auth import get_user_model
@@ -13,6 +14,8 @@ from api.v1.serializers import (
 from questionnaire.models import Survey, Question, Document
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 @sync_to_async
@@ -47,6 +50,7 @@ def save_survey_data(
     Сохранить "Опрос" через сериализатор
 
     Args:
+        user_obj: пользователь
         survey_obj: опрос,
         user_message: пользовательское сообщение
 

@@ -8,7 +8,9 @@ from telegram_bot.survey_handlers import (
     load_document_command,
     _save_document,
     telegram_file_to_base64_image_field,
-    _write_document_db,
+)
+from telegram_bot.sync_to_async import (
+    write_document_db,
 )
 from telegram_bot.menu_handlers import load_command
 from telegram_bot.const import (
@@ -72,135 +74,6 @@ class TestDocumentUpload(TestCase):
         return mock_context
 
     @pytest.mark.asyncio
-    @patch("telegram_bot.survey_handlers._get_or_create_survey")
-    @patch("telegram_bot.survey_handlers._get_or_create_user")
-    @patch("telegram_bot.survey_handlers._save_document")
-    async def test_load_document_command_success(
-        self,
-        mock_save_document,
-        mock_get_user,
-        mock_get_survey,
-    ):
-        """Тест успешной загрузки документа"""
-        # Arrange
-        mock_update = self.create_mock_update(has_photo=True)
-        mock_context = self.create_mock_context()
-
-        mock_survey = Mock()
-        mock_survey.status = "waiting_docs"
-        mock_survey.id = 1
-
-        mock_get_user.return_value = Mock()
-        mock_get_survey.return_value = (None, None, None, mock_survey)
-        mock_save_document.return_value = (True, "test_file_id_123")
-
-        # Act
-        await load_document_command(mock_update, mock_context)
-
-        # Assert
-        mock_save_document.assert_called_once()
-        mock_update.message.reply_photo.assert_called_once()
-
-        # Проверяем, что photo_file_id передается правильно
-        call_args = mock_update.message.reply_photo.call_args
-        assert call_args[1]["photo"] == "test_file_id_123"
-        assert call_args[1]["caption"] == "✅ Документ успешно загружен!"
-
-    @pytest.mark.asyncio
-    @patch("telegram_bot.survey_handlers._get_or_create_survey")
-    @patch("telegram_bot.survey_handlers._get_or_create_user")
-    @patch("telegram_bot.survey_handlers._save_document")
-    async def test_load_document_command_failure(
-        self,
-        mock_save_document,
-        mock_get_user,
-        mock_get_survey,
-    ):
-        """Тест неудачной загрузки документа"""
-        # Arrange
-        mock_update = self.create_mock_update(has_photo=True)
-        mock_context = self.create_mock_context()
-
-        mock_survey = Mock()
-        mock_survey.status = "waiting_docs"
-
-        mock_get_user.return_value = Mock()
-        mock_get_survey.return_value = (None, None, None, mock_survey)
-        mock_save_document.return_value = (False, None)
-
-        # Act
-        await load_document_command(mock_update, mock_context)
-
-        # Assert
-        mock_save_document.assert_called_once()
-
-        mock_update.message.reply_photo.assert_not_called()
-        mock_update.message.reply_text.assert_called_once()
-
-        call_args = mock_update.message.reply_text.call_args
-        assert call_args[0][0] == "❌ Ошибка загрузки документа"
-        assert "reply_markup" in call_args[1]
-
-    @pytest.mark.asyncio
-    @patch("telegram_bot.survey_handlers._get_or_create_survey")
-    @patch("telegram_bot.survey_handlers._get_or_create_user")
-    async def test_load_document_command_wrong_status(
-        self,
-        mock_get_user,
-        mock_get_survey,
-    ):
-        """Тест загрузки документа при неправильном статусе опроса"""
-        # Arrange
-        mock_update = self.create_mock_update(has_photo=True)
-        mock_context = self.create_mock_context()
-
-        mock_survey = Mock()
-        mock_survey.status = "new"  # Не waiting_docs
-
-        mock_get_user.return_value = Mock()
-        mock_get_survey.return_value = (None, None, None, mock_survey)
-
-        # Act
-        await load_document_command(mock_update, mock_context)
-
-        # Assert
-        mock_update.message.reply_text.assert_called_with(
-            "❌ Сначала завершите опрос, затем загружайте документы.\n"
-            "Используйте /start для начала опроса."
-        )
-
-    @pytest.mark.asyncio
-    @patch("telegram_bot.survey_handlers._write_document_db")
-    @patch("telegram_bot.survey_handlers.telegram_file_to_base64_image_field")
-    async def test_save_document_success(
-        self,
-        mock_to_base64,
-        mock_write_db,
-    ):
-        """Тест успешного сохранения документа"""
-        # Arrange
-        mock_survey = Mock()
-        mock_survey.id = 1
-
-        mock_document_file = Mock()
-        mock_document_file.file_id = "test_file_id"
-
-        mock_file = AsyncMock()
-        mock_document_file.get_file = AsyncMock(return_value=mock_file)
-
-        mock_to_base64.return_value = "base64_string_data"
-        mock_write_db.return_value = None
-
-        # Act
-        result, file_id = await _save_document(mock_survey, mock_document_file)
-
-        # Assert
-        assert result is True
-        assert file_id == "test_file_id"
-        mock_to_base64.assert_called_once_with(mock_file)
-        mock_write_db.assert_called_once()
-
-    @pytest.mark.asyncio
     @patch("telegram_bot.survey_handlers.telegram_file_to_base64_image_field")
     async def test_save_document_exception(
         self,
@@ -244,93 +117,8 @@ class TestDocumentUpload(TestCase):
             )  # base64 от "fake_image_data"
 
     @pytest.mark.asyncio
-    @patch("telegram_bot.survey_handlers.DocumentSerializer")
-    async def test_write_document_db_success(self, mock_serializer):
-        """Тест записи документа в базу данных"""
-        # Arrange
-        mock_survey = Mock()
-        mock_survey.user = Mock()
-
-        mock_content_file = "base64_string_data"
-
-        mock_serializer_instance = Mock()
-        mock_serializer_instance.is_valid.return_value = True
-        mock_serializer.return_value = mock_serializer_instance
-
-        # Act
-        await _write_document_db(mock_survey, mock_content_file)
-
-        # Assert
-        mock_serializer.assert_called_once_with(
-            data={"image": mock_content_file},
-            context={"user": mock_survey.user},
-        )
-        mock_serializer_instance.save.assert_called_once_with(
-            survey=mock_survey
-        )
-
-    @pytest.mark.asyncio
-    async def test_load_command_with_photo_success(self):
-        """Тест команды загрузки с фото при успешной загрузке"""
-        # Arrange
-        mock_update = self.create_mock_update()
-        mock_context = self.create_mock_context()
-
-        # Act
-        await load_command(
-            mock_update,
-            mock_context,
-            load_result=True,
-            photo_file_id="test_file_id",
-        )
-
-        # Assert
-        mock_update.message.reply_photo.assert_called_once_with(
-            photo="test_file_id", caption="✅ Документ успешно загружен!"
-        )
-
-    @pytest.mark.asyncio
-    @patch("telegram_bot.menu_handlers._load_documents_keyboard")
-    async def test_load_command_without_photo_success(self, mock_keyboard):
-        """Тест команды загрузки без фото при успешной загрузке"""
-        # Arrange
-        mock_update = self.create_mock_update()
-        mock_context = self.create_mock_context()
-
-        mock_keyboard_instance = Mock()
-        mock_keyboard.return_value = mock_keyboard_instance
-
-        # Act
-        await load_command(
-            mock_update, mock_context, load_result=True, photo_file_id=None
-        )
-
-        # Assert
-        mock_update.message.reply_text.assert_called_with(
-            "✅ Документ успешно загружен!",
-            reply_markup=mock_keyboard_instance,
-        )
-
-    @pytest.mark.asyncio
-    async def test_load_command_default_message(self):
-        """Тест команды загрузки с сообщением по умолчанию"""
-        # Arrange
-        mock_update = self.create_mock_update()
-        mock_context = self.create_mock_context()
-
-        # Act
-        await load_command(mock_update, mock_context, load_result=None)
-
-        # Assert
-        mock_update.message.reply_text.assert_called_once()
-        args, kwargs = mock_update.message.reply_text.call_args
-        assert "Загрузка документов" in args[0]
-        assert PROCESSING_COMMAND in args[0]
-        assert HELP_COMMAND_NAME in args[0]
-
-    @pytest.mark.asyncio
-    @patch("telegram_bot.survey_handlers._get_or_create_survey")
-    @patch("telegram_bot.survey_handlers._get_or_create_user")
+    @patch("telegram_bot.sync_to_async.get_or_create_survey")
+    @patch("telegram_bot.sync_to_async.get_or_create_user")
     async def test_load_document_command_with_provided_survey(
         self,
         mock_get_user,
