@@ -1,3 +1,5 @@
+import pathlib
+import tempfile
 import os
 from urllib.parse import urlparse
 
@@ -71,14 +73,14 @@ class SurveyAdmin(admin.ModelAdmin):
     readonly_fields = (
         "id",
         "user_info",
-        "result",
+        "result_display",
         "current_question",
         "created_at",
         "updated_at",
         "questions_version_uuid",
         "documents_list",
     )
-    exclude = ("user",)
+    exclude = ("user", "result",)
     list_select_related = ("user", "current_question")
     inlines = (DocumentInline,)
     actions = ['download_servey']
@@ -88,37 +90,48 @@ class SurveyAdmin(admin.ModelAdmin):
 
         group_by_uuid = {}
         for servey in queryset:
-            servey_result = {'UUID опроса': str(servey.id)}
+            servey_result = {
+                'ФИО пользователя': f'{servey.user.first_name} '
+                f'{servey.user.last_name} '
+                f'{servey.user.patronymic}'
+            }
+            # переводим резульаты из списка в словарь
             servey_result.update({
                 servey.result[i]: servey.result[i+1] for i in range(
                     0, len(servey.result)-1, 2)
-                })
+            })
             group_by_uuid.setdefault(
                 servey.questions_version_uuid, []
             ).append(servey_result)
 
-        servey_report = Workbook()
-        for uuid, results in group_by_uuid.items():
-            sheet = servey_report.create_sheet('Mysheet')
-            sheet.title = f'{uuid}'
-            column = 1
-            for question in results[0].keys():
-                sheet.cell(row=1, column=column, value=question)
-                column += 1
-            row = 2
-            column = 1
-            for result in results:
-                column = 1
-                for answer in result.values():
-                    sheet.cell(row=row, column=column, value=answer)
+        with tempfile.TemporaryDirectory() as report_dir:
+            path_dir = pathlib.Path(report_dir)
+
+            servey_report = Workbook()
+            for uuid, results in group_by_uuid.items():
+                sheet = servey_report.create_sheet('Mysheet', 0)
+                sheet.title = f'{uuid}'
+                row = 1
+                # заполняем заголовки из первого опроса
+                for question in results[0].keys():
+                    sheet.cell(row=row, column=1, value=question)
+                    row += 1
+                column = 2
+                # для каждого опроса
+                for result in results:
+                    row = 1
+                    # заполняем результаты
+                    for answer in result.values():
+                        sheet.cell(row=row, column=column, value=answer)
+                        row += 1
                     column += 1
 
-        servey_report.save('temporary_files/servey_report.xlsx')
+            servey_report.save(path_dir/'servey_report.xlsx')
 
-        response = FileResponse(
-            open('temporary_files/servey_report.xlsx', 'rb')
-        )
-        return response
+            response = FileResponse(
+                open(path_dir/'servey_report.xlsx', 'rb')
+            )
+            return response
 
     @admin.display(description="Пользователь")
     def user_info(self, obj):
@@ -158,16 +171,12 @@ class SurveyAdmin(admin.ModelAdmin):
     def documents_count(self, obj):
         return obj.docs.count()
 
-    # @admin.display(description="Результаты опроса")
-    # def result_display(self, obj):
-    #     if obj.result:
-    #         return format_html(
-    #             '<pre style="background: #f5f5f5; padding: 10px; '
-    #             "border-radius: 5px; max-height: 300px; "
-    #             'overflow: auto;">{}</pre>',
-    #             str(obj.result),
-    #         )
-    #     return "Нет данных"
+    @admin.display(description="Результаты опроса")
+    def result_display(self, obj):
+        result = ''
+        for i in range(0, len(obj.result), 2):
+            result += f'Вопрос: {obj.result[i]}\nОтвет: {obj.result[i+1]}\n'
+        return result
 
     @admin.display(description="Загруженные документы")
     def documents_list(self, obj):
