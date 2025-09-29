@@ -106,7 +106,7 @@ async def _save_document(
         base64_string = await telegram_file_to_base64_image_field(file)
         await _write_document_db(survey_obj, base64_string)
         logger.debug(
-            f"Документ сохранен для опроса %s",
+            "Документ сохранен для опроса %s",
             survey_obj.id,
         )
         return True, document_file.file_id

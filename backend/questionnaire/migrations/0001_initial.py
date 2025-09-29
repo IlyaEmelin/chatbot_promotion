@@ -161,7 +161,10 @@ class Migration(migrations.Migration):
                     models.JSONField(
                         blank=True,
                         default=list,
-                        help_text="JSON структура с ответами пользователя на вопросы опроса",
+                        help_text=(
+                            "JSON структура с ответами "
+                            "пользователя на вопросы опроса"
+                        ),
                         null=True,
                         verbose_name="Результаты опроса",
                     ),

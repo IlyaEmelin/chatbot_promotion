@@ -1,14 +1,11 @@
 import logging
-import uuid
 
 from django.contrib.auth import get_user_model
-from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.serializers import ValidationError
 from rest_framework.status import HTTP_201_CREATED
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
@@ -19,7 +16,7 @@ from rest_framework.mixins import (
 )
 
 from questionnaire.constant import STATUS_CHOICES
-from questionnaire.models import Survey, Question, Document
+from questionnaire.models import Survey, Document
 from .permissions import AuthorOnly
 from .serializers import (
     SurveyCreateSerializer,
@@ -44,12 +41,21 @@ class SurveyViewSet(
     """
 
     queryset = Survey.objects.all()
-    permission_classes = (IsAuthenticated, AuthorOnly,)
+    permission_classes = (
+        IsAuthenticated,
+        AuthorOnly,
+    )
     # TODO: permission_classes = (IsAuthenticated,)
     filter_backends = (SurveyFilterBackend,)
 
-    @action(('patch',), detail=True,
-            permission_classes=(IsAuthenticated, AuthorOnly,),)
+    @action(
+        ("patch",),
+        detail=True,
+        permission_classes=(
+            IsAuthenticated,
+            AuthorOnly,
+        ),
+    )
     def processing(self, request, pk):
         """Метод смены статуса опроса на <В обработке>."""
         survey = self.get_object()
@@ -136,15 +142,18 @@ class DocumentViewSet(
     """ViewSet для работы с документами."""
 
     queryset = Document.objects.all()
-    permission_classes = (IsAuthenticated, AuthorOnly,)
+    permission_classes = (
+        IsAuthenticated,
+        AuthorOnly,
+    )
     serializer_class = DocumentSerializer
 
     def get_serializer_context(self):
         """Добавляем переменную из URL в контекст сериализатора."""
         context = super().get_serializer_context()
-        survey = get_object_or_404(Survey, id=self.kwargs.get('survey_pk'))
-        context['user'] = survey.user.username
+        survey = get_object_or_404(Survey, id=self.kwargs.get("survey_pk"))
+        context["user"] = survey.user.username
         return context
 
     def perform_create(self, serializer):
-        serializer.save(survey=Survey.objects.get(pk=self.kwargs['survey_pk']))
+        serializer.save(survey=Survey.objects.get(pk=self.kwargs["survey_pk"]))
