@@ -25,7 +25,9 @@ class Command(BaseCommand):
             "--file",
             type=str,
             default="step1.json",
-            help="Путь к JSON файлу с данными (по умолчанию: survey_data.json)",
+            help=(
+                "Путь к JSON файлу с данными (по умолчанию: survey_data.json)"
+            ),
         )
 
     def handle(self, *args, **options):

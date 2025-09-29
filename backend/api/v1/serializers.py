@@ -5,29 +5,22 @@ import base64
 import logging
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, DatabaseError
 from django.core.exceptions import ValidationError
 from rest_framework.serializers import (
     ModelSerializer,
-    UUIDField,
-    IntegerField,
     CharField,
-    PrimaryKeyRelatedField,
-    SerializerMethodField,
     BooleanField,
     SerializerMethodField,
     SlugRelatedField,
     ImageField,
 )
-import environ
 
 from api.yadisk import YandexDiskUploader
 from questionnaire.models import Survey, Question, Document
 from users.models import User
 
-User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
