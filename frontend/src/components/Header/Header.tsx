@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import clsx from "clsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "../../hooks/store";
 import { getUser } from "../../services/auth/slice";
 import { logoutUser } from "../../services/auth/action";
@@ -11,8 +11,16 @@ export const Header = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector(getUser);
+    console.log("пользователь в шапке", user);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+    useEffect(() => {
+        if (isMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+    }, [isMenuOpen]);
 
     return (
         <>
@@ -33,7 +41,7 @@ export const Header = () => {
                 { user ? (
                     <button 
                         className={styles.button} 
-                        onClick={() => {dispatch(logoutUser())}}>
+                        onClick={() => {console.log('выходим'); dispatch(logoutUser())}}>
                             Выйти
                     </button>
                 ) : (

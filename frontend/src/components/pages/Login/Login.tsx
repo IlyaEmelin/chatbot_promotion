@@ -31,7 +31,7 @@ export const Login = () => {
         }
         console.log('login submit', userData);
         dispatch(loginUser(userData));
-        navigate(-1);
+        navigate(-1)
     }
 
     return (

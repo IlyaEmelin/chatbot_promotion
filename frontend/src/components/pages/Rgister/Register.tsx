@@ -5,6 +5,7 @@ import styles from "./Register.module.css";
 import { getError } from "../../../services/auth/slice";
 import { registerUser } from "../../../services/auth/action";
 import { FormButton } from "../../FormButton/FormButton";
+import { useNavigate } from "react-router-dom";
 
 export  const Register = () => {
     const dispatch = useDispatch();
@@ -14,7 +15,7 @@ export  const Register = () => {
         password: ''
     });
     const error = useSelector(getError);
-    
+    const navigate = useNavigate();
 
     const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserData({
@@ -25,11 +26,12 @@ export  const Register = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!userData.email || !userData.password || !userData.username) {
+        if (!userData.password || !userData.username) {
             return;
         }
         console.log('register submit', userData);
         dispatch(registerUser(userData));
+        navigate(-1)
     }
 
     return (

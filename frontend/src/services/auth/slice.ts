@@ -42,7 +42,6 @@ export const authSlice = createSlice({
         })
         .addCase(registerUser.fulfilled, (state, action) => {
             state.user = action.payload;
-            console.log('slice', state.user);
             state.isAuthChecked = true;
             state.isLoading = false;
             state.error = null;
@@ -57,8 +56,9 @@ export const authSlice = createSlice({
             state.isLoading = true;
             state.error = null;
         })
-        .addCase(loginUser.fulfilled, (state) => {
+        .addCase(loginUser.fulfilled, (state, action) => {
             state.isLoading = false;
+            state.user = action.payload;
             state.isAuthChecked = true;
             state.error = null;
         })
@@ -66,6 +66,7 @@ export const authSlice = createSlice({
             state.isLoading = false;
             state.isAuthChecked = true;
             state.error = action.error.message ?? null;
+
         })
         .addCase(logoutUser.pending, (state) => {
             state.isAuthChecked = true;

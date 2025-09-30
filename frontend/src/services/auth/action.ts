@@ -12,18 +12,14 @@ import { setIsAuthChecked, setUser } from './slice';
 export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ email, password, username }: TRegisterData) => {
-    const response = await registerUserApi({
+    await registerUserApi({
       email,
       username,
       password
     });
-    console.log('register action', response);
-    
     const token = await loginUserApi({username, password});
     setCookie('auth_token', token.auth_token);
-    console.log('register login action ok', token);
     const user = await getUserApi();
-    console.log('getUser', user);
     return user;
   }
 );
@@ -34,17 +30,19 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await loginUserApi({ username, password });
       setCookie('auth_token', response.auth_token);
-      console.log('login action ok', response, getCookie('auth_token'));
-      return response;
+      const user = await getUserApi();
+      console.log('login action', user)
+      return user;
     } catch (err) {
-      console.log('login action err', err);
       return Promise.reject(err);
     }
   }
 );
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
+  console.log('logout action 1');
   const response = await logoutApi();
+  console.log('logout action', response);
   deleteCookie('auth_token');
   return response;
 });

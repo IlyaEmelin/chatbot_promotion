@@ -59,25 +59,24 @@ export const loginUserApi = (user: TLoginData): Promise<TAuthResponse> => {
     });
 };
 
-type TLogoutResponse = {
-    message: string;
-}
+// type TLogoutResponse = {
+//     message: string;
+// }
 
-export const logoutApi = (): Promise<TLogoutResponse> => {
+export const logoutApi = () => {
+    console.log('logout api');
     return fetch(`${URL}/auth/token/logout/`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json; charset=utf-8',
             Authorization: `Token ${getCookie('auth_token')}`
         },
     })
-    .then((res) => checkResponse(res))
 };
 
 export const getUserApi = (): Promise<TRegisterResponse> =>
     fetch(`${URL}/auth/users/me/`, {
         headers: {
-        Authorization: `Token ${getCookie('auth_token')}`
+            Authorization: `Token ${getCookie('auth_token')}`
         } as HeadersInit
     })
     .then((res) => checkResponse(res));
