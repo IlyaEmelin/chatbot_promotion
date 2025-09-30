@@ -74,20 +74,38 @@ class CommentInline(admin.TabularInline):
     """Комментарии."""
 
     model = Comment
-    extra = 0
-    readonly_fields = ("comment_info", "created_at_formatted")
+    extra = 1
+    readonly_fields = ("created_at_formatted", "user_display")
+    exclude = ("user",)  # Убираем поле пользователя из формы
 
-    @admin.display(description="Комментарий")
-    def comment_info(self, obj):
-        return format_html(
-            "<strong>{}:</strong><br>{}",
-            obj.user.get_full_name() or obj.user.username,
-            obj.text,
-        )
+    @admin.display(description="Пользователь")
+    def user_display(self, obj):
+        """Отображаем пользователя в readonly режиме."""
+        return obj.user.get_full_name() or obj.user.username
 
     @admin.display(description="Дата создания")
     def created_at_formatted(self, obj):
-        return timezone.localtime(obj.created_at).strftime("%d.%m.%Y %H:%M")
+        if obj.created_at:
+            return timezone.localtime(obj.created_at).strftime(
+                "%d.%m.%Y %H:%M"
+            )
+        return "—"
+
+    def get_formset(self, request, obj=None, **kwargs):
+        """Автоматически устанавливаем текущего пользователя для новых комментариев."""
+        formset = super().get_formset(request, obj, **kwargs)
+
+        class CustomFormSet(formset):
+            def save_new(self, form, commit=True):
+                instance = form.save(commit=False)
+                instance.user = (
+                    request.user
+                )  # Устанавливаем текущего пользователя
+                if commit:
+                    instance.save()
+                return instance
+
+        return CustomFormSet
 
 
 @admin.register(Survey)
@@ -381,11 +399,30 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    """Документ."""
+    """Комментарии."""
 
     list_display = ("survey_short", "user_info", "text", "created_at")
-    exclude = ["user", "created_at"]
+    readonly_fields = ("user_info", "created_at_formatted")
+    exclude = ["created_at"]
     list_filter = ("survey", "user", "created_at")
+
+    def get_readonly_fields(self, request, obj=None):
+        """Делаем поле пользователя readonly при редактировании."""
+        if obj:  # При редактировании существующего комментария
+            return self.readonly_fields + ("user",)
+        return self.readonly_fields
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Устанавливаем текущего пользователя по умолчанию для нового комментария."""
+        form = super().get_form(request, obj, **kwargs)
+
+        if not obj:  # Только для создания нового комментария
+            form.base_fields["user"].initial = request.user
+            form.base_fields["user"].disabled = (
+                True  # Делаем поле недоступным для изменения
+            )
+
+        return form
 
     @admin.display(description="Опрос")
     def survey_short(self, obj):
@@ -404,7 +441,12 @@ class CommentAdmin(admin.ModelAdmin):
             phone,
         )
 
+    @admin.display(description="Дата создания")
+    def created_at_formatted(self, obj):
+        return timezone.localtime(obj.created_at).strftime("%d.%m.%Y %H:%M")
+
     def save_model(self, request, obj, form, change):
         if not obj.pk:
+            # Для нового комментария устанавливаем текущего пользователя
             obj.user = request.user
         super().save_model(request, obj, form, change)
