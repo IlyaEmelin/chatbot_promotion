@@ -45,7 +45,7 @@ LOGGING = {
             "filters": ["add_class_method"],
         },
         "file": {
-            "level": LOGGING_OUTPUT,
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "class": "logging.FileHandler",
             "filename": path.join(BASE_DIR / "logs", "django.log"),
             "formatter": "verbose",
