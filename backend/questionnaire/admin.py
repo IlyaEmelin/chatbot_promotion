@@ -5,15 +5,17 @@ from urllib.parse import urlparse
 
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.http import FileResponse
 from django.utils import timezone
 from django.utils.html import format_html
 from openpyxl import Workbook
 
 from questionnaire.constant import STATUS_CHOICES
-from questionnaire.models import AnswerChoice, Document, Survey, Question
+from questionnaire.models import AnswerChoice, Document, Survey, Question, Comment
 
 User = get_user_model()
+admin.site.unregister(Group)
 
 
 class StatusFilter(admin.SimpleListFilter):
@@ -293,3 +295,34 @@ class UserAdmin(admin.ModelAdmin):
         'email',
         'telegram_username'
     )
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    """Документ."""
+
+    list_display = ("survey_short", "user_info", "text", "created_at")
+    exclude = ['user', 'created_at']
+    list_filter = ("survey", "user", "created_at")
+
+    @admin.display(description="Опрос")
+    def survey_short(self, obj):
+        return f"Опрос {obj.survey.id}"
+
+    @admin.display(description="Пользователь")
+    def user_info(self, obj):
+        user = obj.user
+        phone = getattr(user, "phone", "—")
+        return format_html(
+            "{} ({} {})<br><small>Почта: {}<br>" "Телефон: {}</small>",
+            user.username,
+            user.first_name or "",
+            user.last_name or "",
+            user.email,
+            phone,
+        )
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.user = request.user
+        super().save_model(request, obj, form, change)

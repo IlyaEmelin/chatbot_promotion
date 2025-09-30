@@ -13,7 +13,7 @@ ALLOWED_HOSTS = ["*"]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-logging_output = ["file"] #["console", "file"]
+logging_output = getenv("LOGGING_DESTINATION", "console file").split(" ")
 
 LOGGING = {
     "version": 1,
