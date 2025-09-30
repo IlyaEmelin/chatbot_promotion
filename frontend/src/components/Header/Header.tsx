@@ -1,10 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import clsx from "clsx";
 import { useState } from "react";
+import { useDispatch, useSelector } from "../../hooks/store";
+import { getUser } from "../../services/auth/slice";
+import { logoutUser } from "../../services/auth/action";
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const user = useSelector(getUser);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -24,8 +30,20 @@ export const Header = () => {
                         </li>
                     </ul>
                 </nav>
-                <button className={styles.button}>Войти</button>
-            </header>
+                { user ? (
+                    <button 
+                        className={styles.button} 
+                        onClick={() => {dispatch(logoutUser())}}>
+                            Выйти
+                    </button>
+                ) : (
+                    <button 
+                        className={styles.button} 
+                        onClick={() => {navigate('/login')}}>
+                            Войти
+                    </button>
+                )}
+                </header>
             <div className={clsx(styles.burger, isMenuOpen && styles.active)} onClick={toggleMenu}>
                 <div className={styles.bar}></div>
                 <div className={styles.bar}></div>

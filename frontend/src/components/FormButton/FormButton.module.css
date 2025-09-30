@@ -1,0 +1,12 @@
+.button {
+    color: #ffffff;
+    background-color: #404fdb;
+    text-transform: uppercase;
+    border-style: none;
+    border-radius: 20px;
+    padding: 18.8px 60px;
+    box-shadow: none;
+    transition-duration: 0.2s;
+    transition-property: background-color, color, border-color, box-shadow, opacity, transform;
+    transition-timing-function: ease-in-out;
+}
