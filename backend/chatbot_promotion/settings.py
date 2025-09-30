@@ -13,6 +13,8 @@ ALLOWED_HOSTS = ["*"]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+logging_output = ["file"] #["console", "file"]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -51,27 +53,27 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": logging_output,
         "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": logging_output,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "api": {
-            "handlers": ["console", "file"],
+            "handlers": logging_output,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "recipes": {
-            "handlers": ["console", "file"],
+            "handlers": logging_output,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "users": {
-            "handlers": ["console", "file"],
+            "handlers": logging_output,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
@@ -216,6 +218,7 @@ TELEGRAM_WEBHOOK_URL = getenv(
     "https://yourdomain.com/webhook/",
 )
 
-DISK_TOKEN = getenv("DISK_TOKEN", "dummy-key-for-dev")
+DEFAULT_DISK_TOKEN = "dummy-key-for-dev"
+DISK_TOKEN = getenv("DISK_TOKEN", DEFAULT_DISK_TOKEN)
 
 CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")
