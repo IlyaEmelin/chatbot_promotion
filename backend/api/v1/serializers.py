@@ -170,8 +170,8 @@ class SurveyUpdateSerializer(ModelSerializer):
         add_telegram = validated_data.pop("add_telegram", True)
 
         if current_question := instance.current_question:
-            next_question, answer_text = self.__get_next_answer_choice(
-                answer, current_question
+            next_question, new_status, answer_text = (
+                self.__get_next_answer_choice(answer, current_question)
             )
 
             result = instance.result or []
@@ -201,6 +201,8 @@ class SurveyUpdateSerializer(ModelSerializer):
             instance.current_question = next_question
             instance.status = "new" if next_question else "waiting_docs"
             instance.result = result
+            if new_status:
+                instance.status = new_status
 
             if next_question:
                 instance.questions_version_uuid = UUID(
@@ -291,7 +293,7 @@ class SurveyUpdateSerializer(ModelSerializer):
     def __get_next_answer_choice(
         answer: str | None,
         question: Question,
-    ) -> tuple[Question, str | None]:
+    ) -> tuple[Question, str | None, str | None]:
         """
         Получить следующий вопрос
 
@@ -301,26 +303,35 @@ class SurveyUpdateSerializer(ModelSerializer):
 
         Returns:
             Question: следующий вопрос
+            str | None: смена статуса опроса после ответа
             str | None: текст ответа
         """
         if not answer:
             question.text = (
                 "Не передан ответ. Ответьте снова.\n" + question.text
             )
-            return question, None
+            return question, None, None
 
         if select_answer_choice := question.answers.filter(
             answer=answer
         ).first():
-            return select_answer_choice.next_question, answer
+            return (
+                select_answer_choice.next_question,
+                select_answer_choice.new_status,
+                answer,
+            )
 
         if select_answer_choice := question.answers.filter(
             answer=None
         ).first():
-            return select_answer_choice.next_question, answer
+            return (
+                select_answer_choice.next_question,
+                select_answer_choice.new_status,
+                answer,
+            )
 
         question.text = "Некорректный ответ. Ответьте снова.\n" + question.text
-        return question, None
+        return question, None, None
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data

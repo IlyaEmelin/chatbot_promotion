@@ -65,7 +65,7 @@ class TelegramBot:
 
     def run_polling(self):
         """Запуск бота в режиме polling"""
-        logger.error("Starting bot in polling mode...")
+        logger.info("Starting bot in polling mode...")
         self.application.run_polling()
 
 

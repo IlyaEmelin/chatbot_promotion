@@ -6,7 +6,11 @@
       "type": "start",
       "answers": [
         {"text": "Даю согласие", "next_question_index": 51},
-        {"text": "Отказываюсь", "next_question_index": null}
+        {
+          "text": "Отказываюсь",
+          "next_question_index": null,
+          "new_status": "completed"
+        }
       ]
     },
     {

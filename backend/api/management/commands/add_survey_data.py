@@ -89,6 +89,7 @@ class Command(BaseCommand):
                     current_question=current_question,
                     next_question=next_question,
                     answer=answer_data["text"],
+                    new_status=answer_data.get("new_status"),
                 )
                 logger.info(
                     f'  Создан ответ: {answer_data["text"]} '
