@@ -1,13 +1,9 @@
-import os
-from urllib.parse import urlparse
-
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.html import format_html
 
-from django.http import FileResponse
-from django.urls import path, reverse, reverse_lazy
+from django.urls import path, reverse
 
 from questionnaire.constant import STATUS_CHOICES
 from questionnaire.models import AnswerChoice, Document, Survey, Question
