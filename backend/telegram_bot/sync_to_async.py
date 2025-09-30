@@ -45,7 +45,7 @@ def save_survey_data(
     user_obj: User,
     survey_obj: Survey,
     user_message: str,
-) -> tuple[str, list[None | str]]:
+) -> tuple[str, list[None | str], list[None | str]]:
     """
     Сохранить "Опрос" через сериализатор
 
@@ -57,6 +57,7 @@ def save_survey_data(
     Returns:
         str: Вопрос
         list[None|str]: варианты ответа
+        list[None|str]]: новый статус
     """
     serializer = SurveyUpdateSerializer(
         instance=survey_obj,
@@ -72,6 +73,7 @@ def save_survey_data(
     return (
         data.get("current_question_text"),
         data.get("answers"),
+        data.get("new_status"),
     )
 
 
