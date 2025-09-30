@@ -13,7 +13,7 @@ ALLOWED_HOSTS = ["*"]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-logging_output = getenv("LOGGING_DESTINATION", "console file").split(" ")
+LOGGING_OUTPUT = getenv("LOGGING_DESTINATION", "console file").split(" ")
 
 LOGGING = {
     "version": 1,
@@ -53,27 +53,27 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": logging_output,
+        "handlers": LOGGING_OUTPUT,
         "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": logging_output,
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "api": {
-            "handlers": logging_output,
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
-        "recipes": {
-            "handlers": logging_output,
+        "telegram_bot": {
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "users": {
-            "handlers": logging_output,
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
