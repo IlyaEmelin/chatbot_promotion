@@ -1,12 +1,13 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.status import HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED, HTTP_500_INTERNAL_SERVER_ERROR
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -30,6 +31,7 @@ from .serializers import (
     CommentSerializer,
 )
 from .filter import SurveyFilterBackend
+from ..yadisk import YandexDiskUploader
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -150,8 +152,29 @@ class DocumentViewSet(
         context["user"] = survey.user.username
         return context
 
-    def perform_create(self, serializer):
-        serializer.save(survey=Survey.objects.get(pk=self.kwargs["survey_pk"]))
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            data = serializer.validated_data['image']
+            url = YandexDiskUploader(
+                settings.DISK_TOKEN,
+            ).upload_file(data.name, data.read())
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        self.perform_create(serializer, url)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=HTTP_201_CREATED, headers=headers
+        )
+
+    def perform_create(self, serializer, url):
+        serializer.save(
+            survey=Survey.objects.get(pk=self.kwargs["survey_pk"]),
+            image=url
+        )
 
 
 class CommentViewSet(

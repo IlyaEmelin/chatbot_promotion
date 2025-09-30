@@ -3,7 +3,6 @@ from uuid import uuid4
 import pytest
 from django.urls import reverse
 from rest_framework import status
-from unittest.mock import patch, MagicMock
 
 from questionnaire.models import Document
 
@@ -24,25 +23,27 @@ class TestDocumentViewSet:
     list_view_kwargs = staticmethod(lambda x: {"survey_pk": x})
     data_image = staticmethod(lambda x: {"image": x})
     invalid_pk_kwargs = {"survey_pk": uuid4()}
-    patch_path = "api.v1.serializers.YandexDiskUploader"
 
     def test_create_document_with_base64_image(
             self, authenticated_client, mock_yandex_disk_uploader, survey
     ):
         """Тест создания документа с base64 изображением"""
+        initial_count = Document.objects.count()
         image_data = f'{self.base64_prefix}{self.base64_image}'
         url = reverse(self.list_view_name, kwargs=self.list_view_kwargs(survey.pk))
-        with patch(self.patch_path) as mock_uploader_class:
-            mock_uploader_instance = MagicMock()
-            mock_uploader_instance.upload_file.return_value = self.download_url
-            mock_uploader_class.return_value = mock_uploader_instance
-            data = self.data_image(image_data)
+        data = self.data_image(image_data)
 
-            response = authenticated_client.post(url, data, format='json')
+        response = authenticated_client.post(url, data, format='json')
+        new_record = Document.objects.latest('id')
 
-            assert response.status_code == status.HTTP_201_CREATED
-            assert response.data['image'] == self.download_url
-            mock_uploader_instance.upload_file.assert_called_once()
+        assert response.status_code == status.HTTP_201_CREATED
+        assert "image" in response.data
+        assert response.data["image"] == self.download_url
+        assert Document.objects.count() == initial_count + 1
+        assert new_record.survey == survey
+        assert new_record.image == self.download_url
+        mock_yandex_disk_uploader["mock_get"].assert_called()
+        mock_yandex_disk_uploader["mock_put"].assert_called()
 
     def test_create_document_invalid_base64(self, authenticated_client, survey):
         """Тест создания документа с невалидным base64"""
@@ -112,18 +113,3 @@ class TestDocumentViewSet:
         response = authenticated_client.post(url, data, format='json')
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_yandex_disk_uploader_integration(
-            self, authenticated_client, survey, mock_yandex_disk_uploader
-    ):
-        """Тест интеграции с YandexDiskUploader через mock"""
-        image_data = f'{self.base64_prefix}{self.base64_image}'
-        url = reverse(self.list_view_name, kwargs=self.list_view_kwargs(survey.pk))
-        with patch(self.patch_path) as mock_uploader_class:
-            mock_uploader_class.return_value = mock_yandex_disk_uploader
-            data = self.data_image(image_data)
-
-            response = authenticated_client.post(url, data, format='json')
-
-            assert response.status_code == status.HTTP_201_CREATED
-            mock_yandex_disk_uploader.upload_file.assert_called_once()

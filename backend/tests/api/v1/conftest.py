@@ -10,9 +10,9 @@ import pytest
 User = get_user_model()
 
 
-UPLOAD_URL = "https://mock-upload.url/test.txt"
-DOWNLOAD_URL = "https://mock-download.url/test.txt"
-LOCATION = "https://disk.yandex.ru/disk/test.txt"
+UPLOAD_URL = "https://mock-upload.url/test.png"
+DOWNLOAD_URL = "https://mock-download.url/test.png"
+LOCATION = "https://disk.yandex.ru/disk/test.png"
 TEST_IMAGE_URL = "https://example.com/test.jpg"
 TEST_IMAGES_URLS = "https://example.com/{}.jpg"
 
@@ -212,31 +212,37 @@ def document_factory(document):
     return _factory
 
 
+patch_path = "api.yadisk.requests"
+
 @pytest.fixture
 def mock_yandex_disk_uploader():
     """Фикстура для создания mock-объекта"""
-    with patch("requests.get") as mock_get, patch("requests.put") as mock_put:
-        # mock-объект
-        uploader_mock = MagicMock()
-        # Поведение методов
-        uploader_mock.get_upload_url.return_value = UPLOAD_URL
-        uploader_mock.upload_file.return_value = DOWNLOAD_URL
-        uploader_mock.get_download_url.return_value = DOWNLOAD_URL
-        uploader_mock.check_file_exists.return_value = True
-        # HTTP-запросы
+    with (patch(f"{patch_path}.get") as mock_get,
+          patch(f"{patch_path}.put") as mock_put):
+        # Настройка mock-ответов
         mock_response_upload = MagicMock()
         mock_response_upload.json.return_value = {"href": UPLOAD_URL}
         mock_response_upload.raise_for_status.return_value = None
+
         mock_response_download = MagicMock()
         mock_response_download.json.return_value = {"href": DOWNLOAD_URL}
         mock_response_download.raise_for_status.return_value = None
         mock_response_download.headers = {"Location": LOCATION}
+
         mock_response_put = MagicMock()
         mock_response_put.raise_for_status.return_value = None
         mock_response_put.headers = {"Location": LOCATION}
+
+        # Настройка side_effect для последовательных вызовов
         mock_get.side_effect = [mock_response_upload, mock_response_download]
         mock_put.return_value = mock_response_put
-        yield uploader_mock
+        yield {
+            "mock_get": mock_get,
+            "mock_put": mock_put,
+            "mock_response_upload": mock_response_upload,
+            "mock_response_download": mock_response_download,
+            "mock_response_put": mock_response_put
+        }
 
 
 
