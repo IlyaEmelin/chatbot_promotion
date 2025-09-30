@@ -1,6 +1,7 @@
 volumes:
   pg_data:
   static:
+  logs:
 
 services:
   5_postgres:
@@ -17,7 +18,7 @@ services:
       ENABLE_POSTGRES_DB: true
     volumes:
       - static:/app/backend_static
-      - ./backend/logs:/app/logs
+      - logs:/app/logs
     env_file: .env
     restart: unless-stopped
     depends_on:

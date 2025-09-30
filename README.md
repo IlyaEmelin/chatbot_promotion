@@ -54,11 +54,13 @@ DB_HOST=db
 TZ=Europe/Moscow
 
 # Logging level
+LOGGING_DESTINATION=file  # file&console
 LOGGING_LEVEL=DEBUG
 
 # Telegram
-TELEGRAM_BOT_TOKEN=8477314848:AAGQRPZZrpf9tuiC8cCBgJQDPAgaJuGbysU
+TELEGRAM_BOT_TOKEN=< TelegramBotToken >
 TELEGRAM_WEBHOOK_URL=https://<yourdomain.com>/webhook/
+ADMIN_IDS=< TelegramID >
 
 # Я.Диск токен
 DISK_TOKEN=< Токен Яндекс-диска >
