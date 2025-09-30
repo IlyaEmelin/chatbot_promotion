@@ -41,7 +41,8 @@ services:
   5_gateway:
     build: ./nginx/
     ports:
-      - '580:80'
+      - '80:80'
+      - '443:443'
     volumes:
       - static:/staticfiles/
     env_file: .env

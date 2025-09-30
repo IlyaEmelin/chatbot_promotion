@@ -74,9 +74,9 @@ python manage.py runserver
 ```
 
 #### Endpoints
-Админ-панель - http://dvizhenie.myftp.biz:580/admin/ \
-АПИ - http://dvizhenie.myftp.biz:580/api/v1/ \
-REDOC (Только в Debug режиме) - http://dvizhenie.myftp.biz:580/redoc/
+Админ-панель - https://dvizhenie.sytes.net/admin/ \
+АПИ - https://dvizhenie.sytes.net/api/v1/ \
+REDOC (Только в Debug режиме) - https://dvizhenie.sytes.net/redoc/
 
 ## Развертывание
 
