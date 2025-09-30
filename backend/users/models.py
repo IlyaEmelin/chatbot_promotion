@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from django.utils.translation import gettext_lazy as _
@@ -65,7 +68,7 @@ class User(AbstractUser):
         null=True,
         blank=True,
     )
-    birthday = models.DateField(
+    birthday = models.CharField(
         "Дата рождения",
         validators=[
             birthday_validator,

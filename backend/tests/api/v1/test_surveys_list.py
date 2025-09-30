@@ -13,7 +13,7 @@ from rest_framework.test import APIClient
 
 @pytest.mark.django_db
 class TestSurveyList:
-    """Тест на список опросов"""
+    """Тест на список опросов."""
 
     def test_list_surveys_success(
         self,
@@ -52,7 +52,7 @@ class TestSurveyList:
         user,
         question,
     ):
-        """Тест получения списка с несколькими опросами"""
+        """Тест получения списка с несколькими опросами."""
         # Создаем несколько опросов
         survey1 = Survey.objects.create(
             user=user,
@@ -129,7 +129,7 @@ class TestSurveyList:
         api_client: APIClient,
         survey: Survey,
     ):
-        """Тест получения списка опросов без аутентификации"""
+        """Тест получения списка опросов без аутентификации."""
         url = reverse("survey-list")
 
         response = api_client.get(url)
@@ -142,7 +142,7 @@ class TestSurveyList:
         user,
         question,
     ):
-        """Тест фильтрации опросов по статусу"""
+        """Тест фильтрации опросов по статусу."""
         # Создаем опросы с разными статусами
         draft_survey = Survey.objects.create(
             user=user,
