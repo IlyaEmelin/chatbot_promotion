@@ -16,13 +16,18 @@ from rest_framework.mixins import (
 )
 
 from questionnaire.constant import STATUS_CHOICES
-from questionnaire.models import Survey, Document
-from .permissions import AuthorOnly
+from questionnaire.models import Survey, Document, Comment
+from .permissions import (
+    AuthorOrStaffOnly,
+    NestedAuthorOrStaffOnly,
+    NestedAuthorStaffOnly
+)
 from .serializers import (
     SurveyCreateSerializer,
     SurveyUpdateSerializer,
     SurveyReadSerializer,
     DocumentSerializer,
+    CommentSerializer,
 )
 from .filter import SurveyFilterBackend
 
@@ -43,19 +48,12 @@ class SurveyViewSet(
     queryset = Survey.objects.all()
     permission_classes = (
         IsAuthenticated,
-        AuthorOnly,
+        AuthorOrStaffOnly,
     )
     # TODO: permission_classes = (IsAuthenticated,)
     filter_backends = (SurveyFilterBackend,)
 
-    @action(
-        ("patch",),
-        detail=True,
-        permission_classes=(
-            IsAuthenticated,
-            AuthorOnly,
-        ),
-    )
+    @action(('patch',), detail=True,)
     def processing(self, request, pk):
         """Метод смены статуса опроса на <В обработке>."""
         survey = self.get_object()
@@ -142,10 +140,7 @@ class DocumentViewSet(
     """ViewSet для работы с документами."""
 
     queryset = Document.objects.all()
-    permission_classes = (
-        IsAuthenticated,
-        AuthorOnly,
-    )
+    permission_classes = (NestedAuthorOrStaffOnly,)
     serializer_class = DocumentSerializer
 
     def get_serializer_context(self):
@@ -157,3 +152,25 @@ class DocumentViewSet(
 
     def perform_create(self, serializer):
         serializer.save(survey=Survey.objects.get(pk=self.kwargs["survey_pk"]))
+
+
+class CommentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    GenericViewSet,
+):
+    """ViewSet для работы с комментариями."""
+
+    queryset = Comment.objects.all()
+    permission_classes = (NestedAuthorStaffOnly,)
+    serializer_class = CommentSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(
+            survey=get_object_or_404(Survey, pk=self.kwargs["survey_pk"]),
+            user=self.request.user,
+        )
+
+    def perform_destroy(self, instance):
+        get_object_or_404(Survey, pk=self.kwargs["survey_pk"])
+        instance.delete()

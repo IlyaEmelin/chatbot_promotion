@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from questionnaire.models import Question, AnswerChoice, Survey, Document
+from questionnaire.models import Question, AnswerChoice, Survey, Document, Comment
 from unittest.mock import patch, MagicMock
 import pytest
 
@@ -207,7 +207,7 @@ def document_factory(document):
         )
 
     _factory.create_batch = lambda size, survey: [
-        _factory(survey) for _ in range(size - 1)
+        _factory(survey) for _ in range(size)
     ]
     return _factory
 
@@ -237,3 +237,39 @@ def mock_yandex_disk_uploader():
         mock_get.side_effect = [mock_response_upload, mock_response_download]
         mock_put.return_value = mock_response_put
         yield uploader_mock
+
+
+
+# Фикстуры для комментариев
+
+@pytest.fixture
+def admin_user():
+    """Создание администратора"""
+    return User.objects.create_user(
+        username='admin',
+        email='admin@example.com',
+        password='adminpass123',
+        is_staff=True
+    )
+
+@pytest.fixture
+def authenticated_admin(api_client, admin_user):
+    """Получить аутентифицированного админа"""
+    api_client.force_authenticate(user=admin_user)
+    return api_client
+
+@pytest.fixture
+def comment(survey, admin_user):
+    """Создание комментария"""
+    return Comment.objects.create(
+        survey=survey,
+        user=admin_user,
+        text='Test comment text'
+    )
+
+@pytest.fixture
+def comment_data():
+    """Данные для создания комментария"""
+    return {
+        'text': 'New test comment'
+    }

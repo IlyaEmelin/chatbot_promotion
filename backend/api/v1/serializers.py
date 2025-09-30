@@ -18,7 +18,7 @@ from rest_framework.serializers import (
 )
 
 from api.yadisk import YandexDiskUploader
-from questionnaire.models import Survey, Question, Document
+from questionnaire.models import Survey, Question, Document, Comment
 from users.models import User
 
 
@@ -115,10 +115,15 @@ class SurveyCreateSerializer(ModelSerializer):
         )
         if created:
             logger.debug("Создан опрос %", survey_obj)
-        elif restart_question and survey_obj.current_question is None:
+        elif (
+            restart_question
+            and survey_obj.current_question is None
+            and survey_obj.status in ("processing", "completed")
+        ):
             survey_obj.current_question = question_start
             survey_obj.status = "new"
             survey_obj.result = []
+            survey_obj.docs.all().delete()
             survey_obj.save()
 
         return survey_obj
@@ -322,6 +327,8 @@ class SurveyUpdateSerializer(ModelSerializer):
 
 
 class Base64ImageField(ImageField):
+    """Класс поля для изображений документов."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
             file_format, imgstr = data.split(";base64,")
@@ -343,7 +350,7 @@ class Base64ImageField(ImageField):
 
 
 class DocumentSerializer(ModelSerializer):
-    """Сериализатор для документов"""
+    """Сериализатор для документов."""
 
     image = Base64ImageField()
 
@@ -354,3 +361,12 @@ class DocumentSerializer(ModelSerializer):
             "image",
         )
         read_only_fields = ("survey",)
+
+
+class CommentSerializer(ModelSerializer):
+    """Сериализатор для комментариев."""
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
+        read_only_fields = ("id", "survey", "user", "created_at")
