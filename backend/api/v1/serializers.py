@@ -344,17 +344,15 @@ class Base64ImageField(ImageField):
         if isinstance(data, str) and data.startswith("data:image"):
             file_format, imgstr = data.split(";base64,")
             try:
-                data = ContentFile(
+                return ContentFile(
                     base64.b64decode(imgstr),
                     name=f"{self.parent.context['user']}"
                     f'{"".join(choices(digits, k=10))}.'
                     + file_format.split("/")[-1],
                 )
             except Exception as e:
+                logger.error(DECODE_ERROR.format(e))
                 raise ValidationError(DECODE_ERROR.format(e))
-            return YandexDiskUploader(
-                settings.DISK_TOKEN,
-            ).upload_file(data.name, data.read())
 
     def to_representation(self, value):
         return value
