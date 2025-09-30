@@ -45,7 +45,7 @@ LOGGING = {
             "filters": ["add_class_method"],
         },
         "file": {
-            "level": "INFO",
+            "level": LOGGING_OUTPUT,
             "class": "logging.FileHandler",
             "filename": path.join(BASE_DIR / "logs", "django.log"),
             "formatter": "verbose",
