@@ -1,0 +1,20 @@
+.login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: calc(100% - 40px);
+}
+
+.error {
+    color: red;
+    font-size: 12px;
+    height: 20px;
+}
+
+.links {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
