@@ -38,12 +38,37 @@ git clone <https://github.com/IlyaEmelin/chatbot_promotion.git>
 ```bash
 cd chatbot_promotion
 ```
+#### Пример .env файла
+```
+# base settings
+SECRET_KEY=django-insecure-q%@n0uxcwe^)#k+l2cdqq6nwmi4ugauec3z483le+!%um_aaaa
+DEBUG=true
+CSRF_TRUSTED=http://51.250.113.76:580,http://localhost:3000/
+
+#db settings
+ENABLE_POSTGRES=false
+POSTGRES_USER=django
+POSTGRES_PASSWORD=django
+POSTGRES_DB=django
+DB_HOST=db
+TZ=Europe/Moscow
+
+# Logging level
+LOGGING_DESTINATION=file  # file&console
+LOGGING_LEVEL=DEBUG
+
+# Telegram
+TELEGRAM_BOT_TOKEN=< TelegramBotToken >
+TELEGRAM_WEBHOOK_URL=https://<yourdomain.com>/webhook/
+ADMIN_IDS=< TelegramID >
+
+# Я.Диск токен
+DISK_TOKEN=< Токен Яндекс-диска >
+```
+#### Локальный запуск Django сервера
 ```bash
 cd backend
 ```
-
-#### Запуск сервера
-
 ```bash
 python manage.py runserver
 ```
@@ -59,10 +84,4 @@ python manage.py runserver
 
 ```bash
 sudo docker-compose up -d
-```
-
-Запуск в dev режиме:
-
-```bash
-sudo docker compose -f docker-compose-dev.yml up -d
 ```

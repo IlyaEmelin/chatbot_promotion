@@ -217,6 +217,7 @@ TELEGRAM_WEBHOOK_URL = getenv(
     "TELEGRAM_WEBHOOK_URL",
     "https://yourdomain.com/webhook/",
 )
+TELEGRAM_ADMIN_IDS = getenv("ADMIN_IDS", "").split(",")
 
 DEFAULT_DISK_TOKEN = "dummy-key-for-dev"
 DISK_TOKEN = getenv("DISK_TOKEN", DEFAULT_DISK_TOKEN)
