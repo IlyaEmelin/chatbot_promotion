@@ -10,13 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.9.0",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.1"
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.9.1",
+    "redux": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@types/react-router-dom": "^5.3.3",

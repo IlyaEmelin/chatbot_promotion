@@ -1,21 +1,23 @@
 import logging
 
+from django.conf import settings
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
-from django.conf import settings
+
+from .admin_handlers import log_command
+from .const import (
+    START_COMMAND_NAME,
+    STATUS_COMMAND_NAME,
+    HELP_COMMAND_NAME,
+    PROCESSING_COMMAND, LOG_COMMAND,
+)
+from .menu_handlers import help_command
 from .survey_handlers import (
     start_command,
     status_command,
     load_document_command,
     processing_command,
     handle_message,
-)
-from .menu_handlers import help_command
-from .const import (
-    START_COMMAND_NAME,
-    STATUS_COMMAND_NAME,
-    HELP_COMMAND_NAME,
-    PROCESSING_COMMAND,
 )
 
 logger = logging.getLogger(__name__)
@@ -46,6 +48,9 @@ class TelegramBot:
                 load_document_command,
             )
         )
+        self.application.add_handler(
+            CommandHandler(LOG_COMMAND, log_command)
+        )
 
         self.application.add_handler(
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
@@ -65,7 +70,7 @@ class TelegramBot:
 
     def run_polling(self):
         """Запуск бота в режиме polling"""
-        logger.error("Starting bot in polling mode...")
+        logger.info("Starting bot in polling mode...")
         self.application.run_polling()
 
 

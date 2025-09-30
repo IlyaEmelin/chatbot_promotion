@@ -3,16 +3,16 @@ from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from questionnaire.models import Question, AnswerChoice, Survey, Document
+from questionnaire.models import Question, AnswerChoice, Survey, Document, Comment
 from unittest.mock import patch, MagicMock
 import pytest
 
 User = get_user_model()
 
 
-UPLOAD_URL = "https://mock-upload.url/test.txt"
-DOWNLOAD_URL = "https://mock-download.url/test.txt"
-LOCATION = "https://disk.yandex.ru/disk/test.txt"
+UPLOAD_URL = "https://mock-upload.url/test.png"
+DOWNLOAD_URL = "https://mock-download.url/test.png"
+LOCATION = "https://disk.yandex.ru/disk/test.png"
 TEST_IMAGE_URL = "https://example.com/test.jpg"
 TEST_IMAGES_URLS = "https://example.com/{}.jpg"
 
@@ -207,33 +207,75 @@ def document_factory(document):
         )
 
     _factory.create_batch = lambda size, survey: [
-        _factory(survey) for _ in range(size - 1)
+        _factory(survey) for _ in range(size)
     ]
     return _factory
 
 
+patch_path = "api.yadisk.requests"
+
 @pytest.fixture
 def mock_yandex_disk_uploader():
     """Фикстура для создания mock-объекта"""
-    with patch("requests.get") as mock_get, patch("requests.put") as mock_put:
-        # mock-объект
-        uploader_mock = MagicMock()
-        # Поведение методов
-        uploader_mock.get_upload_url.return_value = UPLOAD_URL
-        uploader_mock.upload_file.return_value = DOWNLOAD_URL
-        uploader_mock.get_download_url.return_value = DOWNLOAD_URL
-        uploader_mock.check_file_exists.return_value = True
-        # HTTP-запросы
+    with (patch(f"{patch_path}.get") as mock_get,
+          patch(f"{patch_path}.put") as mock_put):
+        # Настройка mock-ответов
         mock_response_upload = MagicMock()
         mock_response_upload.json.return_value = {"href": UPLOAD_URL}
         mock_response_upload.raise_for_status.return_value = None
+
         mock_response_download = MagicMock()
         mock_response_download.json.return_value = {"href": DOWNLOAD_URL}
         mock_response_download.raise_for_status.return_value = None
         mock_response_download.headers = {"Location": LOCATION}
+
         mock_response_put = MagicMock()
         mock_response_put.raise_for_status.return_value = None
         mock_response_put.headers = {"Location": LOCATION}
+
+        # Настройка side_effect для последовательных вызовов
         mock_get.side_effect = [mock_response_upload, mock_response_download]
         mock_put.return_value = mock_response_put
-        yield uploader_mock
+        yield {
+            "mock_get": mock_get,
+            "mock_put": mock_put,
+            "mock_response_upload": mock_response_upload,
+            "mock_response_download": mock_response_download,
+            "mock_response_put": mock_response_put
+        }
+
+
+
+# Фикстуры для комментариев
+
+@pytest.fixture
+def admin_user():
+    """Создание администратора"""
+    return User.objects.create_user(
+        username='admin',
+        email='admin@example.com',
+        password='adminpass123',
+        is_staff=True
+    )
+
+@pytest.fixture
+def authenticated_admin(api_client, admin_user):
+    """Получить аутентифицированного админа"""
+    api_client.force_authenticate(user=admin_user)
+    return api_client
+
+@pytest.fixture
+def comment(survey, admin_user):
+    """Создание комментария"""
+    return Comment.objects.create(
+        survey=survey,
+        user=admin_user,
+        text='Test comment text'
+    )
+
+@pytest.fixture
+def comment_data():
+    """Данные для создания комментария"""
+    return {
+        'text': 'New test comment'
+    }

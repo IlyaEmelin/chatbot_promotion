@@ -13,6 +13,8 @@ ALLOWED_HOSTS = ["*"]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+LOGGING_OUTPUT = getenv("LOGGING_DESTINATION", "console file").split(" ")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -43,7 +45,7 @@ LOGGING = {
             "filters": ["add_class_method"],
         },
         "file": {
-            "level": "INFO",
+            "level": getenv("LOGGING_LEVEL", "INFO"),
             "class": "logging.FileHandler",
             "filename": path.join(BASE_DIR / "logs", "django.log"),
             "formatter": "verbose",
@@ -51,27 +53,27 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": LOGGING_OUTPUT,
         "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "api": {
-            "handlers": ["console", "file"],
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
-        "recipes": {
-            "handlers": ["console", "file"],
+        "telegram_bot": {
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
         "users": {
-            "handlers": ["console", "file"],
+            "handlers": LOGGING_OUTPUT,
             "level": getenv("LOGGING_LEVEL", "INFO"),
             "propagate": False,
         },
@@ -166,6 +168,10 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '10000/day',
+        'anon': '1000/day',
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -215,7 +221,9 @@ TELEGRAM_WEBHOOK_URL = getenv(
     "TELEGRAM_WEBHOOK_URL",
     "https://yourdomain.com/webhook/",
 )
+TELEGRAM_ADMIN_IDS = getenv("ADMIN_IDS", "").split(",")
 
-DISK_TOKEN = getenv("DISK_TOKEN", "dummy-key-for-dev")
+DEFAULT_DISK_TOKEN = "dummy-key-for-dev"
+DISK_TOKEN = getenv("DISK_TOKEN", DEFAULT_DISK_TOKEN)
 
 CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")

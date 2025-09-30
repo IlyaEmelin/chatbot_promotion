@@ -1,12 +1,13 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.status import HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED, HTTP_500_INTERNAL_SERVER_ERROR
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -16,15 +17,21 @@ from rest_framework.mixins import (
 )
 
 from questionnaire.constant import STATUS_CHOICES
-from questionnaire.models import Survey, Document
-from .permissions import AuthorOnly
+from questionnaire.models import Survey, Document, Comment
+from .permissions import (
+    AuthorOrStaffOnly,
+    NestedAuthorOrStaffOnly,
+    NestedAuthorStaffOnly
+)
 from .serializers import (
     SurveyCreateSerializer,
     SurveyUpdateSerializer,
     SurveyReadSerializer,
     DocumentSerializer,
+    CommentSerializer,
 )
 from .filter import SurveyFilterBackend
+from ..yadisk import YandexDiskUploader
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -43,19 +50,12 @@ class SurveyViewSet(
     queryset = Survey.objects.all()
     permission_classes = (
         IsAuthenticated,
-        AuthorOnly,
+        AuthorOrStaffOnly,
     )
     # TODO: permission_classes = (IsAuthenticated,)
     filter_backends = (SurveyFilterBackend,)
 
-    @action(
-        ("patch",),
-        detail=True,
-        permission_classes=(
-            IsAuthenticated,
-            AuthorOnly,
-        ),
-    )
+    @action(('patch',), detail=True,)
     def processing(self, request, pk):
         """Метод смены статуса опроса на <В обработке>."""
         survey = self.get_object()
@@ -142,10 +142,7 @@ class DocumentViewSet(
     """ViewSet для работы с документами."""
 
     queryset = Document.objects.all()
-    permission_classes = (
-        IsAuthenticated,
-        AuthorOnly,
-    )
+    permission_classes = (NestedAuthorOrStaffOnly,)
     serializer_class = DocumentSerializer
 
     def get_serializer_context(self):
@@ -155,5 +152,48 @@ class DocumentViewSet(
         context["user"] = survey.user.username
         return context
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            data = serializer.validated_data['image']
+            url = YandexDiskUploader(
+                settings.DISK_TOKEN,
+            ).upload_file(data.name, data.read())
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        self.perform_create(serializer, url)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=HTTP_201_CREATED, headers=headers
+        )
+
+    def perform_create(self, serializer, url):
+        serializer.save(
+            survey=Survey.objects.get(pk=self.kwargs["survey_pk"]),
+            image=url
+        )
+
+
+class CommentViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    GenericViewSet,
+):
+    """ViewSet для работы с комментариями."""
+
+    queryset = Comment.objects.all()
+    permission_classes = (NestedAuthorStaffOnly,)
+    serializer_class = CommentSerializer
+
     def perform_create(self, serializer):
-        serializer.save(survey=Survey.objects.get(pk=self.kwargs["survey_pk"]))
+        serializer.save(
+            survey=get_object_or_404(Survey, pk=self.kwargs["survey_pk"]),
+            user=self.request.user,
+        )
+
+    def perform_destroy(self, instance):
+        get_object_or_404(Survey, pk=self.kwargs["survey_pk"])
+        instance.delete()

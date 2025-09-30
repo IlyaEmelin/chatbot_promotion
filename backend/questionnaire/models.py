@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.db.models import (
     CASCADE,
     CharField,
@@ -98,6 +100,14 @@ class AnswerChoice(Model):
     answer = CharField(
         max_length=ANSWER_LEN,
         verbose_name="Вариант ответа(None - пользовательский)",
+        null=True,
+        blank=True,
+    )
+    new_status = CharField(
+        max_length=STATUS_LEN,
+        choices=list(chain(STATUS_CHOICES, ((None, None),))),
+        default=None,
+        verbose_name="Смена статуса опроса после ответа",
         null=True,
         blank=True,
     )
@@ -209,4 +219,35 @@ class Document(Model):
         verbose_name_plural = "Документы"
 
     def __str__(self):
-        return f"Документ привязанный к опросу {self.survey}."
+        return f"Документ, привязанный к опросу {self.survey}."
+
+
+class Comment(Model):
+    """Комментарий"""
+
+    text = TextField(
+        verbose_name="Текст",
+    )
+    survey = ForeignKey(
+        Survey,
+        on_delete=CASCADE,
+        verbose_name="Опрос",
+    )
+    user = ForeignKey(
+        User,
+        on_delete=CASCADE,
+        verbose_name="Пользователь",
+    )
+    created_at = DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания комментария",
+    )
+
+    class Meta:
+        verbose_name = "комментарий"
+        verbose_name_plural = "Комментарии"
+        default_related_name = "comments"
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"Комментарий к опросу {self.survey}."

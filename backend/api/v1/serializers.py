@@ -18,7 +18,7 @@ from rest_framework.serializers import (
 )
 
 from api.yadisk import YandexDiskUploader
-from questionnaire.models import Survey, Question, Document
+from questionnaire.models import Survey, Question, Document, Comment
 from users.models import User
 
 
@@ -115,10 +115,15 @@ class SurveyCreateSerializer(ModelSerializer):
         )
         if created:
             logger.debug("Создан опрос %", survey_obj)
-        elif restart_question and survey_obj.current_question is None:
+        elif (
+            restart_question
+            and survey_obj.current_question is None
+            and survey_obj.status in ("processing", "completed")
+        ):
             survey_obj.current_question = question_start
             survey_obj.status = "new"
             survey_obj.result = []
+            survey_obj.docs.all().delete()
             survey_obj.save()
 
         return survey_obj
@@ -165,8 +170,8 @@ class SurveyUpdateSerializer(ModelSerializer):
         add_telegram = validated_data.pop("add_telegram", True)
 
         if current_question := instance.current_question:
-            next_question, answer_text = self.__get_next_answer_choice(
-                answer, current_question
+            next_question, new_status, answer_text = (
+                self.__get_next_answer_choice(answer, current_question)
             )
 
             result = instance.result or []
@@ -196,6 +201,8 @@ class SurveyUpdateSerializer(ModelSerializer):
             instance.current_question = next_question
             instance.status = "new" if next_question else "waiting_docs"
             instance.result = result
+            if new_status:
+                instance.status = new_status
 
             if next_question:
                 instance.questions_version_uuid = UUID(
@@ -286,7 +293,7 @@ class SurveyUpdateSerializer(ModelSerializer):
     def __get_next_answer_choice(
         answer: str | None,
         question: Question,
-    ) -> tuple[Question, str | None]:
+    ) -> tuple[Question, str | None, str | None]:
         """
         Получить следующий вопрос
 
@@ -296,54 +303,63 @@ class SurveyUpdateSerializer(ModelSerializer):
 
         Returns:
             Question: следующий вопрос
+            str | None: смена статуса опроса после ответа
             str | None: текст ответа
         """
         if not answer:
             question.text = (
                 "Не передан ответ. Ответьте снова.\n" + question.text
             )
-            return question, None
+            return question, None, None
 
         if select_answer_choice := question.answers.filter(
             answer=answer
         ).first():
-            return select_answer_choice.next_question, answer
+            return (
+                select_answer_choice.next_question,
+                select_answer_choice.new_status,
+                answer,
+            )
 
         if select_answer_choice := question.answers.filter(
             answer=None
         ).first():
-            return select_answer_choice.next_question, answer
+            return (
+                select_answer_choice.next_question,
+                select_answer_choice.new_status,
+                answer,
+            )
 
         question.text = "Некорректный ответ. Ответьте снова.\n" + question.text
-        return question, None
+        return question, None, None
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data
 
 
 class Base64ImageField(ImageField):
+    """Класс поля для изображений документов."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith("data:image"):
             file_format, imgstr = data.split(";base64,")
             try:
-                data = ContentFile(
+                return ContentFile(
                     base64.b64decode(imgstr),
                     name=f"{self.parent.context['user']}"
                     f'{"".join(choices(digits, k=10))}.'
                     + file_format.split("/")[-1],
                 )
             except Exception as e:
+                logger.error(DECODE_ERROR.format(e))
                 raise ValidationError(DECODE_ERROR.format(e))
-            return YandexDiskUploader(
-                settings.DISK_TOKEN,
-            ).upload_file(data.name, data.read())
 
     def to_representation(self, value):
         return value
 
 
 class DocumentSerializer(ModelSerializer):
-    """Сериализатор для документов"""
+    """Сериализатор для документов."""
 
     image = Base64ImageField()
 
@@ -354,3 +370,12 @@ class DocumentSerializer(ModelSerializer):
             "image",
         )
         read_only_fields = ("survey",)
+
+
+class CommentSerializer(ModelSerializer):
+    """Сериализатор для комментариев."""
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
+        read_only_fields = ("id", "survey", "user", "created_at")
