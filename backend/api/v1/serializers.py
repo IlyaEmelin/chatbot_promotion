@@ -371,6 +371,17 @@ class DocumentSerializer(ModelSerializer):
         )
         read_only_fields = ("survey",)
 
+    def create(self, validated_data):
+        data = validated_data.pop('image')
+        try:
+            url = YandexDiskUploader(
+                settings.DISK_TOKEN,
+            ).upload_file(data.name, data.read())
+        except Exception:
+            raise
+        document = Document.objects.create(**validated_data, image=url)
+        return document
+
 
 class CommentSerializer(ModelSerializer):
     """Сериализатор для комментариев."""
