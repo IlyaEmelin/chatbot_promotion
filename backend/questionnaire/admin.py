@@ -11,6 +11,7 @@ from django.http import FileResponse
 from django.utils import timezone
 from django.utils.html import format_html
 from openpyxl import Workbook
+from django.urls import path, reverse
 
 from questionnaire.constant import STATUS_CHOICES
 from questionnaire.models import (
@@ -20,6 +21,7 @@ from questionnaire.models import (
     Question,
     Comment,
 )
+from questionnaire.utils import get_docs_zip, get_excel_file
 
 User = get_user_model()
 admin.site.unregister(Group)
@@ -141,53 +143,7 @@ class SurveyAdmin(admin.ModelAdmin):
 
     @admin.action(description="Скачать результаты опроса в формате Excel")
     def download_servey(self, request, queryset):
-
-        group_by_uuid = {}
-        for servey in queryset:
-            servey_result = {
-                "ФИО пользователя": f"{servey.user.first_name} "
-                f"{servey.user.last_name} "
-                f"{servey.user.patronymic}"
-            }
-            logger.debug("переводим резульаты из списка в словарь")
-            servey_result.update(
-                {
-                    servey.result[i]: servey.result[i + 1]
-                    for i in range(0, len(servey.result) - 1, 2)
-                }
-            )
-            group_by_uuid.setdefault(servey.questions_version_uuid, []).append(
-                servey_result
-            )
-
-        with tempfile.TemporaryDirectory() as report_dir:
-            path_dir = pathlib.Path(report_dir)
-
-            servey_report = Workbook()
-            for uuid, results in group_by_uuid.items():
-                sheet = servey_report.create_sheet("Mysheet", 0)
-                sheet.title = f"{uuid}"
-                row = 1
-                logger.debug("заполняем заголовки из первого опроса")
-                for question in results[0].keys():
-                    sheet.cell(row=row, column=1, value=question)
-                    row += 1
-                column = 2
-                logger.debug("для каждого опроса")
-                for result in results:
-                    row = 1
-                    logger.debug("заполняем результаты")
-                    for answer in result.values():
-                        sheet.cell(row=row, column=column, value=answer)
-                        row += 1
-                    column += 1
-
-            servey_report.save(path_dir / "servey_report.xlsx")
-
-            response = FileResponse(
-                open(path_dir / "servey_report.xlsx", "rb")
-            )
-            return response
+        return get_excel_file(queryset)
 
     @admin.display(description="Пользователь")
     def user_info(self, obj):
@@ -200,24 +156,6 @@ class SurveyAdmin(admin.ModelAdmin):
             user.email,
             phone,
         )
-
-    # @admin.display(description="Статус")
-    # def status_badge(self, obj):
-    #     status_colors = {
-    #         "draft": "gray",
-    #         "new": "blue",
-    #         "waiting_docs": "orange",
-    #         "processing": "purple",
-    #         "completed": "green",
-    #     }
-    #     color = status_colors.get(obj.status, "gray")
-    #     return format_html(
-    #         '<span style="background-color: {}; color: '
-    #         "white; padding: 4px 8px; border-radius: "
-    #         '12px; font-size: 12px;">{}</span>',
-    #         color,
-    #         obj.get_status_display(),
-    #     )
 
     @admin.display(description="Создана")
     def created_at_formatted(self, obj):
@@ -238,37 +176,30 @@ class SurveyAdmin(admin.ModelAdmin):
             result += f"Вопрос: {obj.result[i]}\nОтвет: {obj.result[i+1]}\n"
         return result
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "download_docs/<uuid:uuid>/",
+                self.admin_site.admin_view(get_docs_zip),
+                name="download_docs",
+            ),
+        ]
+        return custom_urls + urls
+
     @admin.display(description="Загруженные документы")
     def documents_list(self, obj):
         documents = obj.docs.all()
         if not documents:
             return "Документы не загружены"
 
-        html = '<div style="max-height: 200px; overflow-y: auto;">'
-        for doc in documents:
-            filename = os.path.basename(urlparse(doc.image).path)
-            html += format_html(
-                """
-                <div style="display: flex; align-items: '
-                'center; margin-bottom: 10px; padding: 5px; background: '
-                'white; border-radius: 3px;">
-                    <a href="{}" target="_blank" style="margin-right: 10px;">
-                        <img src="{}" style="max-height: 50px; '
-                        'max-width: 50px;">
-                    </a>
-                    <div>
-                        <div><strong>{}</strong></div>
-                        <a href="{}" target="_blank" download>Скачать</a>
-                    </div>
-                </div>
-                """,
-                doc.image,
-                doc.image,
-                filename,
-                doc.image,
-            )
-        html += "</div>"
-        return format_html(html)
+        return format_html(
+            '<a class="button" href="{}">Скачать документы</a>',
+            reverse("admin:download_docs", args=(obj.id,)),
+        )
+
+    documents_list.short_description = "Скачать документы"
+    documents_list.allow_tags = True
 
     @admin.display(description="Комментарии")
     def comments_list(self, obj):
