@@ -33,7 +33,7 @@
 #### Клонирование репозитория
 
 ```bash
-git clone <https://github.com/IlyaEmelin/chatbot_promotion.git>
+git clone https://github.com/IlyaEmelin/chatbot_promotion.git
 ```
 ```bash
 cd chatbot_promotion
@@ -73,8 +73,10 @@ cd backend
 python manage.py runserver
 ```
 
-#### API Endpoints
-...
+#### Endpoints
+Админ-панель - http://dvizhenie.myftp.biz:580/admin/ \
+АПИ - http://dvizhenie.myftp.biz:580/api/v1/ \
+REDOC (Только в Debug режиме) - http://dvizhenie.myftp.biz:580/redoc/
 
 ## Развертывание
 
@@ -84,4 +86,9 @@ python manage.py runserver
 
 ```bash
 sudo docker-compose up -d
+```
+
+#### При необходимости: зачистка базы и создание тестовых пользователей
+```bash
+python manage.py clear_data_base --add_user --add_survey_data
 ```
