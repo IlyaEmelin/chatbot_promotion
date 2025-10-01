@@ -1,4 +1,11 @@
 # Чат-бот для благотворительного фонда «Продвижение»
+
+#### Эндпоинты
+**Админ-панель** - https://dvizhenie.sytes.net/admin/ \
+**АПИ** - https://dvizhenie.sytes.net/api/v1/ \
+**REDOC (Только в Debug режиме)** - https://dvizhenie.sytes.net/redoc/ \
+**ТГ-Бот** - https://t.me/ProDvizhenie_5Bot
+
 ## О проекте
 Чат-бот для автоматизации сбора заявок от подопечных и их представителей на сайте dvizhenie.life и в мессенджерах.
 
@@ -72,11 +79,6 @@ cd backend
 ```bash
 python manage.py runserver
 ```
-
-#### Endpoints
-Админ-панель - https://dvizhenie.sytes.net/admin/ \
-АПИ - https://dvizhenie.sytes.net/api/v1/ \
-REDOC (Только в Debug режиме) - https://dvizhenie.sytes.net/redoc/
 
 ## Развертывание
 
