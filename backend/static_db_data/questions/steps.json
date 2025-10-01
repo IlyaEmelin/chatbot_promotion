@@ -129,7 +129,7 @@
       "type": "standart",
       "answers": [
          {"text": "взрослый", "next_question_index": 14},
-         {"text": "ребенок", "next_question_index": }
+         {"text": "ребенок", "next_question_index": 31}
       ]
     },
     {
@@ -447,10 +447,11 @@
     },
     {
       "_index": 50,
-      "text": "Почему нужна коляска/приставка/комплектующие?",
+      "text": "Подтверждена ли запись на Госуслугах?",
       "type": "standart",
       "answers": [
-         {"text": null, "next_question_index": 51}
+        {"text": "Да", "next_question_index": null},
+        {"text": "Нет", "next_question_index": 51}
       ]
     },
     {

@@ -341,6 +341,7 @@ async def handle_message(
         match survey_obj.status:
             case "new":
                 logger.debug("Опрос")
+                new_status = None
                 try:
                     text, answers, new_status = await save_survey_data(
                         user_obj,
@@ -356,6 +357,8 @@ async def handle_message(
                         text,
                         reply_markup=reply_markup,
                     )
+                    if survey_obj.status == "waiting_docs":
+                        await load_command(update, context)
                     return
                 elif new_status != "waiting_docs":
                     await help_command(update, context, new_status)
