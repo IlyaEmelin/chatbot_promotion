@@ -3,7 +3,7 @@ from pathlib import Path
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from chatbot_promotion.settings import TELEGRAM_ADMIN_IDS, BASE_DIR
+from chatbot_promotion.settings import TELEGRAM_ADMIN_IDS, BASE_DIR, DEBUG
 
 
 async def log_command(
@@ -23,7 +23,7 @@ async def log_command(
         str(user_id) == str(admin_id) for admin_id in TELEGRAM_ADMIN_IDS
     )
 
-    if not is_admin:
+    if not is_admin and not DEBUG:
         return
 
     log_file_path = Path(BASE_DIR) / 'logs' / 'django.log'

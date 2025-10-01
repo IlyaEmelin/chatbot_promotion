@@ -24,27 +24,29 @@ services:
     depends_on:
       - 5_postgres
 
-  5_bot:
-    build:
-      context: ./backend/
-      dockerfile: Dockerfile_Bot
-    environment:
-      DB_HOST: 5_postgres
-      ENABLE_POSTGRES_DB: true
-    volumes:
-      - logs:/app/logs
-    env_file: .env
-    restart: unless-stopped
-    depends_on:
-      - 5_backend
+#  5_bot:
+#    build:
+#      context: ./backend/
+#      dockerfile: Dockerfile_Bot
+#    environment:
+#      DB_HOST: 5_postgres
+#      ENABLE_POSTGRES_DB: true
+#    volumes:
+#      - logs:/app/logs
+#    env_file: .env
+#    restart: unless-stopped
+#    depends_on:
+#      - 5_backend
 
   5_gateway:
     build: ./nginx/
     ports:
-      - '580:80'
+      - '80:80'
+      - '443:443'
     volumes:
       - static:/staticfiles/
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     env_file: .env
     restart: unless-stopped
     depends_on:
-      - 5_bot
+      - 5_backend # Поменять на 5_bot если запускается бот на поллинг в отдельном контейнере
