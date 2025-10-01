@@ -1,3 +1,4 @@
+// src/api/surveyAPI.ts - С АВТОРИЗАЦИЕЙ И ПРАВИЛЬНЫМИ ПУТЯМИ
 import { 
   CreateSurveyRequest, 
   CreateSurveyResponse, 
@@ -6,9 +7,27 @@ import {
   SubmitAnswerResponse 
 } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+// Функция для получения куки
+function getCookie(name: string): string | undefined {
+  const matches = document.cookie.match(
+    new RegExp('(?:^|; )' + name.replace(/([$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
+  );
+  return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 console.log('🔧 API Configuration:', { API_BASE_URL });
+
+// Функция для получения заголовков с авторизацией
+function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
+  const accessToken = getCookie('auth_token');
+  
+  return {
+    ...extraHeaders,
+    ...(accessToken ? { Authorization: `Token ${accessToken}` } : {}),
+  };
+}
 
 export const surveyAPI = {
   // POST /api/v1/surveys/ - создание/перезапуск опроса
@@ -19,13 +38,13 @@ export const surveyAPI = {
       result: {}
     };
 
-    console.log('📤 API Request: POST /surveys/', requestBody);
+    console.log('📤 API Request: POST /v1/surveys/', requestBody);
 
-    const response = await fetch(`${API_BASE_URL}/surveys/`, {
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/`, {
       method: 'POST',
-      headers: {
+      headers: getAuthHeaders({
         'Content-Type': 'application/json',
-      },
+      }),
       body: JSON.stringify(requestBody),
     });
     
@@ -36,19 +55,19 @@ export const surveyAPI = {
     }
     
     const data = await response.json();
-    console.log('📥 API Response: POST /surveys/', data);
+    console.log('📥 API Response: POST /v1/surveys/', data);
     return data;
   },
 
   // GET /api/v1/surveys/ - получение списка опросов
   getSurveys: async (): Promise<Survey[]> => {
-    console.log('📤 API Request: GET /surveys/');
+    console.log('📤 API Request: GET /v1/surveys/');
 
-    const response = await fetch(`${API_BASE_URL}/surveys/`, {
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/`, {
       method: 'GET',
-      headers: {
+      headers: getAuthHeaders({
         'Content-Type': 'application/json',
-      },
+      }),
     });
     
     if (!response.ok) {
@@ -58,7 +77,7 @@ export const surveyAPI = {
     }
     
     const data = await response.json();
-    console.log('📥 API Response: GET /surveys/', data);
+    console.log('📥 API Response: GET /v1/surveys/', data);
     return data;
   },
 
@@ -68,13 +87,13 @@ export const surveyAPI = {
       answer
     };
 
-    console.log(`📤 API Request: PUT /surveys/${surveyId}/`, requestBody);
+    console.log(`📤 API Request: PUT /v1/surveys/${surveyId}/`, requestBody);
 
-    const response = await fetch(`${API_BASE_URL}/surveys/${surveyId}/`, {
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/`, {
       method: 'PUT',
-      headers: {
+      headers: getAuthHeaders({
         'Content-Type': 'application/json',
-      },
+      }),
       body: JSON.stringify(requestBody),
     });
     
@@ -85,19 +104,20 @@ export const surveyAPI = {
     }
     
     const data = await response.json();
-    console.log(`📥 API Response: PUT /surveys/${surveyId}/`, data);
+    console.log(`📥 API Response: PUT /v1/surveys/${surveyId}/`, data);
     return data;
   },
 
-  // Загрузка файлов (если есть endpoint)
+  // POST /api/v1/upload/ - загрузка файлов
   uploadFile: async (file: File): Promise<{ url: string }> => {
     const formData = new FormData();
     formData.append('file', file);
     
-    console.log('📤 API Request: POST /upload/', { fileName: file.name, fileSize: file.size });
+    console.log('📤 API Request: POST /v1/upload/', { fileName: file.name, fileSize: file.size });
     
-    const response = await fetch(`${API_BASE_URL}/upload/`, {
+    const response = await fetch(`${API_BASE_URL}/v1/upload/`, {
       method: 'POST',
+      headers: getAuthHeaders(), // Не добавляем Content-Type для FormData
       body: formData,
     });
     
@@ -108,7 +128,10 @@ export const surveyAPI = {
     }
     
     const data = await response.json();
-    console.log('📥 API Response: POST /upload/', data);
+    console.log('📥 API Response: POST /v1/upload/', data);
     return data;
   },
 };
+
+// Экспортируем вспомогательные функции для использования в других местах
+export { getCookie, getAuthHeaders };

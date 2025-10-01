@@ -1,53 +1,3 @@
-<<<<<<< HEAD
-.container {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: white;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.title {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.actionButton {
-  padding: 8px;
-  background-color: transparent;
-  border: none;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.actionButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
-}
-
-.actionButton:active {
-  transform: translateY(0);
-}
-
-.actionButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-=======
 .header {
     display: flex;
     justify-content: space-between;
@@ -260,4 +210,3 @@
     }
     
 } */
->>>>>>> front_Olga

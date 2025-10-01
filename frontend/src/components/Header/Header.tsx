@@ -1,51 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { RotateCcw, X } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { resetSurvey, startSurveyAsync } from '../../store/surveySlice';
-import styles from './Header.module.css';
-
-interface HeaderProps {
-  onClose: () => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({ onClose }) => {
-  const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector(state => state.survey);
-
-  const handleReset = () => {
-    dispatch(resetSurvey());
-    dispatch(startSurveyAsync(true));
-  };
-
-  return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Анкета-бот</h2>
-      <div className={styles.actions}>
-        <button
-          className={styles.actionButton}
-          onClick={handleReset}
-          disabled={isLoading}
-          title="Начать заново"
-          type="button"
-        >
-          <RotateCcw size={18} />
-        </button>
-        <button
-          className={styles.actionButton}
-          onClick={onClose}
-          title="Закрыть"
-          type="button"
-        >
-          <X size={18} />
-        </button>
-      </div>
-    </div>
-  );
-};
-
-export default Header;
-=======
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import clsx from "clsx";
@@ -72,9 +24,6 @@ export const Header = () => {
                     <ul className={styles.menu}>
                         <li className={clsx(styles.menu__item, styles.menu__item_active)}>
                             <Link to="#">Создать анкету</Link>
-                        </li>
-                        <li className={styles.menu__item}>
-                            <Link to="#">Списки анкет</Link>
                         </li>
                     </ul>
                 </nav>
@@ -104,4 +53,3 @@ export const Header = () => {
         </>
     );
 };
->>>>>>> front_Olga

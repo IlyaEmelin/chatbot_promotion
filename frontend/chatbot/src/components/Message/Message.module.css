@@ -23,69 +23,45 @@
 }
 
 .message {
-  max-width: 280px;
-  padding: 12px 16px;
-  border-radius: 18px;
-  font-size: 14px;
-  line-height: 1.4;
-  position: relative;
+  max-width: 80%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.5;
   word-wrap: break-word;
 }
 
 .messageBot {
   background-color: white;
-  color: #374151;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-}
-
-.messageBot::before {
-  content: '';
-  position: absolute;
-  left: -8px;
-  top: 16px;
-  width: 0;
-  height: 0;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-right: 8px solid white;
+  color: #1F2937;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid #F3F4F6;
+  border-radius: 16px 16px 16px 4px;
 }
 
 .messageUser {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-}
-
-.messageUser::before {
-  content: '';
-  position: absolute;
-  right: -8px;
-  top: 16px;
-  width: 0;
-  height: 0;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-left: 8px solid #2563eb;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  border-radius: 16px 16px 4px 16px;
 }
 
 .timestamp {
   font-size: 11px;
-  opacity: 0.7;
-  margin: 4px 0 0 0;
-  font-style: italic;
+  opacity: 0.6;
+  margin: 6px 0 0 0;
 }
 
 .attachments {
   margin-top: 8px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .attachment {
   background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  padding: 4px 8px;
+  border-radius: 6px;
+  padding: 6px 10px;
   margin-bottom: 4px;
   display: block;
-  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.4);
 }

@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "compilerOptions": {
     "target": "es5",
     "lib": [
@@ -23,11 +22,5 @@
   },
   "include": [
     "src"
-=======
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
->>>>>>> front_Olga
   ]
 }

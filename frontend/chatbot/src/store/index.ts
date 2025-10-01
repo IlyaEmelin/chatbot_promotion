@@ -8,15 +8,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [
-          'survey/addMessage', 
-          'survey/loadFromStorage',
-          'survey/startSurveyAsync/fulfilled',
-          'survey/submitAnswerAsync/fulfilled'
-        ],
-        ignoredPaths: ['survey.messages.timestamp', 'survey.messages.attachments'],
-      },
+      serializableCheck: false // фикс ошибки в консоли
     }).concat(storageMiddleware),
 });
 

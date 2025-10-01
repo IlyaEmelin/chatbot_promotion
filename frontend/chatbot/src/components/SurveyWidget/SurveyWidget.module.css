@@ -4,20 +4,34 @@
   right: 20px;
   z-index: 9999;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px; 
 }
 
 .widget {
   width: 400px;
   height: 600px;
   background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border: 1px solid #e5e7eb;
-  transform: translateY(0);
-  transition: all 0.3s ease;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .widget.minimized {
@@ -25,27 +39,24 @@
 }
 
 .toggleButton {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
   color: white;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.4);
   transition: all 0.3s ease;
-  position: absolute;
-  bottom: 0;
-  right: 0;
+  flex-shrink: 0; /* Не сжимать кнопку */
 }
 
 .toggleButton:hover {
-  background-color: #1d4ed8;
   transform: scale(1.05);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 24px rgba(79, 70, 229, 0.5);
 }
 
 .toggleButton:active {
@@ -53,12 +64,16 @@
 }
 
 @media (max-width: 480px) {
-  .widget {
-    width: calc(100vw - 20px);
-    height: calc(100vh - 40px);
+  .container {
     bottom: 10px;
     right: 10px;
-    border-radius: 8px;
+    gap: 12px;
+  }
+  
+  .widget {
+    width: calc(100vw - 20px);
+    height: calc(100vh - 100px);
+    border-radius: 12px;
   }
   
   .toggleButton {

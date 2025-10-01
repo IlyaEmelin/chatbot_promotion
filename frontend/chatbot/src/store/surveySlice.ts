@@ -1,11 +1,9 @@
-// src/store/surveySlice.ts - ИСПРАВЛЕННАЯ ЛОГИКА ОПЦИЙ
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { surveyAPI } from '../api/surveyAPI';
 import { SurveyState, Message } from '../types';
 
 // Функция для определения, есть ли опции у текущего вопроса
 const hasValidOptions = (answers: string[]): boolean => {
-  // Если answers содержит больше одного элемента и они не null/пустые
   return answers.length > 1 && answers.some(answer => answer !== null && answer.trim() !== '');
 };
 
@@ -14,7 +12,9 @@ export const startSurveyAsync = createAsyncThunk(
   'survey/startSurvey',
   async (restart: boolean = false, { rejectWithValue }) => {
     try {
-      // Сначала создаем опрос
+      console.log(`🔄 Starting survey with restart=${restart}`);
+      
+      // Создаем опрос с правильным параметром restart_question
       const createResponse = await surveyAPI.createSurvey(restart);
       
       // Затем получаем список опросов для получения ID и текущего вопроса
@@ -25,7 +25,8 @@ export const startSurveyAsync = createAsyncThunk(
       
       return {
         createResponse,
-        currentSurvey
+        currentSurvey,
+        isRestart: restart
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Unknown error');
@@ -94,7 +95,8 @@ const surveySlice = createSlice({
     },
     
     resetSurvey: (state) => {
-      Object.assign(state, initialState);
+      // ВАЖНО: полностью сбрасываем состояние
+      return { ...initialState };
     },
     
     loadFromStorage: (state, action: PayloadAction<Partial<SurveyState>>) => {
@@ -112,7 +114,7 @@ const surveySlice = createSlice({
       .addCase(startSurveyAsync.fulfilled, (state, action) => {
         state.isLoading = false;
         
-        const { createResponse, currentSurvey } = action.payload;
+        const { createResponse, currentSurvey, isRestart } = action.payload;
         
         state.questionsVersionUuid = createResponse.questions_version_uuid;
         state.surveyId = currentSurvey.id;
@@ -120,14 +122,18 @@ const surveySlice = createSlice({
         state.answers = currentSurvey.answers;
         state.result = currentSurvey.result;
         
+        // При рестарте очищаем историю сообщений
+        if (isRestart) {
+          state.messages = [];
+          console.log('🔄 Survey restarted, messages cleared');
+        }
+        
         // Восстанавливаем сообщения из result если есть история
-        if (Array.isArray(currentSurvey.result) && currentSurvey.result.length > 0) {
+        if (!isRestart && Array.isArray(currentSurvey.result) && currentSurvey.result.length > 0) {
           const messages: Message[] = [];
           
-          // Создаем историю из result (пары вопрос-ответ)
           for (let i = 0; i < currentSurvey.result.length; i += 2) {
             if (currentSurvey.result[i]) {
-              // Вопрос
               messages.push({
                 id: `restored-q-${i}`,
                 text: currentSurvey.result[i],
@@ -136,7 +142,6 @@ const surveySlice = createSlice({
               });
             }
             if (currentSurvey.result[i + 1]) {
-              // Ответ
               messages.push({
                 id: `restored-a-${i}`,
                 text: currentSurvey.result[i + 1],
@@ -149,11 +154,10 @@ const surveySlice = createSlice({
           state.messages = messages;
         }
         
-        // Добавляем текущий вопрос, если он есть и не дублируется
+        // Добавляем текущий вопрос
         if (currentSurvey.current_question_text && 
             !state.messages.some(m => m.text === currentSurvey.current_question_text)) {
           
-          // Определяем, есть ли опции для выбора
           const hasOptions = hasValidOptions(currentSurvey.answers);
           const options = hasOptions ? currentSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : undefined;
           
@@ -183,14 +187,12 @@ const surveySlice = createSlice({
         
         const { submitResponse, updatedSurvey } = action.payload;
         
-        // Обновляем состояние из обновленного опроса
         if (updatedSurvey) {
           state.currentQuestion = updatedSurvey.current_question_text;
           state.answers = updatedSurvey.answers;
           state.result = updatedSurvey.result;
         }
         
-        // Проверяем, завершен ли опрос
         const isCompleted = !submitResponse.current_question_text || 
                            submitResponse.current_question_text.trim() === '' ||
                            (updatedSurvey && !updatedSurvey.current_question_text);
@@ -205,11 +207,9 @@ const surveySlice = createSlice({
           };
           state.messages.push(completionMessage);
         } else {
-          // Добавляем следующий вопрос
           const questionText = updatedSurvey?.current_question_text || submitResponse.current_question_text;
           
           if (questionText) {
-            // Определяем, есть ли опции для следующего вопроса
             const hasOptions = updatedSurvey && hasValidOptions(updatedSurvey.answers);
             const options = hasOptions && updatedSurvey ? 
               updatedSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : 
@@ -243,7 +243,6 @@ const surveySlice = createSlice({
         
         const surveys = action.payload;
         if (surveys.length > 0) {
-          // Берем последний опрос
           const lastSurvey = surveys[surveys.length - 1];
           
           state.surveyId = lastSurvey.id;
@@ -251,11 +250,9 @@ const surveySlice = createSlice({
           state.answers = lastSurvey.answers;
           state.result = lastSurvey.result;
           
-          // Восстанавливаем сообщения из result если есть история
           if (Array.isArray(lastSurvey.result) && lastSurvey.result.length > 0) {
             const messages: Message[] = [];
             
-            // Создаем историю из result
             for (let i = 0; i < lastSurvey.result.length; i += 2) {
               if (lastSurvey.result[i]) {
                 messages.push({
@@ -278,7 +275,6 @@ const surveySlice = createSlice({
             state.messages = messages;
           }
           
-          // Добавляем текущий вопрос если он есть
           if (lastSurvey.current_question_text && 
               !state.messages.some(m => m.text === lastSurvey.current_question_text)) {
             

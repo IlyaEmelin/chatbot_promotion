@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { startSurveyAsync, clearError } from '../../store/surveySlice';
+import { startSurveyAsync, clearError, loadExistingSurveysAsync } from '../../store/surveySlice';
 import Header from '../Header/Header';
-import Progress from '../Progress/Progress';
 import Messages from '../Messages/Messages';
 import Input from '../Input/Input';
 import styles from './Chat.module.css';
@@ -17,14 +16,22 @@ export const Chat: React.FC<ChatProps> = ({ onClose }) => {
 
   useEffect(() => {
     if (!surveyId) {
-      dispatch(startSurveyAsync(false));
+      dispatch(loadExistingSurveysAsync())
+        .unwrap()
+        .then((surveys) => {
+          if (surveys.length === 0) {
+            dispatch(startSurveyAsync(false));
+          }
+        })
+        .catch(() => {
+          dispatch(startSurveyAsync(false));
+        });
     }
   }, [dispatch, surveyId]);
 
   return (
     <div className={styles.widget}>
       <Header onClose={onClose} />
-      <Progress />
       
       {error && (
         <div className={styles.errorMessage}>
