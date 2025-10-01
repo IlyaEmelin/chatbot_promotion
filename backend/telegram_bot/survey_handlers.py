@@ -19,14 +19,12 @@ from .sync_to_async import (
     write_document_db,
     save_survey_data,
     get_or_create_user,
-    get_start_question,
     change_processing,
     get_or_create_survey,
     get_survey_documents,
 )
 from .const import (
     START_COMMAND_NAME,
-    PROCESSING_COMMAND,
 )
 
 logger = logging.getLogger(__name__)
