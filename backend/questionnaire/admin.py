@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.utils.html import format_html
 from django.urls import path, reverse
+from rest_framework.authtoken.models import TokenProxy
 
 from questionnaire.constant import STATUS_CHOICES
 from questionnaire.models import (
@@ -17,8 +18,10 @@ from questionnaire.models import (
 )
 from questionnaire.utils import get_docs_zip, get_excel_file
 
+
 User = get_user_model()
 admin.site.unregister(Group)
+admin.site.unregister(TokenProxy)
 
 logger = logging.getLogger(__name__)
 

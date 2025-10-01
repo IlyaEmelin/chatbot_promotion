@@ -1,6 +1,5 @@
 import logging
 import base64
-import imghdr
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -32,37 +31,33 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
+FILETYPE_ERROR = "Передан неподдерживаемый формат файла"
+
+
+class FileTypeError(Exception):
+    """Класс исключений для неподдерживаемых форматов файлов."""
+
 
 async def telegram_file_to_base64_image_field(file: File) -> str:
     """
     Преобразует Telegram File в строку для Base64ImageField
     Возвращает строку в формате: data:image/jpeg;base64,{base64_data}
     """
-    # Скачиваем файл как байты
+    def get_mime_from_signature(binary_data):
+        """Определяет MIME-тип по сигнатурам файлов"""
+        signatures = {
+            b'\xff\xd8\xff': 'image/jpeg',
+            b'\x89PNG\r\n\x1a\n': 'image/png',
+            b'%PDF': 'application/pdf',
+        }
+        for signature, mime_type in signatures.items():
+            if binary_data.startswith(signature):
+                return mime_type
+        raise FileTypeError(FILETYPE_ERROR)
+
     file_bytes = await file.download_as_bytearray()
-
-    # Определяем тип изображения
-    image_format = imghdr.what(None, h=file_bytes)
-    if not image_format:
-        # Если imghdr не определил, пробуем по расширению
-        image_format = "jpeg"  # значение по умолчанию
-
-    # Маппинг форматов для MIME типов
-    mime_types = {
-        "jpeg": "image/jpeg",
-        "jpg": "image/jpeg",
-        "png": "image/png",
-        "gif": "image/gif",
-        "bmp": "image/bmp",
-        "webp": "image/webp",
-    }
-
-    mime_type = mime_types.get(image_format, "image/jpeg")
-
-    # Кодируем в base64
+    mime_type = get_mime_from_signature(file_bytes)
     base64_data = base64.b64encode(file_bytes).decode("utf-8")
-
-    # Формируем data URI
     data_uri = f"data:{mime_type};base64,{base64_data}"
     return data_uri
 
