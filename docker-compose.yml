@@ -49,4 +49,4 @@ services:
     env_file: .env
     restart: unless-stopped
     depends_on:
-      - 5_backend
+      - 5_backend # Поменять на 5_bot если запускается бот на поллинг в отдельном контейнере
