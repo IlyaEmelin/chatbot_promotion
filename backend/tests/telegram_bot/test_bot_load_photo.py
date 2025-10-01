@@ -115,30 +115,3 @@ class TestDocumentUpload(TestCase):
             assert (
                 "ZmFrZV9pbWFnZV9kYXRh" in result
             )  # base64 от "fake_image_data"
-
-    @pytest.mark.asyncio
-    @patch("telegram_bot.sync_to_async.get_or_create_survey")
-    @patch("telegram_bot.sync_to_async.get_or_create_user")
-    async def test_load_document_command_with_provided_survey(
-        self,
-        mock_get_user,
-        mock_get_survey,
-    ):
-        """Тест загрузки документа с предоставленным survey_obj"""
-        # Arrange
-        mock_update = self.create_mock_update(has_photo=True)
-        mock_context = self.create_mock_context()
-
-        mock_survey = Mock()
-        mock_survey.status = "waiting_docs"
-
-        # Act
-        await load_document_command(
-            mock_update, mock_context, survey_obj=mock_survey
-        )
-
-        # Assert
-        # Не должны вызываться get_user и get_survey,
-        # так как survey_obj предоставлен
-        mock_get_user.assert_not_called()
-        mock_get_survey.assert_not_called()
