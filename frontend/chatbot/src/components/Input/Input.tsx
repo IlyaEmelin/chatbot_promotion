@@ -1,26 +1,20 @@
-import React, { useState, useRef } from 'react';
-import { Send, Paperclip } from 'lucide-react';
+import React, { useState } from 'react';
+import { Send } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { addMessage, submitAnswerAsync } from '../../store/surveySlice';
-import { surveyAPI } from '../../api/surveyAPI';
+import FileUpload from '../FileUpload/FileUpload';
 import styles from './Input.module.css';
 
 export const Input: React.FC = () => {
   const dispatch = useAppDispatch();
   const { isLoading, surveyId, isCompleted, messages } = useAppSelector(state => state.survey);
   const [inputText, setInputText] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSendMessage = async () => {
     if (!inputText.trim() || !surveyId || isLoading) return;
 
-    // Добавляем сообщение пользователя
     dispatch(addMessage({ text: inputText, isBot: false }));
-    
-    // Отправляем ответ на сервер
     dispatch(submitAnswerAsync({ surveyId, answer: inputText }));
-    
     setInputText('');
   };
 
@@ -31,89 +25,49 @@ export const Input: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0 || !surveyId) return;
-
-    setIsUploading(true);
-    
-    try {
-      const fileArray = Array.from(files);
-      
-      // Загружаем файлы на сервер
-      const uploadPromises = fileArray.map(file => surveyAPI.uploadFile(file));
-      const uploadResults = await Promise.all(uploadPromises);
-      
-      // Создаем текст с информацией о загруженных файлах
-      const fileText = `Загружено файлов: ${fileArray.length}\n${uploadResults.map((result, i) => `${fileArray[i].name}: ${result.url}`).join('\n')}`;
-      
-      // Добавляем сообщение
+  const handleUploadComplete = (documents: any[]) => {
+    console.log('Files uploaded:', documents);
+    // Можно отправить уведомление боту о загрузке файлов
+    if (surveyId && documents.length > 0) {
+      const fileNames = documents.map(d => d.file_name || 'файл').join(', ');
       dispatch(addMessage({ 
-        text: `Загружено файлов: ${fileArray.length}`, 
-        isBot: false, 
-        attachments: fileArray 
-      }));
-      
-      // Отправляем информацию о файлах как ответ
-      dispatch(submitAnswerAsync({ surveyId, answer: fileText }));
-      
-    } catch (error) {
-      console.error('Error uploading files:', error);
-      dispatch(addMessage({ 
-        text: `Ошибка загрузки файлов: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`, 
+        text: `Загружено файлов: ${documents.length} (${fileNames})`, 
         isBot: false 
       }));
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
-  // Проверяем, есть ли у последнего сообщения опции для выбора
   const lastMessage = messages[messages.length - 1];
   const hasOptions = lastMessage?.options && lastMessage.options.length > 0;
   
-  // Скрываем поле ввода если опрос завершен или есть опции для выбора
   if (isCompleted || (hasOptions && !isLoading)) {
     return null;
   }
 
-  const inputClass = `${styles.input} ${(isLoading || isUploading) ? styles.inputDisabled : ''}`;
+  const inputClass = `${styles.input} ${isLoading ? styles.inputDisabled : ''}`;
   const sendButtonClass = `${styles.button} ${styles.sendButton} ${
-    (isLoading || isUploading || !inputText.trim()) ? styles.sendButtonDisabled : ''
-  }`;
-  const fileButtonClass = `${styles.button} ${styles.fileButton} ${
-    (isLoading || isUploading) ? styles.buttonDisabled : ''
+    (isLoading || !inputText.trim()) ? styles.sendButtonDisabled : ''
   }`;
 
   return (
     <div className={styles.container}>
+      {/* Компонент загрузки файлов */}
+      {surveyId && <FileUpload onUploadComplete={handleUploadComplete} />}
+      
       <div className={styles.wrapper}>
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={isUploading ? "Загрузка файлов..." : "Введите ответ..."}
+          placeholder="Введите ответ..."
           className={inputClass}
-          disabled={isLoading || isUploading}
+          disabled={isLoading}
         />
         
         <button
-          onClick={() => fileInputRef.current?.click()}
-          className={fileButtonClass}
-          disabled={isLoading || isUploading}
-          title="Прикрепить файл"
-          type="button"
-        >
-          <Paperclip size={18} />
-        </button>
-        
-        <button
           onClick={handleSendMessage}
-          disabled={isLoading || isUploading || !inputText.trim()}
+          disabled={isLoading || !inputText.trim()}
           className={sendButtonClass}
           title="Отправить"
           type="button"
@@ -121,15 +75,6 @@ export const Input: React.FC = () => {
           <Send size={18} />
         </button>
       </div>
-      
-      <input
-        ref={fileInputRef}
-        type="file"
-        onChange={handleFileUpload}
-        multiple
-        className={styles.hiddenInput}
-        accept="image/*,.pdf,.doc,.docx"
-      />
     </div>
   );
 };
