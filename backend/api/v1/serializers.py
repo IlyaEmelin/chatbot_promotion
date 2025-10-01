@@ -117,7 +117,10 @@ class SurveyCreateSerializer(ModelSerializer):
             logger.debug("Создан опрос %", survey_obj)
         elif (
             restart_question
-            and survey_obj.current_question is None
+            and (
+                survey_obj.current_question is None
+                or not survey_obj.current_question.answers.exists()
+            )
             and survey_obj.status in ("processing", "completed")
         ):
             survey_obj.current_question = question_start
@@ -199,7 +202,11 @@ class SurveyUpdateSerializer(ModelSerializer):
                 )
 
             instance.current_question = next_question
-            instance.status = "new" if next_question else "waiting_docs"
+            instance.status = (
+                "new"
+                if next_question and next_question.answers.exists()
+                else "waiting_docs"
+            )
             instance.result = result
             if new_status:
                 instance.status = new_status
@@ -372,7 +379,7 @@ class DocumentSerializer(ModelSerializer):
         read_only_fields = ("survey",)
 
     def create(self, validated_data):
-        data = validated_data.pop('image')
+        data = validated_data.pop("image")
         try:
             url = YandexDiskUploader(
                 settings.DISK_TOKEN,
