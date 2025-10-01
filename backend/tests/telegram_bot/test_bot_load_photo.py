@@ -97,21 +97,14 @@ class TestDocumentUpload(TestCase):
     @pytest.mark.asyncio
     async def test_telegram_file_to_base64_image_field(self):
         """Тест преобразования Telegram файла в base64"""
-        # Arrange
         mock_file = AsyncMock()
         mock_file.download_as_bytearray = AsyncMock(
-            return_value=b"fake_image_data"
+            return_value=b"\xff\xd8\xfffake_image_data"
         )
 
-        # Mock imghdr для определения формата
-        with patch("telegram_bot.survey_handlers.imghdr.what") as mock_imghdr:
-            mock_imghdr.return_value = "jpeg"
+        result = await telegram_file_to_base64_image_field(mock_file)
 
-            # Act
-            result = await telegram_file_to_base64_image_field(mock_file)
-
-            # Assert
-            assert result.startswith("data:image/jpeg;base64,")
-            assert (
-                "ZmFrZV9pbWFnZV9kYXRh" in result
-            )  # base64 от "fake_image_data"
+        assert result.startswith("data:image/jpeg;base64,")
+        assert (
+            "ZmFrZV9pbWFnZV9kYXRh" in result
+        )  # base64 от "fake_image_data"
