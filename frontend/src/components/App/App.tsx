@@ -7,6 +7,7 @@ import { Modal } from '../Modal/Modal'
 import { Login } from '../pages/Login/Login'
 import { Register } from '../pages/Rgister/Register'
 import { OnlyUnAuth } from '../Protected-route/Protected-route'
+import { SurveyWidget } from '../../../chatbot/src/components/SurveyWidget/SurveyWidget'
 
 function App() {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ function App() {
         </Route>
       </Routes>
       <Footer /> 
+      <SurveyWidget />
     </>
   )
 }

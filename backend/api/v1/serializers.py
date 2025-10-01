@@ -1,3 +1,4 @@
+from idlelib.browser import file_open
 from random import choices
 from string import digits
 from uuid import UUID
@@ -117,7 +118,10 @@ class SurveyCreateSerializer(ModelSerializer):
             logger.debug("Создан опрос %", survey_obj)
         elif (
             restart_question
-            and survey_obj.current_question is None
+            and (
+                survey_obj.current_question is None
+                or not survey_obj.current_question.answers.exists()
+            )
             and survey_obj.status in ("processing", "completed")
         ):
             survey_obj.current_question = question_start
@@ -199,7 +203,11 @@ class SurveyUpdateSerializer(ModelSerializer):
                 )
 
             instance.current_question = next_question
-            instance.status = "new" if next_question else "waiting_docs"
+            instance.status = (
+                "new"
+                if next_question and next_question.answers.exists()
+                else "waiting_docs"
+            )
             instance.result = result
             if new_status:
                 instance.status = new_status
@@ -341,11 +349,13 @@ class Base64ImageField(ImageField):
     """Класс поля для изображений документов."""
 
     def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith("data:image"):
-            file_format, imgstr = data.split(";base64,")
+        if (isinstance(data, str)
+                and data.startswith("data:image")
+                or data.startswith("data:application/pdf")):
+            file_format, file_str = data.split(";base64,")
             try:
                 return ContentFile(
-                    base64.b64decode(imgstr),
+                    base64.b64decode(file_str),
                     name=f"{self.parent.context['user']}"
                     f'{"".join(choices(digits, k=10))}.'
                     + file_format.split("/")[-1],
@@ -370,6 +380,17 @@ class DocumentSerializer(ModelSerializer):
             "image",
         )
         read_only_fields = ("survey",)
+
+    def create(self, validated_data):
+        data = validated_data.pop("image")
+        try:
+            url = YandexDiskUploader(
+                settings.DISK_TOKEN,
+            ).upload_file(data.name, data.read())
+        except Exception:
+            raise
+        document = Document.objects.create(**validated_data, image=url)
+        return document
 
 
 class CommentSerializer(ModelSerializer):
