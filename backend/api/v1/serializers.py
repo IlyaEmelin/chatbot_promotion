@@ -1,4 +1,3 @@
-from idlelib.browser import file_open
 from random import choices
 from string import digits
 from uuid import UUID
@@ -349,9 +348,11 @@ class Base64ImageField(ImageField):
     """Класс поля для изображений документов."""
 
     def to_internal_value(self, data):
-        if (isinstance(data, str)
-                and data.startswith("data:image")
-                or data.startswith("data:application/pdf")):
+        if (
+            isinstance(data, str)
+            and data.startswith("data:image")
+            or data.startswith("data:application/pdf")
+        ):
             file_format, file_str = data.split(";base64,")
             try:
                 return ContentFile(
