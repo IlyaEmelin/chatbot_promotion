@@ -33,9 +33,6 @@ export const Header = () => {
                         <li className={clsx(styles.menu__item, styles.menu__item_active)}>
                             <Link to="#">Создать анкету</Link>
                         </li>
-                        <li className={styles.menu__item}>
-                            <Link to="#">Списки анкет</Link>
-                        </li>
                     </ul>
                 </nav>
                 { user ? (
