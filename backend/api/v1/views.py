@@ -7,7 +7,10 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.status import HTTP_201_CREATED, HTTP_500_INTERNAL_SERVER_ERROR
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     CreateModelMixin,
@@ -21,7 +24,7 @@ from questionnaire.models import Survey, Document, Comment
 from .permissions import (
     AuthorOrStaffOnly,
     NestedAuthorOrStaffOnly,
-    NestedAuthorStaffOnly
+    NestedAuthorStaffOnly,
 )
 from .serializers import (
     SurveyCreateSerializer,
@@ -54,7 +57,10 @@ class SurveyViewSet(
     # TODO: permission_classes = (IsAuthenticated,)
     filter_backends = (SurveyFilterBackend,)
 
-    @action(('patch',), detail=True,)
+    @action(
+        ("patch",),
+        detail=True,
+    )
     def processing(self, request, pk):
         """Метод смены статуса опроса на <В обработке>."""
         survey = self.get_object()
@@ -102,8 +108,7 @@ class SurveyViewSet(
         Returns:
             Response: ответ на запрос создания
         """
-        # TODO user = request.user
-        user = User.objects.first()
+        user = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -114,8 +119,7 @@ class SurveyViewSet(
         """
         Обновляет опрос через SurveyUpdateSerializer
         """
-        # TODO: user = request.user
-        user = User.objects.first()
+        user = request.user
         # Получаем объект survey
         survey = self.get_object()
 
@@ -130,6 +134,15 @@ class SurveyViewSet(
         serializer.save(user=user)
 
         return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        serializer = SurveyCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(user=user)
+
+        return Response([serializer.data])
 
 
 class DocumentViewSet(

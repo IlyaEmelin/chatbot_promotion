@@ -91,7 +91,7 @@ class TestTelegramBot(TestCase):
         handlers = self.bot.application.handlers[0]
 
         # Assert
-        assert len(handlers) == 6  # start, help, status, message
+        assert len(handlers) == 7  # start, help, status, message
 
         # Проверяем типы обработчиков
         handler_types = [type(handler).__name__ for handler in handlers]
@@ -100,7 +100,8 @@ class TestTelegramBot(TestCase):
         assert "CommandHandler" == handler_types[2]
         assert "CommandHandler" == handler_types[3]
         assert "MessageHandler" == handler_types[4]
-        assert "MessageHandler" == handler_types[5]
+        assert "CommandHandler" == handler_types[5]
+        assert "MessageHandler" == handler_types[6]
 
 
 class TestKeyboardFunctions:
