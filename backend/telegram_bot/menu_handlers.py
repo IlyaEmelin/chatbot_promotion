@@ -141,6 +141,7 @@ async def load_command(
     context: ContextTypes.DEFAULT_TYPE,
     load_result: bool | None = None,
     photo_file_id: int | None = None,
+    is_pdf: bool | None = None,
 ):
     """
     Команда /help - помощь с кнопкой помощи
@@ -173,7 +174,12 @@ async def load_command(
             if load_result
             else "❌ Ошибка загрузки документа"
         )
-        if photo_file_id:
+        if is_pdf:
+            await update.message.reply_document(
+                document=photo_file_id,
+                caption=caption,
+            )
+        elif photo_file_id:
             await update.message.reply_photo(
                 photo=photo_file_id,
                 caption=caption,
