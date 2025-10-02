@@ -1,7 +1,7 @@
 import { getCookie } from "./cookie";
 import type { TLoginData, TRegisterData } from "./types";
 
-const URL = import.meta.env.VITE_API_URL || 'http://dvizhenie.myftp.biz:580/';
+const URL = import.meta.env.VITE_API_URL || 'https://dvizhenie.sytes.net/api';
 
 const checkResponse = <T>(res: Response): Promise<T> => {
     return res.ok ? res.json() : res.json().then((res) => Promise.reject(res));
@@ -41,7 +41,7 @@ export const registerUserApi = (user: TRegisterData): Promise<TRegisterResponse>
 };
 
 export const loginUserApi = (user: TLoginData): Promise<TAuthResponse> => {
-    return fetch(`${URL}/auth/token/login`, {
+    return fetch(`${URL}/auth/token/login/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json; charset=utf-8',
