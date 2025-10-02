@@ -1,5 +1,4 @@
 import logging
-import asyncio
 
 from django.conf import settings
 from telegram import Update
@@ -82,14 +81,8 @@ class TelegramBot:
 
     def run_polling(self):
         """Запуск бота в режиме polling"""
-        import asyncio
-
-        asyncio.run(self._run_polling())
-
-    async def _run_polling(self):
-        """Асинхронный запуск polling"""
-        await self._ensure_initialized()
-        await self.application.run_polling()
+        logger.info("Starting bot in polling mode...")
+        self.application.run_polling()
 
 
 bot = TelegramBot()
