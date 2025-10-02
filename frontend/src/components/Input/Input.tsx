@@ -17,13 +17,15 @@ export const Input = ({
 }: TInputProps) => {
     return (
         <>
-            <label className={styles.label}>{label}</label>
-            <input 
-                className={styles.input} 
-                type={type} 
-                name ={name} 
-                placeholder={placeholder}
-                onChange={handleChangeInput} />
+            <label className={styles.label}>
+                {label}
+                <input 
+                    className={styles.input} 
+                    type={type} 
+                    name ={name} 
+                    placeholder={placeholder}
+                    onChange={handleChangeInput} />
+            </label>
         </>
     )
 }

@@ -9,9 +9,16 @@
 
 :root {
   --bg-color: #fff;
-  --text-color: #4e4e4e;
-  --accent-color: #404fdb;
- 
+  --accent-color-disabled: #959DEB;
+  --accent-color-active: #404FDB;
+  --accent-color-hover: #2839D4;
+  --accent-color-focus: #2331B9;
+  --text-color-grey: #9FA5A9;
+  --text-color-dark: #0F1F28;
+  --text-color-accent: #404FDB;
+  --system-color-red: #FE3D3D;
+  --system-color-green: #27AE60;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -27,7 +34,10 @@ h5,
 h6,
 p,
 ul,
-li {
+li,
+img,
+button,
+input {
   margin: 0;
   padding: 0;
 }
