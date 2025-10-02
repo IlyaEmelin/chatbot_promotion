@@ -147,7 +147,7 @@ npm run build
 * **CSS**
 * **redux/toolkit**
 * **react-router**
-* 
+  
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 
