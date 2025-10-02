@@ -37,7 +37,9 @@ ul,
 li,
 img,
 button,
-input {
+input,
+label,
+div {
   margin: 0;
   padding: 0;
 }
