@@ -39,13 +39,13 @@ export const Input = ({
                             {showPassword ? 
                                 <img 
                                     className={styles.iconPassword} 
-                                    src="src/assets/hide-password.svg" 
+                                    src="/assets/hide-password.svg" 
                                     alt="скрыть пароль"
                                 /> 
                                 : 
                                 <img 
                                     className={styles.iconPassword} 
-                                    src="src/assets/show-password.svg" 
+                                    src="/assets/show-password.svg" 
                                     alt="показать пароль" 
                                 />
                             }

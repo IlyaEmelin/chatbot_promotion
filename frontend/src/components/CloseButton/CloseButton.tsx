@@ -5,9 +5,9 @@ import styles from "./CloseButton.module.css";
                 <div className={styles.closeMenu} onClick={onClick}>
                     {
                         color === 'black' ?
-                        <img src="src/assets/X-black.svg" alt = "иконка закрытия окна" />
+                        <img src="/assets/X-black.svg" alt = "иконка закрытия окна" />
                         :
-                        <img src="src/assets/X-white.svg" alt = "иконка закрытия окна" />
+                        <img src="/assets/X-white.svg" alt = "иконка закрытия окна" />
                     }
                 </div>
         )

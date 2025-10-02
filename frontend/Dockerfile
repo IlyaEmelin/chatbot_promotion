@@ -8,6 +8,6 @@ CMD [ "npm", "run", "build" ]
 
 FROM node:20-alpine AS production
 WORKDIR /app
-COPY --from=build /usr/www/frontend/package.json ./
+COPY --from=build /app/package.json ./
 RUN npm i 
-COPY --from=build /usr/www/frontend/dist ./dist
+COPY --from=build /app/dist ./dist
