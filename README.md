@@ -94,3 +94,11 @@ sudo docker-compose up -d
 ```bash
 python manage.py clear_data_base --add_user --add_survey_data
 ```
+
+## Сведенье о команде back-end
+- team leader: Емелин Илья
+- backend python: Валерий Гурин
+- dev-ops: Михайлов Харалампий
+- backend python: Олег Мисхожев
+## Ссылка на Swagger
+
