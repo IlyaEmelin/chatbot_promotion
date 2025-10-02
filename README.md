@@ -66,7 +66,7 @@ LOGGING_LEVEL=DEBUG
 
 # Telegram
 TELEGRAM_BOT_TOKEN=< TelegramBotToken >
-TELEGRAM_WEBHOOK_URL=https://<yourdomain.com>/webhook/
+TELEGRAM_WEBHOOK_URL=https://<yourdomain.com>/telegram/webhook/
 ADMIN_IDS=< TelegramID >
 
 # Я.Диск токен
