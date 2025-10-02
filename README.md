@@ -1,5 +1,5 @@
 # Чат-бот для благотворительного фонда «Продвижение»
-
+<a name="Start-point"></a>
 
 - [О проекте](#anchor-about)
 - [Цели проекта](#anchor-target)
@@ -149,14 +149,14 @@ npm run build
 ## Команда проекта:
 | Фото                                                                                                  | Участник            | Роль                          |Контакты|
 |-------------------------------------------------------------------------------------------------------|---------------------|-------------------------------|-|
-| ![Емелин Илья](https://github.com/IlyaEmelin/chatbot_promotion/commit/EmelinIliya.jpg)                | Емелин Илья         | TeamLead, backend-разработчик |[GitHub](https://github.com/IlyaEmelin), [Telegram](https://t.me/Ilya_Emelin)|
-| ![Евстефеева Анна](https://github.com/IlyaEmelin/chatbot_promotion/commit/EvstefeevaAnna.jpg)         | Евстефеева Анна     | Project-менеджер              |[GitHub](https://github.com/AnnaEvstifeeva), [Telegram](https://t.me/annievstifeeva)|
-| ![Богомолова Ольга](https://github.com/IlyaEmelin/chatbot_promotion/commit/BogomolovaOlga.jpg)         | Богомолова Ольга    | Product-менеджер              |[Telegram](https://t.me/OlgaBogomolova16)|
-| ![Шарипова Динара](https://github.com/IlyaEmelin/chatbot_promotion/commit/SharipovaDinara.jpg)          | Шарипова Динара     | UX/UI дизайнер                |[Telegram](https://t.me/DinaraCalifornia)|
-| ![Долгих Кирилл](https://github.com/IlyaEmelin/chatbot_promotion/commit/DolgikhKirill.jpg)            | Долгих Кирилл       | Frontend-разработчик          |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
-| ![Кладова Ольга](https://github.com/IlyaEmelin/chatbot_promotion/commit/xxxxxxxxxxxxx.jpg)            | Кладова Ольга       | Frontend-разработчик          |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
-| ![Гурин Валерий](https://github.com/IlyaEmelin/chatbot_promotion/commit/GurinValeriy.jpg)             | Гурин Валерий       | Backend-разработчик           |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
-| ![Мисхожев Олег](https://github.com/IlyaEmelin/chatbot_promotion/commit/MischozhevOleg.jpg)           | Мисхожев Олег       | Backend-разработчик           |[GitHub](https://github.com/OlegMiskhozhev), [Telegram](https://t.me/miskhozhev)|
-| ![Михайлов Харалампий](https://github.com/IlyaEmelin/chatbot_promotion/commit/MihaylovHaralampiy.jpg) | Михайлов Харалампий | DevOps, backend-разработчик   |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
+| ![EmelinIliya](https://github.com/user-attachments/assets/b679a20b-54ac-4929-9ffb-b84b58217a5f) | Емелин Илья | TeamLead, backend-разработчик |[GitHub](https://github.com/IlyaEmelin), [Telegram](https://t.me/Ilya_Emelin)|
+| ![EvstefeevaAnna](https://github.com/user-attachments/assets/a5e2f675-558b-47bc-8cf3-d7d8ec003f4e) | Евстефеева Анна | Project-менеджер |[GitHub](https://github.com/AnnaEvstifeeva), [Telegram](https://t.me/annievstifeeva)|
+| ![BogomolovaOlga](https://github.com/user-attachments/assets/33484226-14df-46e8-ae77-bfb8e30d0bb8) | Богомолова Ольга | Product-менеджер |[Telegram](https://t.me/OlgaBogomolova16)|
+| ![SharipovaDinara](https://github.com/user-attachments/assets/681ffec2-95c5-46fb-8771-fe6bbaa4db4a) | Шарипова Динара | UX/UI дизайнер |[Telegram](https://t.me/DinaraCalifornia)|
+| ![MikhaylovHaralampiy](https://github.com/user-attachments/assets/94588f0d-cb69-46d8-8160-fcf6b2a19134) | Михайлов Харалампий | Backend-разработчик, DevOps |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
+| ![DolgikhKirill](https://github.com/user-attachments/assets/9f62d065-7205-4719-8261-75a251e43d03) | Долгих Кирилл | Frontend-разработчик |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
+| ![she](https://github.com/user-attachments/assets/c850a2f1-3c9a-404a-9926-f2323b5102b0) | Кладова Ольга | Frontend-разработчик |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
+| ![GurinValeriy](https://github.com/user-attachments/assets/096e634d-00a2-4b54-96e3-dcff56dbd33a) | Гурин Валерий | Backend-разработчик |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
+| ![MiskhozhevOleg](https://github.com/user-attachments/assets/8d674c23-9895-4f21-9cf9-021339e42a1b) | Мисхожев Олег | Backend-разработчик |[GitHub](https://github.com/OlegMiskhozhev), [Telegram](https://t.me/miskhozhev)|
 
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
