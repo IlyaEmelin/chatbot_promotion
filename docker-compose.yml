@@ -9,7 +9,7 @@ services:
     env_file: .env
     command: cp -r /app/dist/. /frontend_static/
     volumes:
-      - static:/frontend_static
+      - static/frontend_static:/frontend_static
 
   postgres:
     image: postgres:17
@@ -26,7 +26,7 @@ services:
       DB_HOST: postgres
       ENABLE_POSTGRES_DB: true
     volumes:
-      - static:/app/backend_static
+      - static/backend_static:/app/backend_static
       - logs:/app/logs
     env_file: .env
     restart: unless-stopped
