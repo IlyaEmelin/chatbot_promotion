@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-CMD ["sh", "-c", "python3 manage.py migrate && gunicorn --bind 0.0.0.0:8000 chatbot_promotion.wsgi"]
+CMD ["sh", "-c", "python manage.py set_webhook && python3 manage.py migrate && gunicorn --bind 0.0.0.0:8000 chatbot_promotion.wsgi"]
