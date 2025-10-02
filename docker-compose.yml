@@ -24,6 +24,20 @@ services:
     depends_on:
       - postgres
 
+  bot:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile_Bot
+    environment:
+      DB_HOST: postgres
+      ENABLE_POSTGRES_DB: true
+    volumes:
+      - logs:/app/logs
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - backend
+
   gateway:
     build: ./nginx/
     ports:
@@ -35,4 +49,4 @@ services:
     env_file: .env
     restart: unless-stopped
     depends_on:
-      - backend
+      - bot
