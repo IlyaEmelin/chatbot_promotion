@@ -27,7 +27,7 @@ export const Header = () => {
         <>
             <header className={clsx(styles.header, isMenuOpen && styles.active)}>
                 <div className={styles.logo}>
-                    <img src="src/assets/logo.svg" alt="логотип" />
+                    <img src="/assets/logo.svg" alt="логотип" />
                 </div>
                 <nav>
                     <ul className={styles.menu}>
