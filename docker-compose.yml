@@ -5,7 +5,11 @@ volumes:
 
 services:
   frontend:
-    build: ./frontend/
+    build:
+      context: ./frontend/
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - REACT_APP_DEBUG=${REACT_APP_DEBUG}
     env_file: .env
     command: cp -r /app/dist/. /frontend_static/
     volumes:

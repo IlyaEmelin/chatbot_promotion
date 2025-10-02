@@ -3,6 +3,13 @@ WORKDIR /app
 COPY package.json ./
 RUN npm i
 COPY . .
+
+ARG VITE_API_URL
+ARG REACT_APP_DEBUG
+
+ENV VITE_API_URL=$VITE_API_URL
+ENV REACT_APP_DEBUG=$REACT_APP_DEBUG
+
 RUN npm run build
 CMD [ "npm", "run", "build" ]
 
