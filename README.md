@@ -16,7 +16,7 @@
 **АПИ** - https://dvizhenie.sytes.net/api/v1/ \
 **REDOC (Только в Debug режиме)** - https://dvizhenie.sytes.net/redoc/ \
 **Swagger** - https://dvizhenie.sytes.net/swagger/ \
-**ТГ-Бот** - https://t.me/ProDvizhenie_5Bot \
+**ТГ-Бот** - https://t.me/ProDvizhenie_5Bot
 
 <a name="anchor-about"></a>
 ## О проекте
@@ -49,6 +49,8 @@
 Экспорт в Excel/Google Таблицы
 Добавление комментариев к заявкам
 Безопасный доступ через личный кабинет
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="anchor-install"></a>
 ## Установка и запуск
@@ -95,6 +97,8 @@ cd backend
 ```bash
 python manage.py runserver
 ```
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="anchor-deployment"></a>
 ## Развертывание
@@ -143,6 +147,8 @@ npm run build
 * **CSS**
 * **redux/toolkit**
 * **react-router**
+* 
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 
 <a name="anchor-team"></a>
