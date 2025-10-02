@@ -7,15 +7,15 @@ from django.utils import timezone
 
 def birthday_validator(value: str | date):
     """Проверяет корректность даты рождения."""
+    message = "Пожалуйста, введите корректную дату рождения!"
     if isinstance(value, str):
-        value = datetime.strptime(value, "%d.%m.%Y")
+        try:
+            value = datetime.strptime(value, "%d.%m.%Y")
+        except ValueError:
+            raise ValidationError(message)
         value = value.replace(tzinfo=ZoneInfo("UTC"))
         if value >= timezone.now():
-            raise ValidationError(
-                "Пожалуйста, введите корректную дату рождения!"
-            )
+            raise ValidationError(message)
     else:
         if value and value >= timezone.now().date():
-            raise ValidationError(
-                "Пожалуйста, введите корректную дату рождения!"
-            )
+            raise ValidationError(message)
