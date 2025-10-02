@@ -1,10 +1,12 @@
 # Чат-бот для благотворительного фонда «Продвижение»
 
 #### Эндпоинты
+**Сайт** - https://dvizhenie.sytes.net
 **Админ-панель** - https://dvizhenie.sytes.net/admin/ \
 **АПИ** - https://dvizhenie.sytes.net/api/v1/ \
 **REDOC (Только в Debug режиме)** - https://dvizhenie.sytes.net/redoc/ \
-**ТГ-Бот** - https://t.me/ProDvizhenie_5Bot
+**Swagger** - https://dvizhenie.sytes.net/swagger/ \
+**ТГ-Бот** - https://t.me/ProDvizhenie_5Bot \
 
 ## О проекте
 Чат-бот для автоматизации сбора заявок от подопечных и их представителей на сайте dvizhenie.life и в мессенджерах.
@@ -76,7 +78,7 @@ ADMIN_IDS=< TelegramID >
 # Я.Диск токен
 DISK_TOKEN=< Токен Яндекс-диска >
 ```
-#### Локальный запуск Django сервера
+### Локальный запуск Django сервера
 ```bash
 cd backend
 ```
@@ -99,10 +101,39 @@ sudo docker-compose up -d
 python manage.py clear_data_base --add_user --add_survey_data
 ```
 
-## Сведенье о команде back-end
-- team leader: Емелин Илья
-- backend python: Валерий Гурин
-- dev-ops: Михайлов Харалампий
-- backend python: Олег Мисхожев
-## Ссылка на Swagger
-- https://dvizhenie.sytes.net/swagger/
+### Локальный запуск front-end приложения
+```bash
+cd frontend
+```
+```bash
+npm i
+npm run dev
+```
+#### Сборка front-end приложения
+
+```bash
+npm run build
+```
+
+## Используемый стек Backend
+* **Django 5.2.6**
+* **Python 3.12**
+* **PostgreSQL DB**
+* **Docker**
+* **pytest 8.4.2**
+
+## Используемый стек Frontend
+
+* **React**
+* **TypeScript**
+* **CSS**
+* **redux/toolkit**
+* **react-router**
+
+## Сведенье о команде 
+- team leader: Емелин Илья GitHub:[IlyaEmelin](https://github.com/IlyaEmelin)
+- backend python: Валерий Гурин GitHub:[IlyaEmelin](https://github.com/IlyaEmelin)
+- dev-ops: Михайлов Харалампий GitHub:[Kharalampiy Mikhaylov](https://github.com/HarisNvr)
+- backend python: Олег Мисхожев GitHub:[OlegMiskhozhev](https://github.com/OlegMiskhozhev)
+- front: Долгих Кирилл  GitHub:[Kirill Dolgikh](https://github.com/nonncal)
+- front: Кладова Ольга GitHub:[OlgaKladova](https://github.com/OlgaKladova)
