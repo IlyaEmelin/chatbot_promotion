@@ -102,3 +102,21 @@ python manage.py clear_data_base --add_user --add_survey_data
 - backend python: Олег Мисхожев
 ## Ссылка на Swagger
 - https://dvizhenie.sytes.net/swagger/
+
+## Сведенье о команде front-end
+- front: Долгих Кирилл
+- front: Кладова Ольга
+
+#### Локальный запуск front-end приложения
+```bash
+cd frontend
+```
+```bash
+npm i
+npm run dev
+```
+#### Сборка front-end приложения
+
+```bash
+npm run build
+```
