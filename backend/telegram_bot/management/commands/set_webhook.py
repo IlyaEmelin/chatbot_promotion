@@ -22,4 +22,4 @@ class Command(BaseCommand):
         if response.json().get("ok"):
             logger.info("Вебхук успешно установлен!")
         else:
-            logger.info("Ошибка при установке вебхука!")
+            logger.error("Ошибка при установке вебхука!")
