@@ -1,5 +1,15 @@
 # Чат-бот для благотворительного фонда «Продвижение»
 
+
+- [О проекте](#anchor-about)
+- [Цели проекта](#anchor-target)
+- [Основные функции](#anchor-functions)
+- [Установка и запуск](#anchor-install)
+- [Развертывание](#anchor-deployment)
+- [Используемый стек](#anchor-stack)
+- [Команда проекта](#anchor-team)
+
+
 #### Эндпоинты
 **Сайт** - https://dvizhenie.sytes.net
 **Админ-панель** - https://dvizhenie.sytes.net/admin/ \
@@ -8,9 +18,11 @@
 **Swagger** - https://dvizhenie.sytes.net/swagger/ \
 **ТГ-Бот** - https://t.me/ProDvizhenie_5Bot \
 
+<a name="anchor-about"></a>
 ## О проекте
 Чат-бот для автоматизации сбора заявок от подопечных и их представителей на сайте dvizhenie.life и в мессенджерах.
 
+<a name="anchor-target"></a>
 ## Цели проекта
 Сократить время обработки заявок сотрудниками фонда
 
@@ -20,6 +32,7 @@
 
 Соответствие требованиям 152-ФЗ «О персональных данных»
 
+<a name="anchor-functions"></a>
 ## Основные функции
 ### Для пользователей
 
@@ -37,6 +50,7 @@
 Добавление комментариев к заявкам
 Безопасный доступ через личный кабинет
 
+<a name="anchor-install"></a>
 ## Установка и запуск
 
 #### Клонирование репозитория
@@ -82,6 +96,7 @@ cd backend
 python manage.py runserver
 ```
 
+<a name="anchor-deployment"></a>
 ## Развертывание
 
 ### Docker Compose:
@@ -113,6 +128,7 @@ npm run build
 
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
+<a name="anchor-stack"></a>
 ## Используемый стек Backend
 * **Django 5.2.6**
 * **Python 3.12**
@@ -129,16 +145,18 @@ npm run build
 * **react-router**
 
 
+<a name="anchor-team"></a>
 ## Команда проекта:
-| Фото                                                                                                  |Участник| Роль                          |Контакты|
-|-------------------------------------------------------------------------------------------------------|-|-------------------------------|-|
-| ![Емелин Илья](https://github.com/IlyaEmelin/chatbot_promotion/commit/EmelinIliya.jpg)                |Емелин Илья| TeamLead, backend-разработчик |[GitHub](https://github.com/IlyaEmelin), [Telegram](https://t.me/Ilya_Emelin)|
-| ![Гурин Валерий](https://github.com/IlyaEmelin/chatbot_promotion/commit/GurinValeriy.jpg)             |Гурин Валерий| Backend-разработчик           |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
-| ![Мисхожев Олег](https://github.com/IlyaEmelin/chatbot_promotion/commit/MischozhevOleg.jpg)           |Мисхожев Олег| Backend-разработчик           |[GitHub](https://github.com/OlegMiskhozhev), [Telegram](https://t.me/miskhozhev)|
-| ![Михайлов Харалампий](https://github.com/IlyaEmelin/chatbot_promotion/commit/MihaylovHaralampiy.jpg) |Михайлов Харалампий| DevOps, backend-разработчик   |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
-| ![Долгих Кирилл](https://github.com/IlyaEmelin/chatbot_promotion/commit/DolgikhKirill.jpg)            |Долгих Кирилл| Frontend-разработчик          |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
-| ![Кладова Ольга](https://github.com/IlyaEmelin/chatbot_promotion/commit/xxxxxxxxxxxxx.jpg)            |Кладова Ольга| Frontend-разработчик          |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
-| ![Евстефеева Анна](https://github.com/IlyaEmelin/chatbot_promotion/commit/EvstefeevaAnna.jpg)         |Евстефеева Анна| Project-менеджер              |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/annievstifeeva)|
-| ![Шарипова Динара](https://github.com/IlyaEmelin/chatbot_promotion/commit/SharipovaDinara.jpg)          |Шарипова Динара| UX/UI дизайнер                |[Telegram](https://t.me/DinaraCalifornia)|
+| Фото                                                                                                  | Участник            | Роль                          |Контакты|
+|-------------------------------------------------------------------------------------------------------|---------------------|-------------------------------|-|
+| ![Емелин Илья](https://github.com/IlyaEmelin/chatbot_promotion/commit/EmelinIliya.jpg)                | Емелин Илья         | TeamLead, backend-разработчик |[GitHub](https://github.com/IlyaEmelin), [Telegram](https://t.me/Ilya_Emelin)|
+| ![Евстефеева Анна](https://github.com/IlyaEmelin/chatbot_promotion/commit/EvstefeevaAnna.jpg)         | Евстефеева Анна     | Project-менеджер              |[GitHub](https://github.com/AnnaEvstifeeva), [Telegram](https://t.me/annievstifeeva)|
+| ![Богомолова Ольга](https://github.com/IlyaEmelin/chatbot_promotion/commit/BogomolovaOlga.jpg)         | Богомолова Ольга    | Product-менеджер              |[Telegram](https://t.me/OlgaBogomolova16)|
+| ![Шарипова Динара](https://github.com/IlyaEmelin/chatbot_promotion/commit/SharipovaDinara.jpg)          | Шарипова Динара     | UX/UI дизайнер                |[Telegram](https://t.me/DinaraCalifornia)|
+| ![Долгих Кирилл](https://github.com/IlyaEmelin/chatbot_promotion/commit/DolgikhKirill.jpg)            | Долгих Кирилл       | Frontend-разработчик          |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
+| ![Кладова Ольга](https://github.com/IlyaEmelin/chatbot_promotion/commit/xxxxxxxxxxxxx.jpg)            | Кладова Ольга       | Frontend-разработчик          |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
+| ![Гурин Валерий](https://github.com/IlyaEmelin/chatbot_promotion/commit/GurinValeriy.jpg)             | Гурин Валерий       | Backend-разработчик           |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
+| ![Мисхожев Олег](https://github.com/IlyaEmelin/chatbot_promotion/commit/MischozhevOleg.jpg)           | Мисхожев Олег       | Backend-разработчик           |[GitHub](https://github.com/OlegMiskhozhev), [Telegram](https://t.me/miskhozhev)|
+| ![Михайлов Харалампий](https://github.com/IlyaEmelin/chatbot_promotion/commit/MihaylovHaralampiy.jpg) | Михайлов Харалампий | DevOps, backend-разработчик   |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
 
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
