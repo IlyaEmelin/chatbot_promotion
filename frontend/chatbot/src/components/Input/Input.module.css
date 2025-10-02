@@ -45,17 +45,6 @@
   min-width: 48px;
 }
 
-.fileButton {
-  background-color: #F3F4F6;
-  color: #6B7280;
-}
-
-.fileButton:hover:not(.buttonDisabled) {
-  background-color: #E5E7EB;
-  color: #374151;
-  transform: scale(1.05);
-}
-
 .sendButton {
   background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
   color: white;
@@ -71,8 +60,7 @@
   transform: scale(0.95);
 }
 
-.sendButtonDisabled,
-.buttonDisabled {
+.sendButtonDisabled {
   background: #D1D5DB !important;
   cursor: not-allowed !important;
   transform: none !important;
@@ -80,6 +68,39 @@
   color: #9CA3AF !important;
 }
 
-.hiddenInput {
-  display: none;
+.finishButton {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  margin-top: 12px;
+}
+
+.finishButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.finishButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.finishButton:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.uploadHint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6B7280;
+  text-align: center;
 }

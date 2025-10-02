@@ -1,0 +1,211 @@
+import React, { useState, useRef } from 'react';
+import { X, Upload, FileText } from 'lucide-react';
+import { useAppSelector } from '../../hooks/redux';
+import { surveyAPI } from '../../api/surveyAPI';
+import { FileWithPreview, UploadedDocument } from '../../types';
+import styles from './FileUpload.module.css';
+
+interface FileUploadProps {
+  onUploadComplete?: (documents: UploadedDocument[]) => void;
+}
+
+export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
+  const { surveyId } = useAppSelector(state => state.survey);
+  const [files, setFiles] = useState<FileWithPreview[]>([]);
+  const [uploadedDocs, setUploadedDocs] = useState<UploadedDocument[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isImage = (file: File) => {
+    return file.type.startsWith('image/');
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 10) / 10 + ' ' + sizes[i];
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (!selectedFiles || selectedFiles.length === 0 || !surveyId) return;
+
+    const newFiles: FileWithPreview[] = Array.from(selectedFiles).map(file => ({
+      file,
+      preview: isImage(file) ? URL.createObjectURL(file) : '',
+      isUploading: true, // СРАЗУ СТАВИМ TRUE
+    }));
+
+    setFiles(prev => [...prev, ...newFiles]);
+
+    // ЗАГРУЖАЕМ ВСЕ ФАЙЛЫ ПАРАЛЛЕЛЬНО
+    const uploadPromises = newFiles.map(fileWithPreview => uploadFile(fileWithPreview));
+    await Promise.all(uploadPromises);
+
+    // Очищаем input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const uploadFile = async (fileWithPreview: FileWithPreview) => {
+    if (!surveyId) return;
+
+    try {
+      const uploadedDoc = await surveyAPI.uploadDocument(surveyId, fileWithPreview.file);
+      
+      // Обновляем файл с ID загруженного документа
+      setFiles(prev => prev.map(f => 
+        f.file === fileWithPreview.file 
+          ? { ...f, isUploading: false, uploadedId: uploadedDoc.id }
+          : f
+      ));
+
+      // Добавляем в список загруженных
+      setUploadedDocs(prev => {
+        const updated = [...prev, uploadedDoc];
+        // ВЫЗЫВАЕМ CALLBACK С ОБНОВЛЕННЫМ СПИСКОМ
+        if (onUploadComplete) {
+          onUploadComplete(updated);
+        }
+        return updated;
+      });
+
+      console.log('✅ File uploaded successfully:', uploadedDoc);
+    } catch (error) {
+      console.error('❌ Error uploading file:', error);
+      
+      setFiles(prev => prev.map(f => 
+        f.file === fileWithPreview.file 
+          ? { 
+              ...f, 
+              isUploading: false, 
+              uploadError: error instanceof Error ? error.message : 'Ошибка загрузки'
+            }
+          : f
+      ));
+    }
+  };
+
+  const handleRemoveFile = async (fileWithPreview: FileWithPreview) => {
+    if (fileWithPreview.uploadedId && surveyId) {
+      try {
+        await surveyAPI.deleteDocument(surveyId, fileWithPreview.uploadedId);
+        
+        setUploadedDocs(prev => {
+          const updated = prev.filter(doc => doc.id !== fileWithPreview.uploadedId);
+          if (onUploadComplete) {
+            onUploadComplete(updated);
+          }
+          return updated;
+        });
+        
+        console.log('✅ Document deleted from server');
+      } catch (error) {
+        console.error('❌ Error deleting document:', error);
+        alert('Не удалось удалить файл с сервера');
+        return;
+      }
+    }
+
+    if (fileWithPreview.preview) {
+      URL.revokeObjectURL(fileWithPreview.preview);
+    }
+
+    setFiles(prev => prev.filter(f => f.file !== fileWithPreview.file));
+  };
+
+  const uploadedCount = files.filter(f => f.uploadedId).length;
+  const totalCount = files.length;
+
+  return (
+    <div className={styles.container}>
+      <button
+        type="button"
+        className={styles.uploadButton}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <Upload size={20} />
+        <span>Загрузить файлы</span>
+      </button>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileSelect}
+        multiple
+        accept="image/*,.pdf,.doc,.docx"
+        className={styles.hiddenInput}
+      />
+
+      {files.length > 0 && (
+        <>
+          <div className={styles.filesList}>
+            {files.map((fileWithPreview, index) => (
+              <div key={index} className={styles.fileItem}>
+                <div className={styles.filePreview}>
+                  {isImage(fileWithPreview.file) ? (
+                    <img 
+                      src={fileWithPreview.preview} 
+                      alt={fileWithPreview.file.name}
+                      className={styles.previewImage}
+                    />
+                  ) : (
+                    <div className={styles.fileIcon}>
+                      <FileText size={24} color="#6B7280" />
+                    </div>
+                  )}
+                  
+                  {fileWithPreview.isUploading && (
+                    <div className={styles.uploadingOverlay}>
+                      <div className={styles.spinner}></div>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.fileInfo}>
+                  <p className={styles.fileName} title={fileWithPreview.file.name}>
+                    {fileWithPreview.file.name.length > 15 
+                      ? fileWithPreview.file.name.substring(0, 12) + '...' 
+                      : fileWithPreview.file.name}
+                  </p>
+                  <p className={styles.fileSize}>
+                    {formatFileSize(fileWithPreview.file.size)}
+                  </p>
+                  
+                  {fileWithPreview.uploadError && (
+                    <p className={styles.uploadError}>Ошибка</p>
+                  )}
+                  
+                  {fileWithPreview.uploadedId && (
+                    <p className={styles.uploadSuccess}>✓</p>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.removeButton}
+                  onClick={() => handleRemoveFile(fileWithPreview)}
+                  disabled={fileWithPreview.isUploading}
+                  title="Удалить файл"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* ПОКАЗЫВАЕМ СКОЛЬКО ФАЙЛОВ ЗАГРУЖЕНО */}
+          {uploadedCount === totalCount && totalCount > 0 && (
+            <div className={styles.uploadSummary}>
+              ✓ Загружено файлов: {uploadedCount}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default FileUpload;

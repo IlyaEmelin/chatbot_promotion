@@ -1,10 +1,12 @@
 // src/api/surveyAPI.ts - С АВТОРИЗАЦИЕЙ И ПРАВИЛЬНЫМИ ПУТЯМИ
 import { 
+  UploadedDocument,
   CreateSurveyRequest, 
   CreateSurveyResponse, 
   Survey, 
   SubmitAnswerRequest, 
-  SubmitAnswerResponse 
+  SubmitAnswerResponse, 
+  ProcessingRequest
 } from '../types';
 
 // Функция для получения куки
@@ -108,28 +110,109 @@ export const surveyAPI = {
     return data;
   },
 
-  // POST /api/v1/upload/ - загрузка файлов
-  uploadFile: async (file: File): Promise<{ url: string }> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    console.log('📤 API Request: POST /v1/upload/', { fileName: file.name, fileSize: file.size });
-    
-    const response = await fetch(`${API_BASE_URL}/v1/upload/`, {
-      method: 'POST',
-      headers: getAuthHeaders(), // Не добавляем Content-Type для FormData
-      body: formData,
+  getDocuments: async (surveyId: string): Promise<UploadedDocument[]> => {
+    console.log(`📤 API Request: GET /v1/surveys/${surveyId}/docs/`);
+
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/docs/`, {
+      method: 'GET',
+      headers: getAuthHeaders({
+        'Content-Type': 'application/json',
+      }),
     });
     
     if (!response.ok) {
       const errorData = await response.text();
       console.error('❌ API Error:', response.status, errorData);
-      throw new Error(`Ошибка загрузки файла: ${response.status}`);
+      throw new Error(`Ошибка получения документов: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('📥 API Response: POST /v1/upload/', data);
+    console.log(`📥 API Response: GET /v1/surveys/${surveyId}/docs/`, data);
     return data;
+  },
+
+  // POST /api/v1/surveys/{survey_pk}/docs/ - загрузить документ
+  uploadDocument: async (surveyId: string, file: File): Promise<UploadedDocument> => {
+  // Читаем файл как dataURL (с префиксом data:image/png;base64,...)
+  const toDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string); // уже с data:image/...;base64,
+      reader.onerror = (error) => reject(error);
+    });
+
+  const base64WithPrefix = await toDataUrl(file);
+
+  const requestBody = {
+    image: base64WithPrefix,  
+  };
+
+  console.log(`📤 API Request: POST /v1/surveys/${surveyId}/docs/`, requestBody);
+
+  const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/docs/`, {
+    method: 'POST',
+    headers: getAuthHeaders({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error('❌ API Error:', response.status, errorData);
+    throw new Error(`Ошибка загрузки документа: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log(`📥 API Response: POST /v1/surveys/${surveyId}/docs/`, data);
+  return data;
+},
+
+
+
+  // DELETE /api/v1/surveys/{survey_pk}/docs/{id}/ - удалить документ
+  deleteDocument: async (surveyId: string, documentId: number): Promise<void> => {
+    console.log(`📤 API Request: DELETE /v1/surveys/${surveyId}/docs/${documentId}/`);
+    
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/docs/${documentId}/`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('❌ API Error:', response.status, errorData);
+      throw new Error(`Ошибка удаления документа: ${response.status}`);
+    }
+    
+    console.log(`✅ Document ${documentId} deleted`);
+  },
+
+    // PATCH /api/v1/surveys/{id}/processing/ - завершить опрос
+  finishSurvey: async (surveyId: string): Promise<void> => {
+    const requestBody: ProcessingRequest = {
+      result: {},
+      status: 'processing'
+    };
+
+    console.log(`📤 API Request: PATCH /v1/surveys/${surveyId}/processing/`, requestBody);
+
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/processing/`, {
+      method: 'PATCH',
+      headers: getAuthHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(requestBody),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('❌ API Error:', response.status, errorData);
+      throw new Error(`Ошибка завершения опроса: ${response.status}`);
+    }
+    
+    console.log('✅ Survey finished successfully');
   },
 };
 
