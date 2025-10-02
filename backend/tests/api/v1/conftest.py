@@ -3,7 +3,13 @@ from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from questionnaire.models import Question, AnswerChoice, Survey, Document, Comment
+from questionnaire.models import (
+    Question,
+    AnswerChoice,
+    Survey,
+    Document,
+    Comment,
+)
 from unittest.mock import patch, MagicMock
 import pytest
 
@@ -214,11 +220,14 @@ def document_factory(document):
 
 patch_path = "api.yadisk.requests"
 
+
 @pytest.fixture
 def mock_yandex_disk_uploader():
     """Фикстура для создания mock-объекта"""
-    with (patch(f"{patch_path}.get") as mock_get,
-          patch(f"{patch_path}.put") as mock_put):
+    with (
+        patch(f"{patch_path}.get") as mock_get,
+        patch(f"{patch_path}.put") as mock_put,
+    ):
         # Настройка mock-ответов
         mock_response_upload = MagicMock()
         mock_response_upload.json.return_value = {"href": UPLOAD_URL}
@@ -241,22 +250,23 @@ def mock_yandex_disk_uploader():
             "mock_put": mock_put,
             "mock_response_upload": mock_response_upload,
             "mock_response_download": mock_response_download,
-            "mock_response_put": mock_response_put
+            "mock_response_put": mock_response_put,
         }
 
 
-
 # Фикстуры для комментариев
+
 
 @pytest.fixture
 def admin_user():
     """Создание администратора"""
     return User.objects.create_user(
-        username='admin',
-        email='admin@example.com',
-        password='adminpass123',
-        is_staff=True
+        username="admin",
+        email="admin@example.com",
+        password="adminpass123",
+        is_staff=True,
     )
+
 
 @pytest.fixture
 def authenticated_admin(api_client, admin_user):
@@ -264,18 +274,16 @@ def authenticated_admin(api_client, admin_user):
     api_client.force_authenticate(user=admin_user)
     return api_client
 
+
 @pytest.fixture
 def comment(survey, admin_user):
     """Создание комментария"""
     return Comment.objects.create(
-        survey=survey,
-        user=admin_user,
-        text='Test comment text'
+        survey=survey, user=admin_user, text="Test comment text"
     )
+
 
 @pytest.fixture
 def comment_data():
     """Данные для создания комментария"""
-    return {
-        'text': 'New test comment'
-    }
+    return {"text": "New test comment"}

@@ -14,7 +14,10 @@ from questionnaire.models import Survey
 class TestSurveyCreate:
 
     def test_create1_survey_success(
-        self, user, authenticated_client, question
+        self,
+        user,
+        authenticated_client,
+        question,
     ):
         """Тест 1 успешного создания опроса."""
         url = reverse("survey-list")

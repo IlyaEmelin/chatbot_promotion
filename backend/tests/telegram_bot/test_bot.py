@@ -12,8 +12,7 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 from telegram_bot.bot import TelegramBot
-from telegram_bot.survey_handlers import start_command, handle_message
-from telegram_bot.menu_handlers import help_command
+from telegram_bot.survey_handlers import handle_message
 from telegram_bot.const import (
     START_COMMAND_NAME,
     HELP_COMMAND_NAME,

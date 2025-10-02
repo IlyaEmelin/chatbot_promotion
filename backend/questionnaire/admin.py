@@ -91,7 +91,18 @@ class CommentInline(admin.TabularInline):
         return "—"
 
     def get_formset(self, request, obj=None, **kwargs):
-        """Автоматически устанавливаем текущего пользователя для новых комментариев."""
+        """
+        Автоматически устанавливаем текущего
+            пользователя для новых комментариев.
+
+        Args:
+            request: запрос
+            obj: объект запроса
+            **kwargs:
+
+        Returns:
+
+        """
         formset = super().get_formset(request, obj, **kwargs)
 
         class CustomFormSet(formset):
@@ -204,14 +215,33 @@ class SurveyAdmin(admin.ModelAdmin):
         if not comments:
             return "Комментарии отсутствуют"
 
-        html = '<div style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">'
+        html = (
+            '<div style="max-height: 300px; '
+            "overflow-y: auto; "
+            "border: 1px solid #ddd; "
+            "padding: 10px; "
+            "border-radius: 5px;"
+            '">'
+        )
         for comment in comments:
             html += format_html(
                 """
-                <div style="margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 5px; border-left: 4px solid #007cba;">
-                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 5px;">
+                <div style="margin-bottom: 15px;
+                    padding: 10px;
+                    background: #f9f9f9;
+                    border-radius: 5px;
+                    border-left: 4px solid #007cba;
+                ">
+                    <div style="display: flex;
+                        justify-content: between;
+                        align-items: center;
+                        margin-bottom: 5px;
+                    ">
                         <strong style="color: #333;">{}</strong>
-                        <small style="color: #666; margin-left: auto;">{}</small>
+                        <small style="color: #666;
+                            margin-left: auto;
+                            ">{}
+                        </small>
                     </div>
                     <div style="color: #555; line-height: 1.4;">{}</div>
                 </div>
@@ -341,7 +371,18 @@ class CommentAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
     def get_form(self, request, obj=None, **kwargs):
-        """Устанавливаем текущего пользователя по умолчанию для нового комментария."""
+        """
+        Устанавливаем текущего пользователя
+        по умолчанию для нового комментария.
+
+        Args:
+            request: запрос
+            obj: объект
+            **kwargs:
+
+        Returns:
+
+        """
         form = super().get_form(request, obj, **kwargs)
 
         if not obj:  # Только для создания нового комментария

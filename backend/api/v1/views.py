@@ -33,7 +33,6 @@ from .serializers import (
     DocumentSerializer,
     CommentSerializer,
 )
-from .filter import SurveyFilterBackend
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -54,8 +53,6 @@ class SurveyViewSet(
         IsAuthenticated,
         AuthorOrStaffOnly,
     )
-    # TODO: permission_classes = (IsAuthenticated,)
-    filter_backends = (SurveyFilterBackend,)
 
     @action(
         ("patch",),
