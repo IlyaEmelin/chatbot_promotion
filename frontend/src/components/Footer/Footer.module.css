@@ -1,5 +1,5 @@
 .footer {
-    background-color: var(--accent-color);
+    background-color: var(--accent-color-active);
     color: var(--bg-color);
     width: calc(100% - 140px);
     display: flex;

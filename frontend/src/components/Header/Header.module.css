@@ -104,7 +104,7 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: flex-start;
-        height: 100vh;
+        height: calc(100vh - 70px);
         width: 210px;
         margin: 0;
         padding: 48px 40px 38px;
@@ -162,8 +162,9 @@
     }
 
     .button:hover {
+
         background-color: var(--bg-color);
-        color: var(--accent-color-active);
+        color: var(--accent-color-hover);
     }
 
     .burger {
@@ -183,6 +184,16 @@
         background-color: var(--accent-color-active);
         margin: 5px;
         transition: .25s ease-in-out;
+    }
+
+    .bar:hover {
+        background-color: var(--accent-color-hover);
+    }
+
+    .bar:focus,
+    .bar:focus-visible {
+        outline: none;
+        background-color: var(--accent-color-focus);
     }
 
     .closeMenu.active {
@@ -220,7 +231,7 @@
 @media (max-width: 640px) {
     .header {
         padding: 42px 25px 25px;
-        width: 210px;
+        width: 160px;
     }
 }
 

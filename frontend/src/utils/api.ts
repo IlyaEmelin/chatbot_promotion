@@ -1,7 +1,7 @@
 import { getCookie } from "./cookie";
 import type { TLoginData, TRegisterData } from "./types";
 
-const URL = import.meta.env.VITE_API_URL || 'http://dvizhenie.myftp.biz:580/api';
+const URL = import.meta.env.VITE_API_URL || 'http://dvizhenie.myftp.biz:580/';
 
 const checkResponse = <T>(res: Response): Promise<T> => {
     return res.ok ? res.json() : res.json().then((res) => Promise.reject(res));
