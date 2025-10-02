@@ -1,4 +1,4 @@
-
+import { CloseButton } from '../CloseButton/CloseButton';
 import styles from './Modal.module.css';
 
 type ModalProps = {
@@ -12,9 +12,8 @@ export const Modal: React.FC<ModalProps> = ({ title, onClose, children }) => {
         <div className={styles.overlay} data-cy='modalOverlay'>
             <div className={styles.modal}>
                 <div className={styles.modalHeader}>
-                    <h2>{title}</h2>
-                    <button onClick={onClose}>X
-                    </button> {/* CloseButton */}
+                    <h1 className={styles.title}>{title}</h1>
+                    <CloseButton onClick={onClose} color='black' />
                 </div>
                 <div className={styles.modalContent}>
                     {children}

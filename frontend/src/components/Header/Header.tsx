@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "../../hooks/store";
 import { getUser } from "../../services/auth/slice";
 import { logoutUser } from "../../services/auth/action";
+import { CloseButton } from "../CloseButton/CloseButton";
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -54,10 +55,7 @@ export const Header = () => {
                 <div className={styles.bar}></div>
                 <div className={styles.bar}></div>
             </div>
-            <div className={clsx(styles.closeMenu, isMenuOpen && styles.active)} onClick={toggleMenu}>
-                <div className={styles.line}></div>
-                <div className={styles.line}></div>
-            </div>
+           {isMenuOpen && <CloseButton onClick={toggleMenu} color='white' />}
         </>
     );
 };

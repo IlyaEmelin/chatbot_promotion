@@ -65,8 +65,8 @@
     font-weight: 600;
     text-transform: uppercase;
     cursor: pointer;
-    background-color: var(--accent-color);
-    border: 1px solid var(--accent-color);
+    background-color: var(--accent-color-active);
+    border: 1px solid var(--accent-color-active);
     border-radius: 20px;
     height: 34px;
     font-size: 12px;
@@ -78,15 +78,15 @@
 
 .button:hover {
     background-color: #fff;
-    color: var(--accent-color);
+    color: var(--accent-color-active);
 }
 
 .button:focus,
 .button:focus-visible {
-    outline: 2px solid var(--accent-color);
+    outline: 2px solid var(--accent-color-active);
     outline-offset: 2px;
     background-color: #fff;
-    color: var(--accent-color);
+    color: var(--accent-color-active);
 }
 
 .burger,
@@ -104,12 +104,12 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: flex-start;
-        height: calc(100vh - 86px);
-        width: 180px;
+        height: 100vh;
+        width: 210px;
         margin: 0;
         padding: 48px 40px 38px;
         border-radius: 0;
-        background-color: var(--accent-color); 
+        background-color: var(--accent-color-active); 
         color: var(--bg-color);
         box-shadow: none;
         z-index: 100;
@@ -140,9 +140,30 @@
         color: var(--bg-color);
     }
 
+    .menu__item_active a:hover {
+        color: var(--bg-color);
+    }
+
+    .menu__item_active a:focus,
+    .menu__item_active a:focus-visible {
+        color: var(--bg-color);
+        outline: 2px solid var(--bg-color);
+        outline-offset: 2px;
+        border-radius: 1px;
+    }
+
+    .menu__item_active:active {
+        color: var(--bg-color);
+    }
+
     .button {
         background-color: var(--bg-color);
-        color: var(--accent-color);
+        color: var(--accent-color-active);
+    }
+
+    .button:hover {
+        background-color: var(--bg-color);
+        color: var(--accent-color-active);
     }
 
     .burger {
@@ -159,7 +180,7 @@
     .bar {
         width: 100%;
         height: 3px;
-        background-color: var(--accent-color);
+        background-color: var(--accent-color-active);
         margin: 5px;
         transition: .25s ease-in-out;
     }
