@@ -159,7 +159,7 @@ npm run build
 | ![EvstefeevaAnna](https://github.com/user-attachments/assets/a5e2f675-558b-47bc-8cf3-d7d8ec003f4e) | Евстефеева Анна | Project-менеджер |[GitHub](https://github.com/AnnaEvstifeeva), [Telegram](https://t.me/annievstifeeva)|
 | ![BogomolovaOlga](https://github.com/user-attachments/assets/33484226-14df-46e8-ae77-bfb8e30d0bb8) | Богомолова Ольга | Product-менеджер |[Telegram](https://t.me/OlgaBogomolova16)|
 | ![SharipovaDinara](https://github.com/user-attachments/assets/681ffec2-95c5-46fb-8771-fe6bbaa4db4a) | Шарипова Динара | UX/UI дизайнер |[Telegram](https://t.me/DinaraCalifornia)|
-| ![MikhaylovHaralampiy](https://github.com/user-attachments/assets/94588f0d-cb69-46d8-8160-fcf6b2a19134) | Михайлов Харалампий | Backend-разработчик, DevOps |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
+| ![MikhaylovHaralampiy](https://github.com/user-attachments/assets/94588f0d-cb69-46d8-8160-fcf6b2a19134) | Михайлов Харалампий | DevOps, backend-разработчик |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
 | ![DolgikhKirill](https://github.com/user-attachments/assets/9f62d065-7205-4719-8261-75a251e43d03) | Долгих Кирилл | Frontend-разработчик |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
 | ![she](https://github.com/user-attachments/assets/c850a2f1-3c9a-404a-9926-f2323b5102b0) | Кладова Ольга | Frontend-разработчик |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
 | ![GurinValeriy](https://github.com/user-attachments/assets/096e634d-00a2-4b54-96e3-dcff56dbd33a) | Гурин Валерий | Backend-разработчик |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
