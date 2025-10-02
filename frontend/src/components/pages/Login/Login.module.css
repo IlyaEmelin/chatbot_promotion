@@ -24,16 +24,11 @@
     align-items: center;
 }
 
-.passwordWrapper input {
-  width: 100%;
-  padding-right: 30px;
-}
-
 .showPasswordButton {
     cursor: pointer;
     position: absolute;
-    top: 50%;
-    right: 0;
+    top: 73%;
+    right: 8px;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -50,7 +45,8 @@
 }
 
 .error {
-    color: red;
+    color: var(--system-color-red);
+    font-weight: 400;
     font-size: 12px;
     height: 20px;
 }
@@ -60,13 +56,31 @@
     justify-content: space-between;
     align-items: center;
     gap: 86px;
+    width: calc(100% + 30px);
 }
 
 .link {
+    flex: 1;
     font-weight: 400;
     font-size: 16px;
     line-height: 140%;
     letter-spacing: -2%;
     cursor: pointer;
     color: var(--text-color-accent);
+}
+
+.link:hover {
+    color: var(--accent-color-hover);
+    cursor: pointer;
+}
+
+.link:focus,
+.link:focus-visible {
+    outline: none;
+    color: var(--accent-color-focus);
+}
+
+.link:disabled {
+    color: var(--accent-color-disabled);
+    cursor: not-allowed;
 }

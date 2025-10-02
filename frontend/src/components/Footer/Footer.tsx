@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./Footer.module.css";
 
 export const Footer = () => {
+    const navigate = useNavigate();
     return (
         <footer className={styles.footer}>
             <div className={styles.info}>
@@ -21,20 +22,19 @@ export const Footer = () => {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <nav className={styles.nav}>
-                    {/* ссылка, как на сайте заказчика */}
-                    <Link to="https://dvizhenie.life/docs" className={styles.nav__link}>Подопечным</Link>
-                    <Link to="https://dvizhenie.life/policy" className={styles.nav__link}>Политика конфиденциальности</Link>
-                    <Link to="https://dvizhenie.life/oferta" className={styles.nav__link}>Оферта о благотворительном пожертвовании</Link>
-                    <Link to="https://dvizhenie.life/sms" className={styles.nav__link}>СМС-пожертвование</Link>
+                    <Link to="#" className={styles.nav__link}>Подопечным</Link>
+                    <Link to="#" className={styles.nav__link}>Политика конфиденциальности</Link>
+                    <Link to="#" className={styles.nav__link}>Оферта о благотворительном пожертвовании</Link>
+                    <Link to="#" className={styles.nav__link}>СМС-пожертвование</Link>
                     <div className={styles.contacts}>
-                        <Link to="https://t.me/fond_prodvigenie" className={styles.nav__link}>Написать нам в ТГ</Link>
+                        <Link to="#" className={styles.nav__link}>Написать нам в ТГ</Link>
                         <div style={{ display: "flex", gap: "20px"}}>
                             <Link to="#" className={styles.nav__link}>8 800 550 17 82</Link>
                             <Link to="#" className={styles.nav__link}>pro@dvizhenie.life</Link>
                         </div>
                     </div>
                 </nav>
-                <button className={styles.button}>Войти</button>
+                <button className={styles.button} onClick={() => navigate("/login")}>Войти</button>
             </div>
         </footer>
     );
