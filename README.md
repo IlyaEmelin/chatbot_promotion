@@ -53,7 +53,7 @@ DEBUG=true
 CSRF_TRUSTED=http://51.250.113.76:580,http://localhost:3000/
 
 # frontend
-VITE_API_URL=https://dvizhenie.sytes.net/api/v1/
+VITE_API_URL=https://dvizhenie.sytes.net/api/
 REACT_APP_DEBUG=true
 
 #db settings
