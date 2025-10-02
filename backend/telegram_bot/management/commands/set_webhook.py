@@ -18,6 +18,7 @@ class Command(BaseCommand):
         data = {"url": webhook_url}
 
         response = requests.post(url, data=data)
+        print(response)
 
         if response.json().get("ok"):
             logger.info("Вебхук успешно установлен!")
