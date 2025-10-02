@@ -20,7 +20,7 @@ def webhook(request):
 
         logger.debug("Обрабатываем обновление асинхронно")
 
-        asyncio.run(bot.process_update(update_data))
+        asyncio.run(bot.process_webhook_update(update_data))
 
         return JsonResponse({"status": "ok"})
     except json.JSONDecodeError as e:
