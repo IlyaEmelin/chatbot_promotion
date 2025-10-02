@@ -13,7 +13,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     margin: auto;
-    min-width: 400px;
+    width: 400px;
     border-radius: 20px;
     background-color: var(--bg-color);
     display: flex;
@@ -61,6 +61,6 @@
 
 @media (max-width: 479px) {
     .modal {
-        max-width: 100vw;
+        max-width: 90vw;
     }
 }
