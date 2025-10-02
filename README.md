@@ -111,6 +111,8 @@ npm run dev
 npm run build
 ```
 
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
+
 ## Используемый стек Backend
 * **Django 5.2.6**
 * **Python 3.12**
@@ -126,10 +128,17 @@ npm run build
 * **redux/toolkit**
 * **react-router**
 
-## Сведенье о команде 
-- team leader: Емелин Илья GitHub:[IlyaEmelin](https://github.com/IlyaEmelin)
-- backend python: Валерий Гурин GitHub:[IlyaEmelin](https://github.com/IlyaEmelin)
-- dev-ops: Михайлов Харалампий GitHub:[Kharalampiy Mikhaylov](https://github.com/HarisNvr)
-- backend python: Олег Мисхожев GitHub:[OlegMiskhozhev](https://github.com/OlegMiskhozhev)
-- front: Долгих Кирилл  GitHub:[Kirill Dolgikh](https://github.com/nonncal)
-- front: Кладова Ольга GitHub:[OlgaKladova](https://github.com/OlgaKladova)
+
+## Команда проекта:
+| Фото                                                                                                  |Участник| Роль                          |Контакты|
+|-------------------------------------------------------------------------------------------------------|-|-------------------------------|-|
+| ![Емелин Илья](https://github.com/IlyaEmelin/chatbot_promotion/commit/EmelinIliya.jpg)                |Емелин Илья| TeamLead, backend-разработчик |[GitHub](https://github.com/IlyaEmelin), [Telegram](https://t.me/Ilya_Emelin)|
+| ![Гурин Валерий](https://github.com/IlyaEmelin/chatbot_promotion/commit/GurinValeriy.jpg)             |Гурин Валерий| Backend-разработчик           |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
+| ![Мисхожев Олег](https://github.com/IlyaEmelin/chatbot_promotion/commit/MischozhevOleg.jpg)           |Мисхожев Олег| Backend-разработчик           |[GitHub](https://github.com/OlegMiskhozhev), [Telegram](https://t.me/miskhozhev)|
+| ![Михайлов Харалампий](https://github.com/IlyaEmelin/chatbot_promotion/commit/MihaylovHaralampiy.jpg) |Михайлов Харалампий| DevOps, backend-разработчик   |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
+| ![Долгих Кирилл](https://github.com/IlyaEmelin/chatbot_promotion/commit/DolgikhKirill.jpg)            |Долгих Кирилл| Frontend-разработчик          |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
+| ![Кладова Ольга](https://github.com/IlyaEmelin/chatbot_promotion/commit/xxxxxxxxxxxxx.jpg)            |Кладова Ольга| Frontend-разработчик          |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
+| ![Евстефеева Анна](https://github.com/IlyaEmelin/chatbot_promotion/commit/EvstefeevaAnna.jpg)         |Евстефеева Анна| Project-менеджер              |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/annievstifeeva)|
+| ![Шарипова Динара](https://github.com/IlyaEmelin/chatbot_promotion/commit/SharipovaDinara.jpg)          |Шарипова Динара| UX/UI дизайнер                |[Telegram](https://t.me/DinaraCalifornia)|
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
