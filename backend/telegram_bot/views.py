@@ -23,6 +23,12 @@ def webhook(request):
         asyncio.run(bot.process_update(update_data))
 
         return JsonResponse({"status": "ok"})
+    except json.JSONDecodeError as e:
+        logger.error("Ошибка декодирования JSON: %s", str(e))
+        return JsonResponse(
+            {"status": "error", "message": "Invalid JSON"},
+            status=400,
+        )
     except Exception as e:
         logger.error(
             "Запуска webhook телеграмм бота %s",
