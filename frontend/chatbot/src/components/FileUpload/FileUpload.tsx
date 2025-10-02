@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, FileText, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, FileText } from 'lucide-react';
 import { useAppSelector } from '../../hooks/redux';
 import { surveyAPI } from '../../api/surveyAPI';
 import { FileWithPreview, UploadedDocument } from '../../types';
@@ -20,11 +20,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '0 B';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['B', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round(bytes / Math.pow(k, i) * 10) / 10 + ' ' + sizes[i];
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,15 +34,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
     const newFiles: FileWithPreview[] = Array.from(selectedFiles).map(file => ({
       file,
       preview: isImage(file) ? URL.createObjectURL(file) : '',
-      isUploading: false,
+      isUploading: true, // СРАЗУ СТАВИМ TRUE
     }));
 
     setFiles(prev => [...prev, ...newFiles]);
 
-    // Автоматически загружаем файлы
-    for (const fileWithPreview of newFiles) {
-      await uploadFile(fileWithPreview);
-    }
+    // ЗАГРУЖАЕМ ВСЕ ФАЙЛЫ ПАРАЛЛЕЛЬНО
+    const uploadPromises = newFiles.map(fileWithPreview => uploadFile(fileWithPreview));
+    await Promise.all(uploadPromises);
 
     // Очищаем input
     if (fileInputRef.current) {
@@ -52,13 +51,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
 
   const uploadFile = async (fileWithPreview: FileWithPreview) => {
     if (!surveyId) return;
-
-    // Устанавливаем статус загрузки
-    setFiles(prev => prev.map(f => 
-      f.file === fileWithPreview.file 
-        ? { ...f, isUploading: true, uploadError: undefined }
-        : f
-    ));
 
     try {
       const uploadedDoc = await surveyAPI.uploadDocument(surveyId, fileWithPreview.file);
@@ -71,12 +63,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
       ));
 
       // Добавляем в список загруженных
-      setUploadedDocs(prev => [...prev, uploadedDoc]);
-      
-      // Уведомляем родительский компонент
-      if (onUploadComplete) {
-        onUploadComplete([...uploadedDocs, uploadedDoc]);
-      }
+      setUploadedDocs(prev => {
+        const updated = [...prev, uploadedDoc];
+        // ВЫЗЫВАЕМ CALLBACK С ОБНОВЛЕННЫМ СПИСКОМ
+        if (onUploadComplete) {
+          onUploadComplete(updated);
+        }
+        return updated;
+      });
 
       console.log('✅ File uploaded successfully:', uploadedDoc);
     } catch (error) {
@@ -95,13 +89,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   };
 
   const handleRemoveFile = async (fileWithPreview: FileWithPreview) => {
-    // Если файл был загружен на сервер, удаляем его
     if (fileWithPreview.uploadedId && surveyId) {
       try {
         await surveyAPI.deleteDocument(surveyId, fileWithPreview.uploadedId);
         
-        // Удаляем из списка загруженных
-        setUploadedDocs(prev => prev.filter(doc => doc.id !== fileWithPreview.uploadedId));
+        setUploadedDocs(prev => {
+          const updated = prev.filter(doc => doc.id !== fileWithPreview.uploadedId);
+          if (onUploadComplete) {
+            onUploadComplete(updated);
+          }
+          return updated;
+        });
         
         console.log('✅ Document deleted from server');
       } catch (error) {
@@ -111,18 +109,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
       }
     }
 
-    // Освобождаем URL превью
     if (fileWithPreview.preview) {
       URL.revokeObjectURL(fileWithPreview.preview);
     }
 
-    // Удаляем из локального состояния
     setFiles(prev => prev.filter(f => f.file !== fileWithPreview.file));
   };
 
+  const uploadedCount = files.filter(f => f.uploadedId).length;
+  const totalCount = files.length;
+
   return (
     <div className={styles.container}>
-      {/* Кнопка загрузки */}
       <button
         type="button"
         className={styles.uploadButton}
@@ -132,7 +130,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
         <span>Загрузить файлы</span>
       </button>
 
-      {/* Скрытый input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -142,68 +139,70 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
         className={styles.hiddenInput}
       />
 
-      {/* Список файлов с превью */}
       {files.length > 0 && (
-        <div className={styles.filesList}>
-          {files.map((fileWithPreview, index) => (
-            <div key={index} className={styles.fileItem}>
-              {/* Превью */}
-              <div className={styles.filePreview}>
-                {isImage(fileWithPreview.file) ? (
-                  <img 
-                    src={fileWithPreview.preview} 
-                    alt={fileWithPreview.file.name}
-                    className={styles.previewImage}
-                  />
-                ) : (
-                  <div className={styles.fileIcon}>
-                    <FileText size={32} color="#6B7280" />
-                  </div>
-                )}
-                
-                {/* Индикатор загрузки */}
-                {fileWithPreview.isUploading && (
-                  <div className={styles.uploadingOverlay}>
-                    <div className={styles.spinner}></div>
-                  </div>
-                )}
-              </div>
+        <>
+          <div className={styles.filesList}>
+            {files.map((fileWithPreview, index) => (
+              <div key={index} className={styles.fileItem}>
+                <div className={styles.filePreview}>
+                  {isImage(fileWithPreview.file) ? (
+                    <img 
+                      src={fileWithPreview.preview} 
+                      alt={fileWithPreview.file.name}
+                      className={styles.previewImage}
+                    />
+                  ) : (
+                    <div className={styles.fileIcon}>
+                      <FileText size={24} color="#6B7280" />
+                    </div>
+                  )}
+                  
+                  {fileWithPreview.isUploading && (
+                    <div className={styles.uploadingOverlay}>
+                      <div className={styles.spinner}></div>
+                    </div>
+                  )}
+                </div>
 
-              {/* Информация о файле */}
-              <div className={styles.fileInfo}>
-                <p className={styles.fileName} title={fileWithPreview.file.name}>
-                  {fileWithPreview.file.name}
-                </p>
-                <p className={styles.fileSize}>
-                  {formatFileSize(fileWithPreview.file.size)}
-                </p>
-                
-                {fileWithPreview.uploadError && (
-                  <p className={styles.uploadError}>
-                    {fileWithPreview.uploadError}
+                <div className={styles.fileInfo}>
+                  <p className={styles.fileName} title={fileWithPreview.file.name}>
+                    {fileWithPreview.file.name.length > 15 
+                      ? fileWithPreview.file.name.substring(0, 12) + '...' 
+                      : fileWithPreview.file.name}
                   </p>
-                )}
-                
-                {fileWithPreview.uploadedId && (
-                  <p className={styles.uploadSuccess}>
-                    ✓ Загружено
+                  <p className={styles.fileSize}>
+                    {formatFileSize(fileWithPreview.file.size)}
                   </p>
-                )}
-              </div>
+                  
+                  {fileWithPreview.uploadError && (
+                    <p className={styles.uploadError}>Ошибка</p>
+                  )}
+                  
+                  {fileWithPreview.uploadedId && (
+                    <p className={styles.uploadSuccess}>✓</p>
+                  )}
+                </div>
 
-              {/* Кнопка удаления */}
-              <button
-                type="button"
-                className={styles.removeButton}
-                onClick={() => handleRemoveFile(fileWithPreview)}
-                disabled={fileWithPreview.isUploading}
-                title="Удалить файл"
-              >
-                <X size={18} />
-              </button>
+                <button
+                  type="button"
+                  className={styles.removeButton}
+                  onClick={() => handleRemoveFile(fileWithPreview)}
+                  disabled={fileWithPreview.isUploading}
+                  title="Удалить файл"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* ПОКАЗЫВАЕМ СКОЛЬКО ФАЙЛОВ ЗАГРУЖЕНО */}
+          {uploadedCount === totalCount && totalCount > 0 && (
+            <div className={styles.uploadSummary}>
+              ✓ Загружено файлов: {uploadedCount}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );

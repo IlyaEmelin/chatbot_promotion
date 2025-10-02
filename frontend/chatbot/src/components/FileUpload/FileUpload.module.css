@@ -1,5 +1,6 @@
 .container {
-  margin-top: 12px;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .uploadButton {
@@ -25,26 +26,38 @@
   transform: translateY(-1px);
 }
 
-.uploadButton:active {
-  transform: translateY(0);
-}
-
 .hiddenInput {
   display: none;
 }
 
 .filesList {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 12px;
+  max-height: 200px; /* ОГРАНИЧИВАЕМ ВЫСОТУ */
+  overflow-y: auto; /* ДОБАВЛЯЕМ СКРОЛЛ */
+  padding: 4px;
+}
+
+.filesList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filesList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filesList::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 2px;
 }
 
 .fileItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  padding: 8px;
   background: white;
   border: 1px solid #E5E7EB;
   border-radius: 12px;
@@ -52,16 +65,16 @@
 }
 
 .filePreview {
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
-  flex-shrink: 0;
   background: #F9FAFB;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  margin-bottom: 8px;
 }
 
 .previewImage {
@@ -99,12 +112,12 @@
 }
 
 .fileInfo {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
+  text-align: center;
 }
 
 .fileName {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
   color: #1F2937;
   margin: 0 0 4px 0;
@@ -114,27 +127,30 @@
 }
 
 .fileSize {
-  font-size: 12px;
+  font-size: 10px;
   color: #6B7280;
   margin: 0;
 }
 
 .uploadError {
-  font-size: 12px;
+  font-size: 10px;
   color: #DC2626;
   margin: 4px 0 0 0;
 }
 
 .uploadSuccess {
-  font-size: 12px;
+  font-size: 10px;
   color: #10B981;
   margin: 4px 0 0 0;
   font-weight: 600;
 }
 
 .removeButton {
-  width: 32px;
-  height: 32px;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #FEE2E2;
   color: #DC2626;
@@ -144,15 +160,28 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .removeButton:hover:not(:disabled) {
   background: #FCA5A5;
+  opacity: 1;
   transform: scale(1.1);
 }
 
 .removeButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.uploadSummary {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #166534;
+  font-weight: 500;
+  text-align: center;
 }

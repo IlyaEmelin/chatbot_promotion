@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { addMessage, submitAnswerAsync } from '../../store/surveySlice';
+import { surveyAPI } from '../../api/surveyAPI';
 import FileUpload from '../FileUpload/FileUpload';
 import styles from './Input.module.css';
 
@@ -9,6 +10,26 @@ export const Input: React.FC = () => {
   const dispatch = useAppDispatch();
   const { isLoading, surveyId, isCompleted, messages } = useAppSelector(state => state.survey);
   const [inputText, setInputText] = useState('');
+  const [uploadedFilesCount, setUploadedFilesCount] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // ПРОВЕРЯЕМ current_question_text НА НАЛИЧИЕ waiting_docs
+  const lastBotMessage = [...messages].reverse().find(m => m.isBot);
+  const isWaitingDocs = lastBotMessage?.text?.includes('загрузим документы') || 
+                        lastBotMessage?.text?.toLowerCase().includes('документ');
+
+  // ЗАГРУЖАЕМ СУЩЕСТВУЮЩИЕ ДОКУМЕНТЫ ПРИ МОНТИРОВАНИИ
+  useEffect(() => {
+    if (surveyId && isWaitingDocs) {
+      surveyAPI.getDocuments(surveyId)
+        .then(docs => {
+          setUploadedFilesCount(docs.length);
+        })
+        .catch(err => {
+          console.error('Error loading documents:', err);
+        });
+    }
+  }, [surveyId, isWaitingDocs]);
 
   const handleSendMessage = async () => {
     if (!inputText.trim() || !surveyId || isLoading) return;
@@ -26,21 +47,69 @@ export const Input: React.FC = () => {
   };
 
   const handleUploadComplete = (documents: any[]) => {
-    console.log('Files uploaded:', documents);
-    // Можно отправить уведомление боту о загрузке файлов
-    if (surveyId && documents.length > 0) {
-      const fileNames = documents.map(d => d.file_name || 'файл').join(', ');
+    setUploadedFilesCount(documents.length);
+  };
+
+  // ЗАВЕРШЕНИЕ ОПРОСА
+  const handleFinishSurvey = async () => {
+    if (!surveyId || isProcessing) return;
+
+    if (!window.confirm('Вы уверены, что хотите завершить заполнение анкеты?')) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      await surveyAPI.finishSurvey(surveyId);
+
       dispatch(addMessage({ 
-        text: `Загружено файлов: ${documents.length} (${fileNames})`, 
-        isBot: false 
+        text: 'Спасибо! Ваша анкета отправлена на обработку. Мы свяжемся с вами в ближайшее время.', 
+        isBot: true 
       }));
+
+      console.log('✅ Survey finished successfully');
+    } catch (error) {
+      console.error('❌ Error finishing survey:', error);
+      alert('Не удалось завершить опрос. Попробуйте еще раз.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const lastMessage = messages[messages.length - 1];
   const hasOptions = lastMessage?.options && lastMessage.options.length > 0;
   
-  if (isCompleted || (hasOptions && !isLoading)) {
+  if (isCompleted) {
+    return null;
+  }
+
+  // ЕСЛИ waiting_docs - ПОКАЗЫВАЕМ ЗАГРУЗКУ И КНОПКУ ЗАВЕРШЕНИЯ
+  if (isWaitingDocs) {
+    return (
+      <div className={styles.container}>
+        {surveyId && <FileUpload onUploadComplete={handleUploadComplete} />}
+        
+        <button
+          type="button"
+          className={styles.finishButton}
+          onClick={handleFinishSurvey}
+          disabled={isProcessing || uploadedFilesCount === 0}
+        >
+          {isProcessing ? 'Отправка...' : 'Завершить заполнение анкеты'}
+        </button>
+        
+        {uploadedFilesCount === 0 && (
+          <p className={styles.uploadHint}>
+            Загрузите хотя бы один документ для завершения
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // ЕСЛИ ЕСТЬ ОПЦИИ - НЕ ПОКАЗЫВАЕМ ПОЛЕ ВВОДА
+  if (hasOptions && !isLoading) {
     return null;
   }
 
@@ -51,9 +120,6 @@ export const Input: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Компонент загрузки файлов */}
-      {surveyId && <FileUpload onUploadComplete={handleUploadComplete} />}
-      
       <div className={styles.wrapper}>
         <input
           type="text"

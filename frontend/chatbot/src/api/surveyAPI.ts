@@ -5,7 +5,8 @@ import {
   CreateSurveyResponse, 
   Survey, 
   SubmitAnswerRequest, 
-  SubmitAnswerResponse 
+  SubmitAnswerResponse, 
+  ProcessingRequest
 } from '../types';
 
 // Функция для получения куки
@@ -186,6 +187,32 @@ export const surveyAPI = {
     }
     
     console.log(`✅ Document ${documentId} deleted`);
+  },
+
+    // PATCH /api/v1/surveys/{id}/processing/ - завершить опрос
+  finishSurvey: async (surveyId: string): Promise<void> => {
+    const requestBody: ProcessingRequest = {
+      result: {},
+      status: 'processing'
+    };
+
+    console.log(`📤 API Request: PATCH /v1/surveys/${surveyId}/processing/`, requestBody);
+
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/processing/`, {
+      method: 'PATCH',
+      headers: getAuthHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(requestBody),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('❌ API Error:', response.status, errorData);
+      throw new Error(`Ошибка завершения опроса: ${response.status}`);
+    }
+    
+    console.log('✅ Survey finished successfully');
   },
 };
 
