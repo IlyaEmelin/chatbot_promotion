@@ -20,6 +20,6 @@ class Command(BaseCommand):
         response = requests.post(url, data=data)
 
         if response.json().get("ok"):
-            logger.error("Вебхук успешно установлен!")
+            logger.info("Вебхук успешно установлен!")
         else:
             logger.error(f"Ошибка при установке вебхука!: {response.json()}")
