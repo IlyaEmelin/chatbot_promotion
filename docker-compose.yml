@@ -4,17 +4,17 @@ volumes:
   logs:
 
 services:
-  5_postgres:
+  postgres:
     image: postgres:17
     volumes:
       - pg_data:/var/lib/postgresql/data
     env_file: .env
     restart: unless-stopped
 
-  5_backend:
+  backend:
     build: ./backend/
     environment:
-      DB_HOST: 5_postgres
+      DB_HOST: postgres
       ENABLE_POSTGRES_DB: true
     volumes:
       - static:/app/backend_static
@@ -22,23 +22,23 @@ services:
     env_file: .env
     restart: unless-stopped
     depends_on:
-      - 5_postgres
+      - postgres
 
-#  5_bot:
-#    build:
-#      context: ./backend/
-#      dockerfile: Dockerfile_Bot
-#    environment:
-#      DB_HOST: 5_postgres
-#      ENABLE_POSTGRES_DB: true
-#    volumes:
-#      - logs:/app/logs
-#    env_file: .env
-#    restart: unless-stopped
-#    depends_on:
-#      - 5_backend
+  bot:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile_Bot
+    environment:
+      DB_HOST: postgres
+      ENABLE_POSTGRES_DB: true
+    volumes:
+      - logs:/app/logs
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - backend
 
-  5_gateway:
+  gateway:
     build: ./nginx/
     ports:
       - '80:80'
@@ -49,4 +49,4 @@ services:
     env_file: .env
     restart: unless-stopped
     depends_on:
-      - 5_backend # Поменять на 5_bot если запускается бот на поллинг в отдельном контейнере
+      - bot
