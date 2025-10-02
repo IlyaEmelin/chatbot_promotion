@@ -52,6 +52,10 @@ SECRET_KEY=django-insecure-q%@n0uxcwe^)#k+l2cdqq6nwmi4ugauec3z483le+!%um_aaaa
 DEBUG=true
 CSRF_TRUSTED=http://51.250.113.76:580,http://localhost:3000/
 
+# frontend
+VITE_API_URL=https://dvizhenie.sytes.net/api/v1/
+REACT_APP_DEBUG=true
+
 #db settings
 ENABLE_POSTGRES=false
 POSTGRES_USER=django
