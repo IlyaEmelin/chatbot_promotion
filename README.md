@@ -1,12 +1,12 @@
 # Чат-бот для благотворительного фонда «Продвижение»
 
 #### Эндпоинты
-**Сайт** - https://dvizhenie.sytes.net
-**Админ-панель** - https://dvizhenie.sytes.net/admin/ \
-**АПИ** - https://dvizhenie.sytes.net/api/v1/ \
-**REDOC (Только в Debug режиме)** - https://dvizhenie.sytes.net/redoc/ \
-**Swagger** - https://dvizhenie.sytes.net/swagger/ \
-**ТГ-Бот** - https://t.me/ProDvizhenie_5Bot \
+**Главная страница** - https://dvizhenie.sytes.net \
+**Админ-панель** - https://dvizhenie.sytes.net/pro-admin-dvizh \
+**АПИ** - https://dvizhenie.sytes.net/api/v1 \
+**REDOC** - https://dvizhenie.sytes.net/redoc \
+**Swagger** - https://dvizhenie.sytes.net/swagger \
+**ТГ-Бот** - https://t.me/ProDvizhenie_5Bot
 
 ## О проекте
 Чат-бот для автоматизации сбора заявок от подопечных и их представителей на сайте dvizhenie.life и в мессенджерах.
