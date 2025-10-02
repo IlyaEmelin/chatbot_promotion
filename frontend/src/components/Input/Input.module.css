@@ -65,7 +65,7 @@
 
 @media (max-width: 400px) {
     .input {
-        width: calc(100vw - 40px);
+        width: calc(90vw - 40px);
     }
     
 }
