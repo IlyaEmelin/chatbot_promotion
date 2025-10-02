@@ -123,6 +123,8 @@ npm run build
 * **React**
 * **TypeScript**
 * **CSS**
+* **redux/toolkit**
+* **react-router**
 
 ## Сведенье о команде 
 - team leader: Емелин Илья GitHub:[IlyaEmelin](https://github.com/IlyaEmelin)
