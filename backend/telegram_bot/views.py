@@ -1,10 +1,10 @@
 import logging
-import asyncio
+import json
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-import json
+from asgiref.sync import async_to_sync
 
 from .bot import bot
 
@@ -20,9 +20,11 @@ def webhook(request):
 
         logger.debug("Обрабатываем обновление асинхронно")
 
-        asyncio.run(bot.process_webhook_update(update_data))
+        # Используем async_to_sync для правильного управления event loop
+        async_to_sync(bot.process_webhook_update)(update_data)
 
         return JsonResponse({"status": "ok"})
+
     except json.JSONDecodeError as e:
         logger.error("Ошибка декодирования JSON: %s", str(e))
         return JsonResponse(
@@ -31,7 +33,7 @@ def webhook(request):
         )
     except Exception as e:
         logger.error(
-            "Запуска webhook телеграмм бота %s",
+            "Ошибка webhook телеграмм бота %s",
             str(e),
             exc_info=True,
         )
