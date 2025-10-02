@@ -1,4 +1,14 @@
 # Чат-бот для благотворительного фонда «Продвижение»
+<a name="Start-point"></a>
+
+- [О проекте](#anchor-about)
+- [Цели проекта](#anchor-target)
+- [Основные функции](#anchor-functions)
+- [Установка и запуск](#anchor-install)
+- [Развертывание](#anchor-deployment)
+- [Используемый стек](#anchor-stack)
+- [Команда проекта](#anchor-team)
+
 
 #### Эндпоинты
 **Сайт** - https://dvizhenie.sytes.net
@@ -8,9 +18,11 @@
 **Swagger** - https://dvizhenie.sytes.net/swagger/ \
 **ТГ-Бот** - https://t.me/ProDvizhenie_5Bot \
 
+<a name="anchor-about"></a>
 ## О проекте
 Чат-бот для автоматизации сбора заявок от подопечных и их представителей на сайте dvizhenie.life и в мессенджерах.
 
+<a name="anchor-target"></a>
 ## Цели проекта
 Сократить время обработки заявок сотрудниками фонда
 
@@ -20,6 +32,7 @@
 
 Соответствие требованиям 152-ФЗ «О персональных данных»
 
+<a name="anchor-functions"></a>
 ## Основные функции
 ### Для пользователей
 
@@ -37,6 +50,7 @@
 Добавление комментариев к заявкам
 Безопасный доступ через личный кабинет
 
+<a name="anchor-install"></a>
 ## Установка и запуск
 
 #### Клонирование репозитория
@@ -82,6 +96,7 @@ cd backend
 python manage.py runserver
 ```
 
+<a name="anchor-deployment"></a>
 ## Развертывание
 
 ### Docker Compose:
@@ -111,6 +126,9 @@ npm run dev
 npm run build
 ```
 
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
+
+<a name="anchor-stack"></a>
 ## Используемый стек Backend
 * **Django 5.2.6**
 * **Python 3.12**
@@ -126,10 +144,19 @@ npm run build
 * **redux/toolkit**
 * **react-router**
 
-## Сведенье о команде 
-- team leader: Емелин Илья GitHub:[IlyaEmelin](https://github.com/IlyaEmelin)
-- backend python: Валерий Гурин GitHub:[IlyaEmelin](https://github.com/IlyaEmelin)
-- dev-ops: Михайлов Харалампий GitHub:[Kharalampiy Mikhaylov](https://github.com/HarisNvr)
-- backend python: Олег Мисхожев GitHub:[OlegMiskhozhev](https://github.com/OlegMiskhozhev)
-- front: Долгих Кирилл  GitHub:[Kirill Dolgikh](https://github.com/nonncal)
-- front: Кладова Ольга GitHub:[OlgaKladova](https://github.com/OlgaKladova)
+
+<a name="anchor-team"></a>
+## Команда проекта:
+| Фото                                                                                                  | Участник            | Роль                          |Контакты|
+|-------------------------------------------------------------------------------------------------------|---------------------|-------------------------------|-|
+| ![EmelinIliya](https://github.com/user-attachments/assets/b679a20b-54ac-4929-9ffb-b84b58217a5f) | Емелин Илья | TeamLead, backend-разработчик |[GitHub](https://github.com/IlyaEmelin), [Telegram](https://t.me/Ilya_Emelin)|
+| ![EvstefeevaAnna](https://github.com/user-attachments/assets/a5e2f675-558b-47bc-8cf3-d7d8ec003f4e) | Евстефеева Анна | Project-менеджер |[GitHub](https://github.com/AnnaEvstifeeva), [Telegram](https://t.me/annievstifeeva)|
+| ![BogomolovaOlga](https://github.com/user-attachments/assets/33484226-14df-46e8-ae77-bfb8e30d0bb8) | Богомолова Ольга | Product-менеджер |[Telegram](https://t.me/OlgaBogomolova16)|
+| ![SharipovaDinara](https://github.com/user-attachments/assets/681ffec2-95c5-46fb-8771-fe6bbaa4db4a) | Шарипова Динара | UX/UI дизайнер |[Telegram](https://t.me/DinaraCalifornia)|
+| ![MikhaylovHaralampiy](https://github.com/user-attachments/assets/94588f0d-cb69-46d8-8160-fcf6b2a19134) | Михайлов Харалампий | Backend-разработчик, DevOps |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
+| ![DolgikhKirill](https://github.com/user-attachments/assets/9f62d065-7205-4719-8261-75a251e43d03) | Долгих Кирилл | Frontend-разработчик |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
+| ![she](https://github.com/user-attachments/assets/c850a2f1-3c9a-404a-9926-f2323b5102b0) | Кладова Ольга | Frontend-разработчик |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
+| ![GurinValeriy](https://github.com/user-attachments/assets/096e634d-00a2-4b54-96e3-dcff56dbd33a) | Гурин Валерий | Backend-разработчик |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
+| ![MiskhozhevOleg](https://github.com/user-attachments/assets/8d674c23-9895-4f21-9cf9-021339e42a1b) | Мисхожев Олег | Backend-разработчик |[GitHub](https://github.com/OlegMiskhozhev), [Telegram](https://t.me/miskhozhev)|
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
