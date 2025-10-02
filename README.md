@@ -101,4 +101,4 @@ python manage.py clear_data_base --add_user --add_survey_data
 - dev-ops: Михайлов Харалампий
 - backend python: Олег Мисхожев
 ## Ссылка на Swagger
-
+- https://dvizhenie.sytes.net/swagger/
