@@ -4,12 +4,21 @@ volumes:
   logs:
 
 services:
+  frontend:
+    build: ./frontend/
+    env_file: .env
+    command: cp -r /app/dist/. /frontend_static/
+    volumes:
+      - static:/frontend_static
+
   postgres:
     image: postgres:17
     volumes:
       - pg_data:/var/lib/postgresql/data
     env_file: .env
     restart: unless-stopped
+    depends_on:
+      - frontend
 
   backend:
     build: ./backend/
