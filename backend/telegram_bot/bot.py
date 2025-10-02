@@ -44,7 +44,7 @@ class TelegramBot:
         )
         self.application.add_handler(
             MessageHandler(
-                filters.PHOTO | filters.Document.IMAGE,
+                filters.PHOTO | filters.Document.IMAGE | filters.Document.PDF,
                 load_document_command,
             )
         )

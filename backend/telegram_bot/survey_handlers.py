@@ -32,25 +32,26 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 FILETYPE_ERROR = "Передан неподдерживаемый формат файла"
+SIGNATURES_MIMETYPES ={
+    b"\xff\xd8\xff": "image/jpeg",
+    b"\x89PNG\r\n\x1a\n": "image/png",
+    b"%PDF": "application/pdf",
+}
 
 
 class FileTypeError(Exception):
     """Класс исключений для неподдерживаемых форматов файлов."""
 
 
-async def telegram_file_to_base64_image_field(file: File) -> str:
+async def telegram_file_to_base64_image_field(file: File) -> tuple[str, bool]:
     """
     Преобразует Telegram File в строку для Base64ImageField
     Возвращает строку в формате: data:image/jpeg;base64,{base64_data}
     """
+
     def get_mime_from_signature(binary_data):
         """Определяет MIME-тип по сигнатурам файлов"""
-        signatures = {
-            b'\xff\xd8\xff': 'image/jpeg',
-            b'\x89PNG\r\n\x1a\n': 'image/png',
-            b'%PDF': 'application/pdf',
-        }
-        for signature, mime_type in signatures.items():
+        for signature, mime_type in SIGNATURES_MIMETYPES.items():
             if binary_data.startswith(signature):
                 return mime_type
         raise FileTypeError(FILETYPE_ERROR)
@@ -59,13 +60,13 @@ async def telegram_file_to_base64_image_field(file: File) -> str:
     mime_type = get_mime_from_signature(file_bytes)
     base64_data = base64.b64encode(file_bytes).decode("utf-8")
     data_uri = f"data:{mime_type};base64,{base64_data}"
-    return data_uri
+    return data_uri, mime_type == SIGNATURES_MIMETYPES[b"%PDF"]
 
 
 async def _save_document(
     survey_obj: Survey,
     document_file,
-) -> tuple[bool, int | None]:
+) -> tuple[bool, int | None, bool | None]:
     """
     Сохранить документ из Telegram
 
@@ -79,19 +80,19 @@ async def _save_document(
     """
     try:
         file = await document_file.get_file()
-        base64_string = await telegram_file_to_base64_image_field(file)
+        base64_string, is_pdf = await telegram_file_to_base64_image_field(file)
         await write_document_db(survey_obj, base64_string)
         logger.debug(
             "Документ сохранен для опроса %s",
             survey_obj.id,
         )
-        return True, document_file.file_id
+        return True, document_file.file_id, is_pdf
     except Exception as e:
         logger.error(
             f"Ошибка при сохранении документа: {str(e)}",
             exc_info=True,
         )
-        return False, None
+        return False, None, None
 
 
 def _get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
@@ -238,32 +239,32 @@ async def load_document_command(
             __, ___, ____, survey_obj = await get_or_create_survey(
                 user_obj, False
             )
-
         logger.debug("Проверяем статус опроса")
         await _inform_msg(survey_obj, update)
-
-        logger.debug("Обработка фото")
-        photo = None
+        logger.debug("Обработка документа")
+        doc_image = None
         if update.message.photo:
             logger.debug(
                 "Берем фото самого высокого качества (последнее в списке)"
             )
-            photo = update.message.photo[-1]
-
-        if not photo:
+            doc_image = update.message.photo[-1]
+        if update.message.document:
+            logger.debug("Берем документ PDF")
+            doc_image = update.message.document
+        if not doc_image:
             await update.message.reply_text(
                 "❌ Файл не обнаружен. Отправьте фото."
             )
             await load_command(update, context)
             return
 
-        result, file_id = await _save_document(survey_obj, photo)
-
+        result, file_id, is_pdf = await _save_document(survey_obj, doc_image)
         await load_command(
             update,
             context,
             load_result=result,
             photo_file_id=file_id,
+            is_pdf=is_pdf,
         )
     except Exception as e:
         logger.error(
