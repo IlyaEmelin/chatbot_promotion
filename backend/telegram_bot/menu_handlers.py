@@ -82,15 +82,16 @@ async def help_command(
         _, __, result, survey = await get_or_create_survey(user_obj, False)
         status = survey.status
 
-    help_text_start = f"""
-Текущий статус опроса: {__get_status(status)}
-{
-    (
+    processing_text = (
         "Спасибо за вашу заявку, свяжемся с вами по указанными вами контактам "
         "в ближайшее время"
-    ) 
-    if status == "processing" else ""
-}
+        if status == "processing"
+        else ""
+    )
+
+    help_text_start = f"""
+Текущий статус опроса: {__get_status(status)}
+{processing_text}
 📋 *Доступные команды:*
 
 /{START_COMMAND_NAME} - Пройти(Перепройти) опрос"""

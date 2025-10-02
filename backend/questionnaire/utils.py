@@ -65,7 +65,10 @@ def get_excel_file(queryset):
 
         response = FileResponse(
             BytesIO(file_content),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            content_type=(
+                "application/"
+                "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ),
         )
         response["Content-Disposition"] = f'attachment; filename="{file_name}"'
 
