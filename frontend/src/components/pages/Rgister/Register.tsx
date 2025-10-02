@@ -58,13 +58,13 @@ export  const Register = () => {
         <form className={styles.register} onSubmit={handleSubmit}>
             <div className={styles.inputs}>
                 <Input 
-                    label="Имя" 
+                    label="Имя*" 
                     type="text" 
                     name="username" 
                     placeholder="Введите имя" 
                     handleChangeInput={handleChangeInput} />
                 <Input 
-                    label="Email*" 
+                    label="Email" 
                     type="email" 
                     name="email" 
                     placeholder="Введите email" 
