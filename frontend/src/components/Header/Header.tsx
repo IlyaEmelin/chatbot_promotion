@@ -12,7 +12,6 @@ export const Header = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector(getUser);
-    console.log("пользователь в шапке", user);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     useEffect(() => {

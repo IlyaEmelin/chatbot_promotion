@@ -12,7 +12,8 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   const { surveyId } = useAppSelector(state => state.survey);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
-  const [uploadedDocs, setUploadedDocs] = useState<UploadedDocument[]>([]);
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setUploadedDocs] = useState<UploadedDocument[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isImage = (file: File) => {

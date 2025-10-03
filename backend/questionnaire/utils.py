@@ -92,7 +92,12 @@ def get_docs_zip(request, uuid):
             for document in documents:
                 response = get(document.image)
                 if response.status_code == 200:
-                    image_name = str(uuid4()) + ".jpg"
+                    extension = (
+                        (
+                            document.image.split('filename=')[-1]
+                        ).split('&')[0]
+                    ).split('.')[-1]
+                    image_name = str(uuid4()) + '.' + extension
                     image_path = path_dir / image_name
                     with open(image_path, "wb") as image_file:
                         image_file.write(response.content)

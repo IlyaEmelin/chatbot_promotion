@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "../../../hooks/store";
 import { Input } from "../../Input/Input";
 import styles from "./Register.module.css";
-import { getError } from "../../../services/auth/slice";
+import { getError, getUser, setError } from "../../../services/auth/slice";
 import { registerUser } from "../../../services/auth/action";
 import { FormButton } from "../../FormButton/FormButton";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,6 +22,7 @@ export  const Register = () => {
 
     const [showPassword, setShowPassword] = useState(false);
     const error = useSelector(getError);
+    const user = useSelector(getUser);
     const navigate = useNavigate();
 
     const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,8 +42,8 @@ export  const Register = () => {
             // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             e.target.value === '' ? setValidationErrors({ ...validationErrors, password: '' }) : null;
         }
-
         
+        dispatch(setError(null));
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -51,8 +52,17 @@ export  const Register = () => {
             return;
         }
         dispatch(registerUser(userData));
+        if (!user) {
+            return;
+        }
         navigate(-1);
     }
+    
+    useEffect(() => {
+        return () => {
+            dispatch(setError(null));
+        }
+    }, [dispatch]);
 
     return (
         <form className={styles.register} onSubmit={handleSubmit}>
@@ -84,7 +94,7 @@ export  const Register = () => {
             </div>
             <div className={styles.buttons}>
                 <Link to="/login" replace className={styles.link}>Войти</Link>
-                <FormButton text="Зарегистрироваться" />
+                <FormButton text="Зарегистрироваться" disabled={!userData.password || !userData.username || validationErrors.email !== '' || validationErrors.password !== '' || (error ? true : false)} />
             </div>
             {error && <span className={styles.error}>{error}</span>}
         </form>

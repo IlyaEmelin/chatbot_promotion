@@ -1,7 +1,7 @@
 import styles from "./FormButton.module.css";
 
-export const FormButton = ({ text }: { text: string }) => {
+export const FormButton = ({ text, disabled }: { text: string, disabled?: boolean }) => {
     return (
-        <button className={styles.button} type="submit">{text}</button>
+        <button className={styles.button} type="submit" disabled={disabled}>{text}</button>
     )
 }

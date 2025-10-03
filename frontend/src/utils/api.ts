@@ -18,7 +18,6 @@ type TRegisterResponse = {
 }
 
 export const registerUserApi = (user: TRegisterData): Promise<TRegisterResponse> => {
-    console.log('register api', JSON.stringify(user));
     return fetch(`${URL}/auth/users/`, {
         method: 'POST',
         headers: {
@@ -27,15 +26,12 @@ export const registerUserApi = (user: TRegisterData): Promise<TRegisterResponse>
         body: JSON.stringify(user),
     })
     .then((res) => {
-        console.log('register api res', res);
         return checkResponse<TRegisterResponse>(res)
     })
     .then((res) => {
-        console.log('register api', res);
         return res;
     })
     .catch((err) => {
-        console.log('register api err', err);
         return Promise.reject(err);
     });
 };
@@ -50,21 +46,14 @@ export const loginUserApi = (user: TLoginData): Promise<TAuthResponse> => {
     })
     .then((res) => checkResponse<TAuthResponse>(res))
     .then((res) => {
-        console.log('login api', res);
         return res;
     })
     .catch((err) => {
-        console.log('login api err', err);
         return Promise.reject(err);
     });
 };
 
-// type TLogoutResponse = {
-//     message: string;
-// }
-
 export const logoutApi = () => {
-    console.log('logout api');
     return fetch(`${URL}/auth/token/logout/`, {
         method: 'POST',
         headers: {
