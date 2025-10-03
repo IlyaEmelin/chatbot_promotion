@@ -148,6 +148,7 @@ class SurveyAdmin(admin.ModelAdmin):
     list_select_related = ("user", "current_question")
     inlines = (DocumentInline, CommentInline)
     actions = ["download_servey"]
+    ordering = ("-created_at",)
 
     @admin.action(description="Скачать результаты опроса в формате Excel")
     def download_servey(self, request, queryset):
