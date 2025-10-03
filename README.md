@@ -6,7 +6,7 @@
 - [Основные функции](#anchor-functions)
 - [Установка и запуск](#anchor-install)
 - [Развертывание](#anchor-deployment)
-- [Используемый стек](#anchor-stack)
+- [Технический стек](#anchor-stack)
 - [Команда проекта](#anchor-team)
 
 
@@ -139,14 +139,14 @@ npm run build
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="anchor-stack"></a>
-## Используемый стек Backend
+## Технический стек backend
 * [Python 3.12](https://www.python.org/)
 * [Django 5.2.6](https://www.djangoproject.com/)
 * [Pytest 8.4.2](https://pypi.org/project/pytest/)
 * [PostgreSQL DB](https://www.postgresql.org/)
 * [Docker](https://www.docker.com/)
 
-## Используемый стек Frontend
+## Технический стек frontend
 * [React](https://react.dev/)
 * [TypeScript](https://www.typescriptlang.org/)
 * [CSS](https://www.w3.org/TR/css/#css)
@@ -163,7 +163,8 @@ npm run build
 | ![EmelinIliya](https://github.com/user-attachments/assets/b679a20b-54ac-4929-9ffb-b84b58217a5f) | Емелин Илья | TeamLead, backend-разработчик |[GitHub](https://github.com/IlyaEmelin), [Telegram](https://t.me/Ilya_Emelin)|
 | ![EvstefeevaAnna](https://github.com/user-attachments/assets/a5e2f675-558b-47bc-8cf3-d7d8ec003f4e) | Евстефеева Анна | Project-менеджер |[GitHub](https://github.com/AnnaEvstifeeva), [Telegram](https://t.me/annievstifeeva)|
 | ![BogomolovaOlga](https://github.com/user-attachments/assets/33484226-14df-46e8-ae77-bfb8e30d0bb8) | Богомолова Ольга | Product-менеджер |[Telegram](https://t.me/OlgaBogomolova16)|
-| ![SharipovaDinara](https://github.com/user-attachments/assets/681ffec2-95c5-46fb-8771-fe6bbaa4db4a) | Шарипова Динара | UX/UI дизайнер |[Telegram](https://t.me/DinaraCalifornia)|
+| ![SolovevaElena](https://github.com/user-attachments/assets/43cf86ac-6e24-459b-82fd-4c58827736bc) | Соловьёва Елена | UX/UI-дизайнер |[Telegram](https://t.me/Semidea)|
+| ![SharipovaDinara](https://github.com/user-attachments/assets/681ffec2-95c5-46fb-8771-fe6bbaa4db4a) | Шарипова Динара | UX/UI-дизайнер |[Telegram](https://t.me/DinaraCalifornia)|
 | ![MikhaylovHaralampiy](https://github.com/user-attachments/assets/94588f0d-cb69-46d8-8160-fcf6b2a19134) | Михайлов Харалампий | DevOps, backend-разработчик |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
 | ![DolgikhKirill](https://github.com/user-attachments/assets/9f62d065-7205-4719-8261-75a251e43d03) | Долгих Кирилл | Frontend-разработчик |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
 | ![KladovaOlga](https://github.com/user-attachments/assets/bf472fad-0ccd-437f-a5ff-372c1e7a728a) | Кладова Ольга | Frontend-разработчик |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
