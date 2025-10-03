@@ -4,12 +4,25 @@ volumes:
   logs:
 
 services:
+  frontend:
+    build:
+      context: ./frontend/
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - REACT_APP_DEBUG=${REACT_APP_DEBUG}
+    env_file: .env
+    command: cp -r /app/dist/. /frontend_static/
+    volumes:
+      - static:/frontend_static
+
   postgres:
     image: postgres:17
     volumes:
       - pg_data:/var/lib/postgresql/data
     env_file: .env
     restart: unless-stopped
+    depends_on:
+      - frontend
 
   backend:
     build: ./backend/

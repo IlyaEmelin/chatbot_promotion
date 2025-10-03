@@ -19,7 +19,7 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("pro-admin-dvizh/", admin.site.urls),
     path("telegram/webhook/", include("telegram_bot.urls")),
     path("api/", include("api.urls")),
     path(
