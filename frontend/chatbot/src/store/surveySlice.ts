@@ -94,8 +94,7 @@ const surveySlice = createSlice({
       state.error = null;
     },
     
-    resetSurvey: (state) => {
-      // ВАЖНО: полностью сбрасываем состояние
+    resetSurvey: () => {
       return { ...initialState };
     },
     
