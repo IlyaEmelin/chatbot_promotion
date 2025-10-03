@@ -1,9 +1,11 @@
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
+from chatbot_promotion.settings import DEBUG, STATIC_URL, STATIC_ROOT
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -38,3 +40,7 @@ urlpatterns = [
         name="schema-redoc",
     ),
 ]
+
+if DEBUG:
+    urlpatterns += static(STATIC_URL,
+                          document_root=STATIC_ROOT)
