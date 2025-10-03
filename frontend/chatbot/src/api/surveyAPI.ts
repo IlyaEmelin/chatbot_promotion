@@ -1,4 +1,3 @@
-// src/api/surveyAPI.ts - С АВТОРИЗАЦИЕЙ И ПРАВИЛЬНЫМИ ПУТЯМИ
 import { 
   UploadedDocument,
   CreateSurveyRequest, 
@@ -9,7 +8,6 @@ import {
   ProcessingRequest
 } from '../types';
 
-// Функция для получения куки
 function getCookie(name: string): string | undefined {
   const matches = document.cookie.match(
     new RegExp('(?:^|; )' + name.replace(/([$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
@@ -17,11 +15,8 @@ function getCookie(name: string): string | undefined {
   return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-console.log('🔧 API Configuration:', { API_BASE_URL });
-
-// Функция для получения заголовков с авторизацией
 function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
   const accessToken = getCookie('auth_token');
   
@@ -138,7 +133,7 @@ export const surveyAPI = {
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string); // уже с data:image/...;base64,
+      reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
     });
 
