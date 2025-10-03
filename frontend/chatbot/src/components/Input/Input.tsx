@@ -46,7 +46,7 @@ export const Input: React.FC = () => {
     }
   };
 
-  const handleUploadComplete = (documents: any[]) => {
+  const handleUploadComplete = (documents: unknown[]) => {
     setUploadedFilesCount(documents.length);
   };
 

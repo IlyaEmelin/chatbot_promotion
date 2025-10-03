@@ -1,6 +1,6 @@
 import SurveyWidget from "./components/SurveyWidget";
 
-function App() {
+function Bot() {
   return (
     <div>
       <SurveyWidget />
@@ -8,4 +8,4 @@ function App() {
   );
 }
 
-export default App;
+export default Bot;
