@@ -26,6 +26,35 @@ function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<strin
   };
 }
 
+async function handleApiError(response: Response): Promise<never> {
+  let errorMessage = '';
+
+  try {
+    const errorData = await response.json();
+    
+    if (errorData.detail) {
+      errorMessage = errorData.detail;
+    } else if (errorData.message) {
+      errorMessage = errorData.message;
+    } else if (errorData.error) {
+      errorMessage = errorData.error;
+    } else {
+      errorMessage = JSON.stringify(errorData);
+    }
+  } catch {
+    // Если не удалось распарсить JSON
+    errorMessage = await response.text() || `Ошибка ${response.status}`;
+  }
+
+  console.error('❌ API Error:', {
+    status: response.status,
+    statusText: response.statusText,
+    message: errorMessage
+  });
+
+  throw new Error(errorMessage);
+}
+
 export const surveyAPI = {
   // POST /api/v1/surveys/ - создание/перезапуск опроса
   createSurvey: async (restart_question: boolean = false): Promise<CreateSurveyResponse> => {
@@ -46,9 +75,7 @@ export const surveyAPI = {
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('❌ API Error:', response.status, errorData);
-      throw new Error(`Ошибка создания опроса: ${response.status}`);
+      await handleApiError(response);
     }
     
     const data = await response.json();
@@ -68,9 +95,7 @@ export const surveyAPI = {
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('❌ API Error:', response.status, errorData);
-      throw new Error(`Ошибка получения опросов: ${response.status}`);
+      await handleApiError(response);
     }
     
     const data = await response.json();
@@ -95,9 +120,7 @@ export const surveyAPI = {
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('❌ API Error:', response.status, errorData);
-      throw new Error(`Ошибка отправки ответа: ${response.status}`);
+      await handleApiError(response);
     }
     
     const data = await response.json();
@@ -116,9 +139,7 @@ export const surveyAPI = {
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('❌ API Error:', response.status, errorData);
-      throw new Error(`Ошибка получения документов: ${response.status}`);
+      await handleApiError(response);
     }
     
     const data = await response.json();
@@ -128,43 +149,39 @@ export const surveyAPI = {
 
   // POST /api/v1/surveys/{survey_pk}/docs/ - загрузить документ
   uploadDocument: async (surveyId: string, file: File): Promise<UploadedDocument> => {
-  // Читаем файл как dataURL (с префиксом data:image/png;base64,...)
-  const toDataUrl = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
+    // Читаем файл как dataURL (с префиксом data:image/png;base64,...)
+    const toDataUrl = (file: File): Promise<string> =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+      });
+
+    const base64WithPrefix = await toDataUrl(file);
+
+    const requestBody = {
+      image: base64WithPrefix,  
+    };
+
+    console.log(`📤 API Request: POST /v1/surveys/${surveyId}/docs/`, { fileSize: file.size });
+
+    const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/docs/`, {
+      method: 'POST',
+      headers: getAuthHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(requestBody),
     });
 
-  const base64WithPrefix = await toDataUrl(file);
+    if (!response.ok) {
+      await handleApiError(response);
+    }
 
-  const requestBody = {
-    image: base64WithPrefix,  
-  };
-
-  console.log(`📤 API Request: POST /v1/surveys/${surveyId}/docs/`, requestBody);
-
-  const response = await fetch(`${API_BASE_URL}/v1/surveys/${surveyId}/docs/`, {
-    method: 'POST',
-    headers: getAuthHeaders({
-      'Content-Type': 'application/json',
-    }),
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error('❌ API Error:', response.status, errorData);
-    throw new Error(`Ошибка загрузки документа: ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log(`📥 API Response: POST /v1/surveys/${surveyId}/docs/`, data);
-  return data;
-},
-
-
+    const data = await response.json();
+    console.log(`📥 API Response: POST /v1/surveys/${surveyId}/docs/`, data);
+    return data;
+  },
 
   // DELETE /api/v1/surveys/{survey_pk}/docs/{id}/ - удалить документ
   deleteDocument: async (surveyId: string, documentId: number): Promise<void> => {
@@ -176,15 +193,13 @@ export const surveyAPI = {
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('❌ API Error:', response.status, errorData);
-      throw new Error(`Ошибка удаления документа: ${response.status}`);
+      await handleApiError(response);
     }
     
     console.log(`✅ Document ${documentId} deleted`);
   },
 
-    // PATCH /api/v1/surveys/{id}/processing/ - завершить опрос
+  // PATCH /api/v1/surveys/{id}/processing/ - завершить опрос
   finishSurvey: async (surveyId: string): Promise<void> => {
     const requestBody: ProcessingRequest = {
       result: {},
@@ -202,14 +217,11 @@ export const surveyAPI = {
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('❌ API Error:', response.status, errorData);
-      throw new Error(`Ошибка завершения опроса: ${response.status}`);
+      await handleApiError(response);
     }
     
     console.log('✅ Survey finished successfully');
   },
 };
 
-// Экспортируем вспомогательные функции для использования в других местах
 export { getCookie, getAuthHeaders };

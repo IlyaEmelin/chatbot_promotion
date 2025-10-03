@@ -12,7 +12,7 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   const { surveyId } = useAppSelector(state => state.survey);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //eslint-disable-next-line  @typescript-eslint/no-unused-vars
   const [_, setUploadedDocs] = useState<UploadedDocument[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -84,12 +84,20 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
     } catch (error) {
       console.error('❌ Error uploading file:', error);
       
+      let errorMessage = 'Ошибка загрузки';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        if (errorMessage.includes('Учетные данные') || errorMessage.includes('401')) {
+          errorMessage = 'Требуется авторизация';
+        }
+      }
+      
       setFiles(prev => prev.map(f => 
         f.file === fileWithPreview.file 
           ? { 
               ...f, 
               isUploading: false, 
-              uploadError: error instanceof Error ? error.message : 'Ошибка загрузки'
+              uploadError: errorMessage
             }
           : f
       ));
@@ -132,7 +140,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   const uploadedCount = files.filter(f => f.uploadedId).length;
   const totalCount = files.length;
 
-  // ЕСЛИ НЕ АВТОРИЗОВАН - ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ
   if (!isAuthenticated) {
     return (
       <div className={styles.container}>

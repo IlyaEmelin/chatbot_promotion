@@ -77,7 +77,21 @@ export const Input: React.FC = () => {
       console.log('✅ Survey finished successfully');
     } catch (error) {
       console.error('❌ Error finishing survey:', error);
-      alert('Не удалось завершить опрос. Попробуйте еще раз.');
+      
+      let errorMessage = 'Не удалось завершить опрос. Попробуйте еще раз.';
+      if (error instanceof Error) {
+        if (error.message.includes('Учетные данные') || error.message.includes('401')) {
+          errorMessage = 'Требуется авторизация';
+        } else if (error.message.includes('403')) {
+          errorMessage = 'Доступ запрещен';
+        } else if (error.message.includes('404')) {
+          errorMessage = 'Опрос не найден';
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Ошибка сервера. Попробуйте позже.';
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsProcessing(false);
     }
