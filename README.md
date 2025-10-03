@@ -139,19 +139,18 @@ npm run build
 
 <a name="anchor-stack"></a>
 ## Используемый стек Backend
-* **Django 5.2.6**
-* **Python 3.12**
-* **PostgreSQL DB**
-* **Docker**
-* **pytest 8.4.2**
+* [Python 3.12](https://www.python.org/)
+* [Django 5.2.6](https://www.djangoproject.com/)
+* [Pytest 8.4.2](https://pypi.org/project/pytest/)
+* [PostgreSQL DB](https://www.postgresql.org/)
+* [Docker](https://www.docker.com/)
 
 ## Используемый стек Frontend
-
-* **React**
-* **TypeScript**
-* **CSS**
-* **redux/toolkit**
-* **react-router**
+* [React](https://react.dev/)
+* [TypeScript](https://www.typescriptlang.org/)
+* [CSS](https://www.w3.org/TR/css/#css)
+* [Redux Toolkit](https://redux-toolkit.js.org/)
+* [React Router](https://reactrouter.com/)
   
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
