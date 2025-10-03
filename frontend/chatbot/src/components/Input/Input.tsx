@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { addMessage, submitAnswerAsync } from '../../store/surveySlice';
-import { surveyAPI } from '../../api/surveyAPI';
+import { surveyAPI, getCookie } from '../../api/surveyAPI';
 import FileUpload from '../FileUpload/FileUpload';
 import styles from './Input.module.css';
 
@@ -12,6 +12,13 @@ export const Input: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [uploadedFilesCount, setUploadedFilesCount] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // ПРОВЕРКА АВТОРИЗАЦИИ
+  useEffect(() => {
+    const authToken = getCookie('auth_token');
+    setIsAuthenticated(!!authToken);
+  }, []);
 
   // ПРОВЕРЯЕМ current_question_text НА НАЛИЧИЕ waiting_docs
   const lastBotMessage = [...messages].reverse().find(m => m.isBot);
@@ -20,7 +27,7 @@ export const Input: React.FC = () => {
 
   // ЗАГРУЖАЕМ СУЩЕСТВУЮЩИЕ ДОКУМЕНТЫ ПРИ МОНТИРОВАНИИ
   useEffect(() => {
-    if (surveyId && isWaitingDocs) {
+    if (surveyId && isWaitingDocs && isAuthenticated) {
       surveyAPI.getDocuments(surveyId)
         .then(docs => {
           setUploadedFilesCount(docs.length);
@@ -29,10 +36,10 @@ export const Input: React.FC = () => {
           console.error('Error loading documents:', err);
         });
     }
-  }, [surveyId, isWaitingDocs]);
+  }, [surveyId, isWaitingDocs, isAuthenticated]);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim() || !surveyId || isLoading) return;
+    if (!inputText.trim() || !surveyId || isLoading || !isAuthenticated) return;
 
     dispatch(addMessage({ text: inputText, isBot: false }));
     dispatch(submitAnswerAsync({ surveyId, answer: inputText }));
@@ -40,7 +47,7 @@ export const Input: React.FC = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && isAuthenticated) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -50,9 +57,8 @@ export const Input: React.FC = () => {
     setUploadedFilesCount(documents.length);
   };
 
-  // ЗАВЕРШЕНИЕ ОПРОСА
   const handleFinishSurvey = async () => {
-    if (!surveyId || isProcessing) return;
+    if (!surveyId || isProcessing || !isAuthenticated) return;
 
     if (!window.confirm('Вы уверены, что хотите завершить заполнение анкеты?')) {
       return;
@@ -71,7 +77,21 @@ export const Input: React.FC = () => {
       console.log('✅ Survey finished successfully');
     } catch (error) {
       console.error('❌ Error finishing survey:', error);
-      alert('Не удалось завершить опрос. Попробуйте еще раз.');
+      
+      let errorMessage = 'Не удалось завершить опрос. Попробуйте еще раз.';
+      if (error instanceof Error) {
+        if (error.message.includes('Учетные данные') || error.message.includes('401')) {
+          errorMessage = 'Требуется авторизация';
+        } else if (error.message.includes('403')) {
+          errorMessage = 'Доступ запрещен';
+        } else if (error.message.includes('404')) {
+          errorMessage = 'Опрос не найден';
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Ошибка сервера. Попробуйте позже.';
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -82,6 +102,18 @@ export const Input: React.FC = () => {
   
   if (isCompleted) {
     return null;
+  }
+
+  // ЕСЛИ НЕ АВТОРИЗОВАН - ПОКАЗЫВАЕМ СООБЩЕНИЕ
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.authWarning}>
+          <Lock size={20} />
+          <p>Для отправки сообщений необходимо авторизоваться</p>
+        </div>
+      </div>
+    );
   }
 
   // ЕСЛИ waiting_docs - ПОКАЗЫВАЕМ ЗАГРУЗКУ И КНОПКУ ЗАВЕРШЕНИЯ
