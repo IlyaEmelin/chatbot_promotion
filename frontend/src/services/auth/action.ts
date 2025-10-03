@@ -6,13 +6,13 @@ import {
   registerUserApi,
 } from '../../utils/api';
 import { type TLoginData, type TRegisterData } from '../../utils/types';
-import { getCookie, setCookie, deleteCookie } from '../../utils/cookie';
-import { setIsAuthChecked, setUser } from './slice';
+import { setCookie, deleteCookie } from '../../utils/cookie';
 
 export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ email, password, username }: TRegisterData) => {
-    await registerUserApi({
+    try {
+      await registerUserApi({
       email,
       username,
       password
@@ -21,6 +21,21 @@ export const registerUser = createAsyncThunk(
     setCookie('auth_token', token.auth_token);
     const user = await getUserApi();
     return user;
+    } catch (err) {
+      let errorMessage = err.details?.[0] || err.message || '';
+      if (err.username) {
+        errorMessage = err.username?.[0];
+      }
+      if (err.email) {
+        const emailError = err.email?.[0];
+        errorMessage = errorMessage + (emailError ? ` ${emailError}` : '');
+      }
+      if (err.password) {
+        const passwordError = err.password?.[0];
+        errorMessage = errorMessage + (passwordError ? ` ${passwordError}` : '');
+      }
+      throw new Error(errorMessage);
+    }
   }
 );
 
@@ -31,36 +46,17 @@ export const loginUser = createAsyncThunk(
       const response = await loginUserApi({ username, password });
       setCookie('auth_token', response.auth_token);
       const user = await getUserApi();
-      console.log('login action', user)
       return user;
     } catch (err) {
-      return Promise.reject(err);
+      let errorMessage = err.details?.[0] || err.message;
+      errorMessage = err.non_field_errors?.[0] || errorMessage;
+      throw new Error(errorMessage);
     }
   }
 );
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
-  console.log('logout action 1');
   const response = await logoutApi();
-  console.log('logout action', response);
   deleteCookie('auth_token');
   return response;
 });
-
-export const checkUserAuth = createAsyncThunk(
-  'auth/checkUserAuth',
-  async (_, { dispatch }) => {
-    if (getCookie('auth_token')) {
-      try {
-        const response = await getUserApi();
-        dispatch(setUser(response));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        dispatch(setIsAuthChecked(true));
-      }
-    } else {
-      dispatch(setIsAuthChecked(true));
-    }
-  }
-);

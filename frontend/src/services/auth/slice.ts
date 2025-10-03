@@ -21,15 +21,14 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         setUser(state, action: PayloadAction<TUser | null>) {
-        state.user = action.payload;
+            state.user = action.payload;
         },
-        setIsAuthChecked(state, action: PayloadAction<boolean>) {
-        state.isAuthChecked = action.payload;
+        setError(state, action: PayloadAction<string | null>) {
+            state.error = action.payload;
         }
     },
     selectors: {
         getUser: (state) => state.user,
-        getIsAuthChecked: (state) => state.isAuthChecked,
         getError: (state) => state.error,
         getIsLoading: (state) => state.isLoading
     },
@@ -66,7 +65,6 @@ export const authSlice = createSlice({
             state.isLoading = false;
             state.isAuthChecked = true;
             state.error = action.error.message ?? null;
-
         })
         .addCase(logoutUser.pending, (state) => {
             state.isAuthChecked = true;
@@ -85,6 +83,6 @@ export const authSlice = createSlice({
     }
 });
 
-export const { setUser, setIsAuthChecked } = authSlice.actions;
-export const { getUser, getIsAuthChecked, getIsLoading, getError } =
+export const { setUser, setError } = authSlice.actions;
+export const { getUser, getIsLoading, getError } =
   authSlice.selectors;
