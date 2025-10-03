@@ -13,11 +13,10 @@
 #### Эндпоинты
 
 **Главная страница** - https://dvizhenie.sytes.net \
-**Админ-панель** - https://dvizhenie.sytes.net/pro-admin-dvizh \
+**Админ-панель** - https://dvizhenie.sytes.net/pro-admin-dvizh (как войти на тестовый сервер: login: admin password: admin123)\
 **АПИ** - https://dvizhenie.sytes.net/api/v1 \
 **REDOC** - https://dvizhenie.sytes.net/redoc \
 **Swagger** - https://dvizhenie.sytes.net/swagger \
-
 **ТГ-Бот** - https://t.me/ProDvizhenie_5Bot
 
 <a name="anchor-about"></a>
