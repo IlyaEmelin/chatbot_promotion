@@ -185,3 +185,22 @@
   font-weight: 500;
   text-align: center;
 }
+
+.authWarning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  background: #FEF3C7;
+  border: 2px solid #F59E0B;
+  border-radius: 12px;
+  color: #92400E;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.authWarning p {
+  margin: 0;
+}

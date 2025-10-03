@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { X, Upload, FileText } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Upload, FileText, Lock } from 'lucide-react';
 import { useAppSelector } from '../../hooks/redux';
-import { surveyAPI } from '../../api/surveyAPI';
+import { surveyAPI, getCookie } from '../../api/surveyAPI';
 import { FileWithPreview, UploadedDocument } from '../../types';
 import styles from './FileUpload.module.css';
 
@@ -12,9 +12,16 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   const { surveyId } = useAppSelector(state => state.survey);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
-   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setUploadedDocs] = useState<UploadedDocument[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ПРОВЕРКА АВТОРИЗАЦИИ
+  useEffect(() => {
+    const authToken = getCookie('auth_token');
+    setIsAuthenticated(!!authToken);
+  }, []);
 
   const isImage = (file: File) => {
     return file.type.startsWith('image/');
@@ -29,22 +36,25 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAuthenticated) {
+      alert('Необходимо авторизоваться для загрузки файлов');
+      return;
+    }
+
     const selectedFiles = event.target.files;
     if (!selectedFiles || selectedFiles.length === 0 || !surveyId) return;
 
     const newFiles: FileWithPreview[] = Array.from(selectedFiles).map(file => ({
       file,
       preview: isImage(file) ? URL.createObjectURL(file) : '',
-      isUploading: true, // СРАЗУ СТАВИМ TRUE
+      isUploading: true,
     }));
 
     setFiles(prev => [...prev, ...newFiles]);
 
-    // ЗАГРУЖАЕМ ВСЕ ФАЙЛЫ ПАРАЛЛЕЛЬНО
     const uploadPromises = newFiles.map(fileWithPreview => uploadFile(fileWithPreview));
     await Promise.all(uploadPromises);
 
-    // Очищаем input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -56,17 +66,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
     try {
       const uploadedDoc = await surveyAPI.uploadDocument(surveyId, fileWithPreview.file);
       
-      // Обновляем файл с ID загруженного документа
       setFiles(prev => prev.map(f => 
         f.file === fileWithPreview.file 
           ? { ...f, isUploading: false, uploadedId: uploadedDoc.id }
           : f
       ));
 
-      // Добавляем в список загруженных
       setUploadedDocs(prev => {
         const updated = [...prev, uploadedDoc];
-        // ВЫЗЫВАЕМ CALLBACK С ОБНОВЛЕННЫМ СПИСКОМ
         if (onUploadComplete) {
           onUploadComplete(updated);
         }
@@ -90,6 +97,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   };
 
   const handleRemoveFile = async (fileWithPreview: FileWithPreview) => {
+    if (!isAuthenticated) {
+      alert('Необходимо авторизоваться');
+      return;
+    }
+
     if (fileWithPreview.uploadedId && surveyId) {
       try {
         await surveyAPI.deleteDocument(surveyId, fileWithPreview.uploadedId);
@@ -119,6 +131,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
 
   const uploadedCount = files.filter(f => f.uploadedId).length;
   const totalCount = files.length;
+
+  // ЕСЛИ НЕ АВТОРИЗОВАН - ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.authWarning}>
+          <Lock size={20} />
+          <p>Для загрузки файлов необходимо авторизоваться</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -197,7 +221,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
             ))}
           </div>
 
-          {/* ПОКАЗЫВАЕМ СКОЛЬКО ФАЙЛОВ ЗАГРУЖЕНО */}
           {uploadedCount === totalCount && totalCount > 0 && (
             <div className={styles.uploadSummary}>
               ✓ Загружено файлов: {uploadedCount}
