@@ -15,7 +15,7 @@ function getCookie(name: string): string | undefined {
   return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
   const accessToken = getCookie('auth_token');
