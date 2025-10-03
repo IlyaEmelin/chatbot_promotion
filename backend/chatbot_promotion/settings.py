@@ -89,6 +89,7 @@ CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")
 AUTH_USER_MODEL = "users.User"
 
 INSTALLED_APPS = [
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -107,6 +108,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "django.middleware.locale.LocaleMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -215,6 +217,12 @@ AUTH_PASSWORD_VALIDATORS = [
         ),
     },
 ]
+
+UNFOLD = {
+    "SITE_TITLE": "ПРО-ДВИЖЕНИЕ",
+    "SITE_HEADER": "ПРО-ДВИЖЕНИЕ",
+    "SITE_ICON": "staticfiles/admin_logo.svg"
+}
 
 LANGUAGE_CODE = "ru"
 

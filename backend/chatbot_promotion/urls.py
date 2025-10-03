@@ -20,6 +20,7 @@ schema_view = get_schema_view(
     generator_class=DividedСategoriesSchemaGenerator,
 )
 
+
 urlpatterns = [
     path("pro-admin-dvizh/", admin.site.urls),
     path("telegram/webhook/", include("telegram_bot.urls")),
