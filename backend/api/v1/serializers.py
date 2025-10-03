@@ -1,3 +1,4 @@
+from datetime import datetime
 from random import choices
 from string import digits
 from uuid import UUID
@@ -127,6 +128,7 @@ class SurveyCreateSerializer(ModelSerializer):
             survey_obj.status = "new"
             survey_obj.result = []
             survey_obj.docs.all().delete()
+            survey_obj.created_at = datetime.now()
             survey_obj.save()
 
         return survey_obj
