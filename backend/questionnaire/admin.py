@@ -340,6 +340,7 @@ class UserAdmin(admin.ModelAdmin):
                 "fields": (
                     "is_active",
                     "is_superuser",
+                    "is_staff",
                     "date_joined",
                     "last_login",
                 )
