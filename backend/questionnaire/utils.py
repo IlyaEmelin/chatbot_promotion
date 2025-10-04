@@ -62,17 +62,17 @@ def get_excel_file(queryset):
         # Читаем файл в память и создаем ответ
         with open(file_path, "rb") as f:
             file_content = f.read()
-
-        response = FileResponse(
-            BytesIO(file_content),
-            content_type=(
-                "application/"
-                "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            ),
-        )
-        response["Content-Disposition"] = f'attachment; filename="{file_name}"'
-
-        return response
+            response = FileResponse(
+                BytesIO(file_content),
+                content_type=(
+                    "application/"
+                    "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ),
+            )
+            response["Content-Disposition"] = (
+                f'attachment; filename="{file_name}"'
+            )
+            return response
 
 
 def get_docs_zip(request, uuid):
@@ -93,11 +93,9 @@ def get_docs_zip(request, uuid):
                 response = get(document.image)
                 if response.status_code == 200:
                     extension = (
-                        (
-                            document.image.split('filename=')[-1]
-                        ).split('&')[0]
-                    ).split('.')[-1]
-                    image_name = str(uuid4()) + '.' + extension
+                        (document.image.split("filename=")[-1]).split("&")[0]
+                    ).split(".")[-1]
+                    image_name = str(uuid4()) + "." + extension
                     image_path = path_dir / image_name
                     with open(image_path, "wb") as image_file:
                         image_file.write(response.content)
