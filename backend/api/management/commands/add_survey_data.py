@@ -6,6 +6,7 @@ from pathlib import Path
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.conf import settings
+
 from questionnaire.models import (
     Question,
     AnswerChoice,
@@ -29,8 +30,29 @@ class Command(BaseCommand):
                 "Путь к JSON файлу с данными (по умолчанию: survey_data.json)"
             ),
         )
+        parser.add_argument(
+            "--overwrite",
+            type=bool,
+            default=False,
+            help="Перезаписать данные в вопрос/ответах",
+        )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, overwrite=False, **options) -> None:
+        """
+        Загружает вопросы и варианты ответов из JSON файла
+
+        Args:
+            *args: аргументы
+            overwrite: перезаписать список вопросов ответов
+            **options: именные аргументы
+        """
+        if overwrite:
+            logger.debug("Удаление всех вариантов ответа из базы данных")
+            AnswerChoice.objects.all().delete()
+            logger.debug("Удаление всех вопросов из базы данных")
+            Question.objects.all().delete()
+            logger.info("Данные успешно стерты из базы данных!")
+
         path, file_name = (
             options.get("path", _DEFAULT_PATH),
             options.get("file_name", _DEFAULT_FILE_NAME),
@@ -51,7 +73,14 @@ class Command(BaseCommand):
         except Exception as e:
             logger.error(f"Произошла ошибка: {str(e)}")
 
-    def load_data_from_json(self, file_path):
+    @staticmethod
+    def load_data_from_json(file_path: Path | str) -> None:
+        """
+        Получаем данные из json объекта
+
+        Args:
+            file_path: путь к файлу
+        """
         with open(file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
 

@@ -36,11 +36,12 @@ def __get_status(status: str) -> str:
     return STATUS_DICT.get(status, "❌ Ошибка")
 
 
-def _get_default_help_keyboard(add_processing_command) -> ReplyKeyboardMarkup:
+def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
     """
     Клавиатура по умолчанию с кнопкой помощи
+
     Args:
-        add_processing_command: добавить команду закончить загрузку документов
+        status: статус ответа
 
     Returns:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
@@ -50,7 +51,7 @@ def _get_default_help_keyboard(add_processing_command) -> ReplyKeyboardMarkup:
         [KeyboardButton(f"/{STATUS_COMMAND_NAME}")],
         [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
     ]
-    if add_processing_command:
+    if status == "waiting_docs":
         keyboard.insert(
             1,
             [KeyboardButton(f"/{PROCESSING_COMMAND}")],
@@ -61,6 +62,29 @@ def _get_default_help_keyboard(add_processing_command) -> ReplyKeyboardMarkup:
         resize_keyboard=True,
         one_time_keyboard=False,
     )
+
+
+def __get_command_text(status) -> str:
+    """
+    Получить список доступных команд
+
+    Args:
+        status: статус ответа
+
+    Returns:
+        str: текстовый список доступных команд
+    """
+    commands = [
+        f"/{START_COMMAND_NAME} - Пройти(Перепройти) опрос",
+        f"/{STATUS_COMMAND_NAME} - Получить статус опроса",
+        f"/{HELP_COMMAND_NAME} - Показать это сообщение помощи",
+    ]
+    if status == "waiting_docs":
+        commands.insert(
+            1,
+            f"/{PROCESSING_COMMAND} - Закончить загрузку документов",
+        )
+    return "\n".join(commands)
 
 
 async def help_command(
@@ -89,31 +113,20 @@ async def help_command(
         else ""
     )
 
-    help_text_start = f"""
+    help_text = f"""
 Текущий статус опроса: {__get_status(status)}
 {processing_text}
 📋 *Доступные команды:*
 
-/{START_COMMAND_NAME} - Пройти(Перепройти) опрос"""
-
-    help_text_middle = (
-        f"""\n/{PROCESSING_COMMAND} - Закончить загрузку документов"""
-        if status == "waiting_docs"
-        else ""
-    )
-
-    help_text_end = f"""
-/{STATUS_COMMAND_NAME} - Получить статус опроса
-/{HELP_COMMAND_NAME} - Показать это сообщение помощи
+{__get_command_text(status)}
 
 💡 *Советы:*
 - Используйте кнопки для быстрых ответов
 - Вы всегда можете вернуться к помощи через /help
 """
-    help_text = help_text_start + help_text_middle + help_text_end
     await update.message.reply_text(
         help_text,
-        reply_markup=_get_default_help_keyboard(status == "processing"),
+        reply_markup=_get_default_help_keyboard(status),
         parse_mode="Markdown",  # Для красивого форматирования
     )
 
