@@ -83,7 +83,7 @@ logger = logging.getLogger(__name__)
 
 SECRET_KEY = getenv("SECRET_KEY", default=get_random_secret_key())
 
-DEBUG = getenv("DEBUG", "").lower() == "true"
+DEBUG = getenv("DEBUG", "").lower() in ("True", "true")
 # Ya disk token
 DISK_TOKEN = getenv("DISK_TOKEN", "")
 
@@ -141,7 +141,7 @@ WSGI_APPLICATION = "chatbot_promotion.wsgi.application"
 
 SWAGGER_USE_COMPAT_RENDERERS = False
 
-if getenv("ENABLE_POSTGRES_DB", "").lower() == "true":
+if getenv("ENABLE_POSTGRES_DB", "").lower() in ("True", "true"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -168,9 +168,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'user': '10000/day',
-        'anon': '1000/day',
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "10000/day",
+        "anon": "1000/day",
     },
 }
 
@@ -222,6 +222,11 @@ TELEGRAM_WEBHOOK_URL = getenv(
     "https://yourdomain.com/webhook/",
 )
 TELEGRAM_ADMIN_IDS = getenv("ADMIN_IDS", "").split(",")
+# Отображать в текстовом сообщение вариант ответа на русском
+TELEGRAM_SHOW_RESPONSE_CHOICE = getenv(
+    "TELEGRAM_SHOW_RESPONSE_CHOICE",
+    "false",
+) in ("True", "true")
 
 DEFAULT_DISK_TOKEN = "dummy-key-for-dev"
 DISK_TOKEN = getenv("DISK_TOKEN", DEFAULT_DISK_TOKEN)
