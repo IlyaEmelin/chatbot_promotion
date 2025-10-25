@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from questionnaire.models import Survey
-from questionnaire.constant import STATUS_CHOICES
+from questionnaire.constant import SurveyStatus
 
 User = get_user_model()
 
@@ -36,7 +36,7 @@ class TestSurveyProcessing:
         response = authenticated_client.patch(url)
         assert response.status_code == status.HTTP_200_OK
         survey.refresh_from_db()
-        assert survey.status == STATUS_CHOICES[2][0]
+        assert survey.status == SurveyStatus.PROCESSING.value
 
     @pytest.mark.django_db
     def test_processing_unauthorized(self, api_client, survey):
@@ -71,13 +71,13 @@ class TestSurveyProcessing:
         self, authenticated_client, survey
     ):
         """Тест изменения статуса опроса, который уже в обработке"""
-        survey.status = STATUS_CHOICES[2][0]
+        survey.status = SurveyStatus.PROCESSING.value
         survey.save()
         url = self.get_url(survey.id)
         response = authenticated_client.patch(url)
         assert response.status_code == status.HTTP_200_OK
         survey.refresh_from_db()
-        assert survey.status == STATUS_CHOICES[2][0]
+        assert survey.status == SurveyStatus.PROCESSING.value
 
     @pytest.mark.django_db
     def test_processing_different_users_surveys(

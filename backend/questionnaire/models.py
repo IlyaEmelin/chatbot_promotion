@@ -20,7 +20,7 @@ from .constant import (
     ANSWER_LEN,
     FILE_URL_MAX_LEN,
     MAX_LEN_STRING,
-    STATUS_CHOICES,
+    SurveyStatus,
     STATUS_LEN,
     QUESTION_TYPE,
     QUESTION_TYPE_LEN,
@@ -105,7 +105,7 @@ class AnswerChoice(Model):
     )
     new_status = CharField(
         max_length=STATUS_LEN,
-        choices=list(chain(STATUS_CHOICES, ((None, None),))),
+        choices=list(chain(SurveyStatus.choices(), ((None, None),))),
         default=None,
         verbose_name="Смена статуса опроса после ответа",
         null=True,
@@ -163,7 +163,7 @@ class Survey(Model):
     )
     status = CharField(
         max_length=STATUS_LEN,
-        choices=STATUS_CHOICES,
+        choices=SurveyStatus.choices(),
         default="new",
         verbose_name="Статус опроса",
     )
