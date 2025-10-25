@@ -19,7 +19,7 @@ from rest_framework.mixins import (
     DestroyModelMixin,
 )
 
-from questionnaire.constant import STATUS_CHOICES
+from questionnaire.constant import SurveyStatus
 from questionnaire.models import Survey, Document, Comment
 from .permissions import (
     AuthorOrStaffOnly,
@@ -61,7 +61,7 @@ class SurveyViewSet(
     def processing(self, request, pk):
         """Метод смены статуса опроса на <В обработке>."""
         survey = self.get_object()
-        survey.status = STATUS_CHOICES[2][0]
+        survey.status = SurveyStatus.PROCESSING.value
         survey.save()
         return Response(self.get_serializer(survey).data)
 

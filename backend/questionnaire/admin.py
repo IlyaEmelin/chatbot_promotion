@@ -8,7 +8,7 @@ from django.utils.html import format_html
 from django.urls import path, reverse
 from rest_framework.authtoken.models import TokenProxy
 
-from questionnaire.constant import STATUS_CHOICES
+from questionnaire.constant import SurveyStatus
 from questionnaire.models import (
     AnswerChoice,
     Document,
@@ -32,8 +32,8 @@ class StatusFilter(admin.SimpleListFilter):
     title = "Статус заявки"
     parameter_name = "status"
 
-    def lookups(self, request, model_admin):
-        return STATUS_CHOICES
+    def lookups(self, request, model_admin) -> tuple[tuple[str, str], ...]:
+        return SurveyStatus.choices()
 
     def queryset(self, request, queryset):
         if self.value():

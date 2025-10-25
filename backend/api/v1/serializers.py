@@ -20,6 +20,7 @@ from rest_framework.serializers import (
 
 from api.yadisk import YandexDiskUploader
 from questionnaire.models import Survey, Question, Document, Comment
+from questionnaire.constant import SurveyStatus
 from users.models import User
 
 
@@ -109,7 +110,7 @@ class SurveyCreateSerializer(ModelSerializer):
             user=validated_data.get("user"),
             defaults={
                 "current_question": question_start,
-                "status": "new",
+                "status": SurveyStatus.NEW.value,
                 "result": [],
                 "questions_version_uuid": question_start.updated_uuid,
             },
@@ -122,10 +123,14 @@ class SurveyCreateSerializer(ModelSerializer):
                 survey_obj.current_question is None
                 or not survey_obj.current_question.answers.exists()
             )
-            and survey_obj.status in ("processing", "completed")
+            and survey_obj.status
+            in (
+                SurveyStatus.PROCESSING.value,
+                SurveyStatus.COMPLETED.value,
+            )
         ):
             survey_obj.current_question = question_start
-            survey_obj.status = "new"
+            survey_obj.status = SurveyStatus.NEW.value
             survey_obj.result = []
             survey_obj.docs.all().delete()
             survey_obj.created_at = datetime.now()
@@ -205,9 +210,9 @@ class SurveyUpdateSerializer(ModelSerializer):
 
             instance.current_question = next_question
             instance.status = (
-                "new"
+                SurveyStatus.NEW.value
                 if next_question and next_question.answers.exists()
-                else "waiting_docs"
+                else SurveyStatus.WAITING_DOCS.value
             )
             instance.result = result
             if new_status:

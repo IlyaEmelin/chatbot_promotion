@@ -12,6 +12,7 @@ from api.v1.serializers import (
 )
 
 from questionnaire.models import Survey, Question, Document
+from questionnaire.constant import SurveyStatus
 
 User = get_user_model()
 
@@ -123,7 +124,7 @@ def change_processing(survey_obj: Survey) -> None:
     Args:
         survey_obj: объект опроса
     """
-    survey_obj.status = "processing"
+    survey_obj.status = SurveyStatus.PROCESSING.value
     survey_obj.save()
 
 

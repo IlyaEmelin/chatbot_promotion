@@ -9,6 +9,7 @@ from rest_framework.status import (
 )
 from questionnaire.models import Survey
 from rest_framework.test import APIClient
+from questionnaire.constant import SurveyStatus
 
 
 @pytest.mark.django_db
@@ -49,7 +50,7 @@ class TestSurveyList:
         assert len(response.data) == 1
         response_question = response.data[0]
         assert response_question["current_question_text"] == question.text
-        assert response_question["status"] == "new"
+        assert response_question["status"] == SurveyStatus.NEW.value
         assert response_question["result"] == []
         assert response_question["answers"] == []
 
@@ -65,7 +66,7 @@ class TestSurveyList:
         user_survey = Survey.objects.create(
             user=user,
             current_question=question,
-            status="new",
+            status=SurveyStatus.NEW.value,
             result=[],
             questions_version_uuid="12345678-1234-1234-1234-123456789012",
         )
@@ -79,7 +80,7 @@ class TestSurveyList:
         other_survey = Survey.objects.create(
             user=other_user,
             current_question=question,
-            status="new",
+            status=SurveyStatus.NEW.value,
             result=[],
             questions_version_uuid="32345678-1234-1234-1234-123456789012",
         )

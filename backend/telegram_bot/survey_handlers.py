@@ -14,6 +14,7 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 from questionnaire.models import Survey
+from questionnaire.constant import SurveyStatus
 from .menu_handlers import help_command, load_command
 from .sync_to_async import (
     write_document_db,
@@ -115,7 +116,7 @@ def _get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     return reply_markup
 
 
-async def _inform_msg(survey_obj, update) -> None:
+async def _inform_msg(survey_obj: Survey, update) -> None:
     """
     Информационное сообщение в зависимости от статуса
 
@@ -124,19 +125,19 @@ async def _inform_msg(survey_obj, update) -> None:
         update:
     """
     match survey_obj.status:
-        case "new":
+        case SurveyStatus.NEW.value:
             await update.message.reply_text(
                 "📝 Опрос еще не завершен. "
                 "Пожалуйста, ответьте на все вопросы.\n"
                 f"Используйте /{START_COMMAND_NAME} для "
                 "продолжение опроса."
             )
-        case "processing":
+        case SurveyStatus.PROCESSING.value:
             await update.message.reply_text(
                 "✅ Ваша заявка уже находится в обработке.\n"
                 "Ожидайте решения."
             )
-        case "completed":
+        case SurveyStatus.COMPLETED.value:
             # Завершено - все готово
             await update.message.reply_text(
                 "🎉 Опрос завершен! Заявка обработана.\n"
@@ -340,7 +341,7 @@ async def handle_message(
         __, ___, ____, survey_obj = await get_or_create_survey(user_obj, False)
         logger.debug(f"Статус опроса: {survey_obj.status}")
         match survey_obj.status:
-            case "new":
+            case SurveyStatus.NEW.value:
                 logger.debug("Опрос")
                 new_status = None
                 try:
@@ -368,14 +369,14 @@ async def handle_message(
                         text,
                         reply_markup=reply_markup,
                     )
-                    if survey_obj.status == "waiting_docs":
+                    if survey_obj.status == SurveyStatus.WAITING_DOCS.value:
                         await load_command(update, context)
                     return
-                elif new_status != "waiting_docs":
+                elif new_status != SurveyStatus.WAITING_DOCS.value:
                     await help_command(update, context, new_status)
                 else:
                     await load_command(update, context)
-            case "waiting_docs":
+            case SurveyStatus.WAITING_DOCS.value:
                 logger.debug("Загрузка документов")
                 await load_command(update, context)
             case _:

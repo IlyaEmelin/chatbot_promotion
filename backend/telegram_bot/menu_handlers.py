@@ -2,6 +2,7 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
+from questionnaire.constant import SurveyStatus
 from .const import (
     START_COMMAND_NAME,
     HELP_COMMAND_NAME,
@@ -13,27 +14,8 @@ from .sync_to_async import (
     get_or_create_survey,
 )
 
-STATUS_DICT = {
-    "new": "🆕 Новая",
-    "waiting_docs": "📎 Ожидает документы",
-    "processing": "⏳ В обработке",
-    "completed": "✅ Завершен",
-}
 
 logger = logging.getLogger(__name__)
-
-
-def __get_status(status: str) -> str:
-    """
-    Получить текстовое описание статуса на интерфейсе.
-
-    Args:
-        status: внутренне имя статуса
-
-    Returns:
-        str: читаемое название
-    """
-    return STATUS_DICT.get(status, "❌ Ошибка")
 
 
 def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
@@ -51,7 +33,7 @@ def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
         [KeyboardButton(f"/{STATUS_COMMAND_NAME}")],
         [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
     ]
-    if status == "waiting_docs":
+    if status == SurveyStatus.WAITING_DOCS.value:
         keyboard.insert(
             1,
             [KeyboardButton(f"/{PROCESSING_COMMAND}")],
@@ -79,7 +61,7 @@ def __get_command_text(status) -> str:
         f"/{STATUS_COMMAND_NAME} - Получить статус опроса",
         f"/{HELP_COMMAND_NAME} - Показать это сообщение помощи",
     ]
-    if status == "waiting_docs":
+    if status == SurveyStatus.WAITING_DOCS.value:
         commands.insert(
             1,
             f"/{PROCESSING_COMMAND} - Закончить загрузку документов",
@@ -109,12 +91,12 @@ async def help_command(
     processing_text = (
         "Спасибо за вашу заявку, свяжемся с вами по указанными вами контактам "
         "в ближайшее время"
-        if status == "processing"
+        if status == SurveyStatus.PROCESSING.value
         else ""
     )
 
     help_text = f"""
-Текущий статус опроса: {__get_status(status)}
+Текущий статус опроса: {SurveyStatus.get_ext_label(status)}
 {processing_text}
 📋 *Доступные команды:*
 
