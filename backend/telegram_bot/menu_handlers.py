@@ -36,11 +36,12 @@ def __get_status(status: str) -> str:
     return STATUS_DICT.get(status, "❌ Ошибка")
 
 
-def _get_default_help_keyboard(add_processing_command) -> ReplyKeyboardMarkup:
+def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
     """
     Клавиатура по умолчанию с кнопкой помощи
+
     Args:
-        add_processing_command: добавить команду закончить загрузку документов
+        status: статус ответа
 
     Returns:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
@@ -50,7 +51,7 @@ def _get_default_help_keyboard(add_processing_command) -> ReplyKeyboardMarkup:
         [KeyboardButton(f"/{STATUS_COMMAND_NAME}")],
         [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
     ]
-    if add_processing_command:
+    if status == "waiting_docs":
         keyboard.insert(
             1,
             [KeyboardButton(f"/{PROCESSING_COMMAND}")],
@@ -125,7 +126,7 @@ async def help_command(
 """
     await update.message.reply_text(
         help_text,
-        reply_markup=_get_default_help_keyboard(status == "processing"),
+        reply_markup=_get_default_help_keyboard(status),
         parse_mode="Markdown",  # Для красивого форматирования
     )
 
