@@ -11,6 +11,7 @@ from rest_framework.status import (
 from rest_framework.test import APIClient
 
 from questionnaire.models import Survey, Question, AnswerChoice
+from questionnaire.constant import SurveyStatus
 
 
 @pytest.mark.django_db
@@ -157,7 +158,7 @@ class TestSurveyUpdate:
         # Проверяем, что опрос завершен
         completed_survey = Survey.objects.get(id=survey.id)
         assert completed_survey.current_question is None
-        assert completed_survey.status == "waiting_docs"
+        assert completed_survey.status == SurveyStatus.WAITING_DOCS.value
         assert len(completed_survey.result) == 2
 
     def test_update_survey_unauthenticated(self, api_client, survey):

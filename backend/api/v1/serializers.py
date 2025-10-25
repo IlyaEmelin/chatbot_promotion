@@ -123,7 +123,11 @@ class SurveyCreateSerializer(ModelSerializer):
                 survey_obj.current_question is None
                 or not survey_obj.current_question.answers.exists()
             )
-            and survey_obj.status in ("processing", "completed")
+            and survey_obj.status
+            in (
+                SurveyStatus.PROCESSING.value,
+                SurveyStatus.COMPLETED.value,
+            )
         ):
             survey_obj.current_question = question_start
             survey_obj.status = SurveyStatus.NEW.value

@@ -369,14 +369,14 @@ async def handle_message(
                         text,
                         reply_markup=reply_markup,
                     )
-                    if survey_obj.status == "waiting_docs":
+                    if survey_obj.status == SurveyStatus.WAITING_DOCS.value:
                         await load_command(update, context)
                     return
-                elif new_status != "waiting_docs":
+                elif new_status != SurveyStatus.WAITING_DOCS.value:
                     await help_command(update, context, new_status)
                 else:
                     await load_command(update, context)
-            case "waiting_docs":
+            case SurveyStatus.WAITING_DOCS.value:
                 logger.debug("Загрузка документов")
                 await load_command(update, context)
             case _:

@@ -160,7 +160,7 @@ def survey_with_custom_answer(user, question_with_custom_answer) -> Survey:
     return Survey.objects.create(
         user=user,
         current_question=question_with_custom_answer,
-        status="new",
+        status=SurveyStatus.NEW.value,
         result=[],
         questions_version_uuid="72345678-1234-1234-1234-123456789012",
     )
