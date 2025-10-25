@@ -92,6 +92,8 @@ LOGGING_LEVEL=DEBUG
 TELEGRAM_BOT_TOKEN=< TelegramBotToken >
 TELEGRAM_WEBHOOK_URL=https://<yourdomain.com>/telegram/webhook/
 ADMIN_IDS=< TelegramID >
+# Отображать в текстовом сообщение варианты ответа
+TELEGRAM_SHOW_RESPONSE_CHOICE=true
 
 # Я.Диск токен
 DISK_TOKEN=< Токен Яндекс-диска >

@@ -1,6 +1,7 @@
 import logging
 import base64
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from telegram import (
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 FILETYPE_ERROR = "Передан неподдерживаемый формат файла"
-SIGNATURES_MIMETYPES ={
+SIGNATURES_MIMETYPES = {
     b"\xff\xd8\xff": "image/jpeg",
     b"\x89PNG\r\n\x1a\n": "image/png",
     b"%PDF": "application/pdf",
@@ -315,8 +316,14 @@ async def processing_command(
 async def handle_message(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
-):
-    """Обработка обычных текстовых сообщений"""
+) -> None:
+    """
+    Обработка обычных текстовых сообщений
+
+    Args:
+        update: обновление от Telegram
+        context: контекст
+    """
     user_message: str = update.message.text
     user: TelegramUser = update.effective_user
 
@@ -342,6 +349,16 @@ async def handle_message(
                         survey_obj,
                         user_message,
                     )
+                    if (
+                        settings.TELEGRAM_SHOW_RESPONSE_CHOICE
+                        and answers
+                        and None not in answers
+                    ):
+                        logger.debug("Подклейка в сообщение вариантов ответа")
+                        text += "\nВарианты ответа:\n"
+                        text += "\n".join(
+                            f"🔘 - {answer}" for answer in answers
+                        )
                 except ValidationError as exp:
                     text, answers = "\n".join(exp.messages), []
 
