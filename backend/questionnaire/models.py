@@ -164,7 +164,7 @@ class Survey(Model):
     status = CharField(
         max_length=STATUS_LEN,
         choices=SurveyStatus.choices(),
-        default="new",
+        default=SurveyStatus.NEW.value,
         verbose_name="Статус опроса",
     )
     result = JSONField(

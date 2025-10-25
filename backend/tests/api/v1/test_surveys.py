@@ -8,6 +8,7 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
 )
 from questionnaire.models import Survey
+from questionnaire.constant import SurveyStatus
 
 
 @mark.django_db
@@ -35,7 +36,7 @@ class TestSurveyCreate:
         survey = Survey.objects.get(id=response.data["id"])
         assert survey.user == user
         assert survey.current_question == question
-        assert survey.status == "new"
+        assert survey.status == SurveyStatus.NEW.value
         assert survey.result == []
 
     def test_create2_survey_success(
@@ -61,7 +62,7 @@ class TestSurveyCreate:
         survey = Survey.objects.get(id=response.data["id"])
         assert survey.user == user
         assert survey.current_question == question
-        assert survey.status == "new"
+        assert survey.status == SurveyStatus.NEW.value
         assert survey.result == []
 
     def test_create_survey_unauthenticated(self, user, api_client, question):

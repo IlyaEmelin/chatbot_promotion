@@ -3,6 +3,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.status import HTTP_200_OK
 from questionnaire.models import Survey, Question, AnswerChoice
+from questionnaire.constant import SurveyStatus
 
 
 @pytest.mark.django_db
@@ -269,7 +270,7 @@ class TestSurveyUpdateExternalFields:
         survey = Survey.objects.create(
             user=user,
             current_question=question,
-            status="new",
+            status=SurveyStatus.NEW.value,
             result=[],
             questions_version_uuid="32345678-1234-1234-1234-123456789012",
         )

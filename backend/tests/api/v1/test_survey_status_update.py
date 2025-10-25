@@ -88,7 +88,7 @@ class TestSurveyProcessing:
         other_user_survey = Survey.objects.create(
             user=other_user,
             current_question=question,
-            status="new",
+            status=SurveyStatus.NEW.value,
             result=[],
             questions_version_uuid=uuid.uuid4(),
         )

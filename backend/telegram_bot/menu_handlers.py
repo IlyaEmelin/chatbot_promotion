@@ -2,6 +2,7 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
+from questionnaire.constant import SurveyStatus
 from .const import (
     START_COMMAND_NAME,
     HELP_COMMAND_NAME,
@@ -14,10 +15,10 @@ from .sync_to_async import (
 )
 
 STATUS_DICT = {
-    "new": "🆕 Новая",
-    "waiting_docs": "📎 Ожидает документы",
-    "processing": "⏳ В обработке",
-    "completed": "✅ Завершен",
+    SurveyStatus.NEW.value: "🆕 Новая",
+    SurveyStatus.WAITING_DOCS.value: "📎 Ожидает документы",
+    SurveyStatus.WAITING_DOCS.PROCESSING.value: "⏳ В обработке",
+    SurveyStatus.WAITING_DOCS.COMPLETED.value: "✅ Завершен",
 }
 
 logger = logging.getLogger(__name__)
