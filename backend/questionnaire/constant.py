@@ -8,14 +8,27 @@ QUESTION_TYPE_LEN: Final = 30
 FILE_URL_MAX_LEN = 2048
 
 
-class TelegramCommand(StrEnum):
+class TelegramCommand(Enum):
     """Класс телеграмм команд"""
 
-    START = "start"
-    STATUS = "status"
-    PROCESSING = "processing"
-    HELP = "help"
-    LOG = "log"
+    START = ("start", "Пройти(Перепройти) опрос")
+    STATUS = ("status", "Получить статус опроса")
+    PROCESSING = ("processing", "Закончить загрузку документов")
+    HELP = ("help", "Показать это сообщение помощи")
+    LOG = ("log", "Скачать логи сервера")
+
+    def __init__(
+        self,
+        value: str,
+        help_msg: str,
+    ):
+        self.__value = value
+        self.__help_msg = help_msg
+
+    @property
+    def value(self) -> str:
+        """str: значение"""
+        return self.__value
 
     def get_call_name(self) -> str:
         """
@@ -25,6 +38,15 @@ class TelegramCommand(StrEnum):
             str: команда для нажатия
         """
         return f"/{self.value}"
+
+    def get_text_command(self) -> str:
+        """
+        Получить текс доступной команды
+
+        Returns:
+            str: текст доступной команды
+        """
+        return f"{self.get_call_name()} - {self.__help_msg}"
 
 
 class SurveyStatus(Enum):

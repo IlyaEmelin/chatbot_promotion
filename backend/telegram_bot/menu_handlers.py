@@ -43,18 +43,9 @@ def __get_command_text(status: SurveyStatus) -> str:
     Returns:
         str: текстовый список доступных команд
     """
-    commands = [
-        f"{TelegramCommand.START.get_call_name()} - Пройти(Перепройти) опрос",
-        f"{TelegramCommand.STATUS.get_call_name()} - Получить статус опроса",
-        f"{TelegramCommand.HELP.get_call_name()} - Показать это сообщение помощи",
-    ]
-    if status == SurveyStatus.WAITING_DOCS:
-        commands.insert(
-            1,
-            f"{TelegramCommand.PROCESSING.get_call_name()} "
-            "- Закончить загрузку документов",
-        )
-    return "\n".join(commands)
+    return "\n".join(
+        command.get_text_command() for command in status.available_commands
+    )
 
 
 async def help_command(

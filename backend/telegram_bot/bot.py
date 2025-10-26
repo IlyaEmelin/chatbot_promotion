@@ -28,23 +28,23 @@ class TelegramBot:
 
     def setup_handlers(self):
         self.application.add_handler(
-            CommandHandler(str(TelegramCommand.START.value), start_command),
+            CommandHandler(TelegramCommand.START.value, start_command),
         )
         self.application.add_handler(
-            CommandHandler(str(TelegramCommand.STATUS.value), status_command)
+            CommandHandler(TelegramCommand.STATUS.value, status_command)
         )
         self.application.add_handler(
-            CommandHandler(str(TelegramCommand.HELP.value), help_command),
+            CommandHandler(TelegramCommand.HELP.value, help_command),
         )
         self.application.add_handler(
             CommandHandler(
-                str(TelegramCommand.PROCESSING.value),
+                TelegramCommand.PROCESSING.value,
                 processing_command,
             ),
         )
         self.application.add_handler(
             CommandHandler(
-                str(TelegramCommand.LOG),
+                TelegramCommand.LOG.value,
                 log_command,
             )
         )
