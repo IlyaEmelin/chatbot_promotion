@@ -2,8 +2,7 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
-from questionnaire.constant import SurveyStatus
-from .const import TelegramCommand
+from questionnaire.constant import SurveyStatus, TelegramCommand
 from .sync_to_async import (
     get_or_create_user,
     get_or_create_survey,
@@ -13,7 +12,7 @@ from .sync_to_async import (
 logger = logging.getLogger(__name__)
 
 
-def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
+def _get_default_help_keyboard(status: SurveyStatus) -> ReplyKeyboardMarkup:
     """
     Клавиатура по умолчанию с кнопкой помощи
 
@@ -24,16 +23,9 @@ def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
-        [KeyboardButton(TelegramCommand.START.get_call_name())],
-        [KeyboardButton(TelegramCommand.STATUS.get_call_name())],
-        [KeyboardButton(TelegramCommand.HELP.get_call_name())],
+        [KeyboardButton(command.get_call_name())]
+        for command in status.available_commands
     ]
-    if status == SurveyStatus.WAITING_DOCS.value:
-        keyboard.insert(
-            1,
-            [KeyboardButton(TelegramCommand.PROCESSING.get_call_name())],
-        )
-
     return ReplyKeyboardMarkup(
         keyboard,
         resize_keyboard=True,
@@ -41,7 +33,7 @@ def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
     )
 
 
-def __get_command_text(status) -> str:
+def __get_command_text(status: SurveyStatus) -> str:
     """
     Получить список доступных команд
 
@@ -56,7 +48,7 @@ def __get_command_text(status) -> str:
         f"{TelegramCommand.STATUS.get_call_name()} - Получить статус опроса",
         f"{TelegramCommand.HELP.get_call_name()} - Показать это сообщение помощи",
     ]
-    if status == SurveyStatus.WAITING_DOCS.value:
+    if status == SurveyStatus.WAITING_DOCS:
         commands.insert(
             1,
             f"{TelegramCommand.PROCESSING.get_call_name()} "
@@ -84,19 +76,21 @@ async def help_command(
         _, __, result, survey = await get_or_create_survey(user_obj, False)
         status = survey.status
 
+    status_enum = SurveyStatus.from_value(status)
+
     processing_text = (
         "Спасибо за вашу заявку, свяжемся с вами по указанными вами контактам "
         "в ближайшее время"
-        if status == SurveyStatus.PROCESSING.value
+        if status_enum == SurveyStatus.PROCESSING
         else ""
     )
 
     help_text = f"""
-Текущий статус опроса: {SurveyStatus.get_ext_label(status)}
+Текущий статус опроса: {status_enum.ext_label}
 {processing_text}
 📋 *Доступные команды:*
 
-{__get_command_text(status)}
+{__get_command_text(status_enum)}
 
 💡 *Советы:*
 - Используйте кнопки для быстрых ответов
@@ -104,7 +98,7 @@ async def help_command(
 """
     await update.message.reply_text(
         help_text,
-        reply_markup=_get_default_help_keyboard(status),
+        reply_markup=_get_default_help_keyboard(status_enum),
         parse_mode="Markdown",  # Для красивого форматирования
     )
 

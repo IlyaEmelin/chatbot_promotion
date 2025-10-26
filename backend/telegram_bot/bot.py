@@ -5,8 +5,8 @@ from django.conf import settings
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
+from questionnaire.constant import TelegramCommand
 from .admin_handlers import log_command
-from .const import TelegramCommand
 from .menu_handlers import help_command
 from .survey_handlers import (
     start_command,

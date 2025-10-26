@@ -1,5 +1,5 @@
 from typing import Final
-from enum import Enum
+from enum import Enum, StrEnum
 
 MAX_LEN_STRING: Final = 40
 STATUS_LEN: Final = 25
@@ -8,13 +8,75 @@ QUESTION_TYPE_LEN: Final = 30
 FILE_URL_MAX_LEN = 2048
 
 
-class SurveyStatus(Enum):
-    NEW = ("new", "Новая", "🆕")
-    WAITING_DOCS = ("waiting_docs", "Ожидает документов", "📎")
-    PROCESSING = ("processing", "В обработке", "⏳")
-    COMPLETED = ("completed", "Завершена", "✅")
+class TelegramCommand(StrEnum):
+    """Класс телеграмм команд"""
 
-    def __init__(self, value: str, label: str, icon: str) -> None:
+    START = "start"
+    STATUS = "status"
+    PROCESSING = "processing"
+    HELP = "help"
+    LOG = "log"
+
+    def get_call_name(self) -> str:
+        """
+        Получить команду для нажатия
+
+        Returns:
+            str: команда для нажатия
+        """
+        return f"/{self.value}"
+
+
+class SurveyStatus(Enum):
+    NEW = (
+        "new",
+        "Новая",
+        "🆕",
+        (
+            TelegramCommand.START,
+            TelegramCommand.STATUS,
+            TelegramCommand.HELP,
+        ),
+    )
+    WAITING_DOCS = (
+        "waiting_docs",
+        "Ожидает документов",
+        "📎",
+        (
+            TelegramCommand.START,
+            TelegramCommand.PROCESSING,
+            TelegramCommand.STATUS,
+            TelegramCommand.HELP,
+        ),
+    )
+    PROCESSING = (
+        "processing",
+        "В обработке",
+        "⏳",
+        (
+            TelegramCommand.START,
+            TelegramCommand.STATUS,
+            TelegramCommand.HELP,
+        ),
+    )
+    COMPLETED = (
+        "completed",
+        "Завершена",
+        "✅",
+        (
+            TelegramCommand.START,
+            TelegramCommand.STATUS,
+            TelegramCommand.HELP,
+        ),
+    )
+
+    def __init__(
+        self,
+        value: str,
+        label: str,
+        icon: str,
+        available_commands: tuple[TelegramCommand, ...],
+    ) -> None:
         """
         Конструктор
 
@@ -22,10 +84,12 @@ class SurveyStatus(Enum):
             value: значение
             label: описание
             icon: иконка
+            available_commands: список доступных комманд
         """
         self.__value = value
         self.__label = label
         self.__icon = icon
+        self.__available_commands = available_commands
 
     @property
     def value(self) -> str:
@@ -41,6 +105,11 @@ class SurveyStatus(Enum):
     def ext_label(self) -> str:
         """str: расширенное описание"""
         return f"{self.__icon} {self.__label}"
+
+    @property
+    def available_commands(self) -> tuple[TelegramCommand, ...]:
+        """tuple[TelegramCommand, ...]: список доступных команд"""
+        return self.__available_commands
 
     @classmethod
     def choices(cls) -> tuple[tuple[str, str], ...]:

@@ -14,7 +14,7 @@ from telegram import (
 from telegram.ext import ContextTypes
 
 from questionnaire.models import Survey
-from questionnaire.constant import SurveyStatus
+from questionnaire.constant import SurveyStatus, TelegramCommand
 from .menu_handlers import help_command, load_command
 from .sync_to_async import (
     write_document_db,
@@ -24,7 +24,7 @@ from .sync_to_async import (
     get_or_create_survey,
     get_survey_documents,
 )
-from .const import TelegramCommand
+
 
 logger = logging.getLogger(__name__)
 
