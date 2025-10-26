@@ -24,9 +24,7 @@ from .sync_to_async import (
     get_or_create_survey,
     get_survey_documents,
 )
-from .const import (
-    START_COMMAND_NAME,
-)
+from .const import TelegramCommand
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +127,7 @@ async def _inform_msg(survey_obj: Survey, update) -> None:
             await update.message.reply_text(
                 "📝 Опрос еще не завершен. "
                 "Пожалуйста, ответьте на все вопросы.\n"
-                f"Используйте /{START_COMMAND_NAME} для "
+                f"Используйте {TelegramCommand.START.get_call_name()} для "
                 "продолжение опроса."
             )
         case SurveyStatus.PROCESSING.value:
@@ -141,7 +139,8 @@ async def _inform_msg(survey_obj: Survey, update) -> None:
             # Завершено - все готово
             await update.message.reply_text(
                 "🎉 Опрос завершен! Заявка обработана.\n"
-                f"Используйте /{START_COMMAND_NAME} для нового опроса."
+                f"Используйте {TelegramCommand.START.get_call_name()} "
+                "для нового опроса."
             )
 
 

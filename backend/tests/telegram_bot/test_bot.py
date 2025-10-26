@@ -13,11 +13,7 @@ from telegram.ext import ContextTypes
 
 from telegram_bot.bot import TelegramBot
 from telegram_bot.survey_handlers import handle_message
-from telegram_bot.const import (
-    START_COMMAND_NAME,
-    HELP_COMMAND_NAME,
-    STATUS_COMMAND_NAME,
-)
+from telegram_bot.const import TelegramCommand
 
 
 class TestTelegramBot(TestCase):
@@ -98,8 +94,8 @@ class TestTelegramBot(TestCase):
         assert "CommandHandler" == handler_types[1]
         assert "CommandHandler" == handler_types[2]
         assert "CommandHandler" == handler_types[3]
-        assert "MessageHandler" == handler_types[4]
-        assert "CommandHandler" == handler_types[5]
+        assert "CommandHandler" == handler_types[4]
+        assert "MessageHandler" == handler_types[5]
         assert "MessageHandler" == handler_types[6]
 
 
@@ -116,9 +112,15 @@ class TestKeyboardFunctions:
         # Assert
         assert keyboard is not None
         assert len(keyboard.keyboard) == 3
-        assert f"/{START_COMMAND_NAME}" in str(keyboard.keyboard[0][0])
-        assert f"/{STATUS_COMMAND_NAME}" in str(keyboard.keyboard[1][0])
-        assert f"/{HELP_COMMAND_NAME}" in str(keyboard.keyboard[2][0])
+        assert TelegramCommand.START.get_call_name() in str(
+            keyboard.keyboard[0][0]
+        )
+        assert TelegramCommand.STATUS.get_call_name() in str(
+            keyboard.keyboard[1][0]
+        )
+        assert TelegramCommand.HELP.get_call_name() in str(
+            keyboard.keyboard[2][0]
+        )
 
     def test_get_reply_markup_with_answers(self):
         """Тест создания клавиатуры с ответами"""

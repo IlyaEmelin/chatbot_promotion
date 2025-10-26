@@ -3,12 +3,7 @@ from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
 from questionnaire.constant import SurveyStatus
-from .const import (
-    START_COMMAND_NAME,
-    HELP_COMMAND_NAME,
-    STATUS_COMMAND_NAME,
-    PROCESSING_COMMAND,
-)
+from .const import TelegramCommand
 from .sync_to_async import (
     get_or_create_user,
     get_or_create_survey,
@@ -29,14 +24,14 @@ def _get_default_help_keyboard(status) -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
-        [KeyboardButton(f"/{START_COMMAND_NAME}")],
-        [KeyboardButton(f"/{STATUS_COMMAND_NAME}")],
-        [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
+        [KeyboardButton(TelegramCommand.START.get_call_name())],
+        [KeyboardButton(TelegramCommand.STATUS.get_call_name())],
+        [KeyboardButton(TelegramCommand.HELP.get_call_name())],
     ]
     if status == SurveyStatus.WAITING_DOCS.value:
         keyboard.insert(
             1,
-            [KeyboardButton(f"/{PROCESSING_COMMAND}")],
+            [KeyboardButton(TelegramCommand.PROCESSING.get_call_name())],
         )
 
     return ReplyKeyboardMarkup(
@@ -57,14 +52,15 @@ def __get_command_text(status) -> str:
         str: текстовый список доступных команд
     """
     commands = [
-        f"/{START_COMMAND_NAME} - Пройти(Перепройти) опрос",
-        f"/{STATUS_COMMAND_NAME} - Получить статус опроса",
-        f"/{HELP_COMMAND_NAME} - Показать это сообщение помощи",
+        f"{TelegramCommand.START.get_call_name()} - Пройти(Перепройти) опрос",
+        f"{TelegramCommand.STATUS.get_call_name()} - Получить статус опроса",
+        f"{TelegramCommand.HELP.get_call_name()} - Показать это сообщение помощи",
     ]
     if status == SurveyStatus.WAITING_DOCS.value:
         commands.insert(
             1,
-            f"/{PROCESSING_COMMAND} - Закончить загрузку документов",
+            f"{TelegramCommand.PROCESSING.get_call_name()} "
+            "- Закончить загрузку документов",
         )
     return "\n".join(commands)
 
@@ -121,8 +117,8 @@ def _load_documents_keyboard() -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
-        [KeyboardButton(f"/{PROCESSING_COMMAND}")],
-        [KeyboardButton(f"/{HELP_COMMAND_NAME}")],
+        [KeyboardButton(TelegramCommand.PROCESSING.get_call_name())],
+        [KeyboardButton(TelegramCommand.HELP.get_call_name())],
     ]
     return ReplyKeyboardMarkup(
         keyboard,
@@ -154,8 +150,8 @@ async def load_command(
 📋 *Загрузка документов*
 
 Команды:
-/{PROCESSING_COMMAND} - закончить загрузку документов
-/{HELP_COMMAND_NAME} - помощь
+{TelegramCommand.PROCESSING.get_call_name()} - закончить загрузку документов
+{TelegramCommand.HELP.get_call_name()} - помощь
 """
         reply_markup = _load_documents_keyboard()
         await update.message.reply_text(
