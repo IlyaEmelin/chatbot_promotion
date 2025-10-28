@@ -170,7 +170,7 @@ npm run build
 | ![MikhaylovHaralampiy](https://github.com/user-attachments/assets/94588f0d-cb69-46d8-8160-fcf6b2a19134) | Михайлов Харалампий | DevOps, backend-разработчик |[GitHub](https://github.com/HarisNvr), [Telegram](https://t.me/HarisNvr)|
 | ![DolgikhKirill](https://github.com/user-attachments/assets/9f62d065-7205-4719-8261-75a251e43d03) | Долгих Кирилл | Frontend-разработчик |[GitHub](https://github.com/nonncal), [Telegram](https://t.me/nonncal)|
 | ![KladovaOlga](https://github.com/user-attachments/assets/bf472fad-0ccd-437f-a5ff-372c1e7a728a) | Кладова Ольга | Frontend-разработчик |[GitHub](https://github.com/OlgaKladova), [Telegram](https://t.me/MidoriKl)|
-| ![GurinValeriy](https://github.com/user-attachments/assets/096e634d-00a2-4b54-96e3-dcff56dbd33a) | Гурин Валерий | Backend-разработчик |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza)|
+| ![GurinValeriy](https://github.com/user-attachments/assets/096e634d-00a2-4b54-96e3-dcff56dbd33a) | Гурин Валерий | Backend-разработчик |[GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/FuntikPiggy)|
 | ![MiskhozhevOleg](https://github.com/user-attachments/assets/8d674c23-9895-4f21-9cf9-021339e42a1b) | Мисхожев Олег | Backend-разработчик |[GitHub](https://github.com/OlegMiskhozhev), [Telegram](https://t.me/miskhozhev)|
 
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
