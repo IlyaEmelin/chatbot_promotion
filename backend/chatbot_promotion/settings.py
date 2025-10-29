@@ -138,7 +138,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "chatbot_promotion.wsgi.application"
 
-SWAGGER_USE_COMPAT_RENDERERS = False
+
+# SWAGGER_USE_COMPAT_RENDERERS = False
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+    'OPERATIONS_SORTER': 'alpha',
+    'TAGS_SORTER': 'alpha',
+    'DOC_EXPANSION': 'none',
+    'DEEP_LINKING': True,
+}
+
+# Дополнительно для Redoc
+REDOC_SETTINGS = {
+    'SPEC_URL': ('schema-json', {'format': '.json'}),
+}
+
 
 if getenv("ENABLE_POSTGRES_DB", "").lower() == "true":
     DATABASES = {
