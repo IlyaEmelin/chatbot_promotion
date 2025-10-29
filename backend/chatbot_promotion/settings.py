@@ -84,8 +84,7 @@ logger = logging.getLogger(__name__)
 SECRET_KEY = getenv("SECRET_KEY", default=get_random_secret_key())
 
 DEBUG = getenv("DEBUG", "").lower() == "true"
-# Ya disk token
-DISK_TOKEN = getenv("DISK_TOKEN", "")
+CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")
 
 AUTH_USER_MODEL = "users.User"
 
@@ -213,6 +212,9 @@ STATIC_ROOT = BASE_DIR / "backend_static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Ya disk token
+DISK_TOKEN = getenv("DISK_TOKEN", "")
+
 TELEGRAM_BOT_TOKEN = getenv(
     "TELEGRAM_BOT_TOKEN",
     "your_bot_token_here",
@@ -233,5 +235,3 @@ TELEGRAM_SHOW_RESPONSE_CHOICE = (
 
 DEFAULT_DISK_TOKEN = "dummy-key-for-dev"
 DISK_TOKEN = getenv("DISK_TOKEN", DEFAULT_DISK_TOKEN)
-
-CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")
