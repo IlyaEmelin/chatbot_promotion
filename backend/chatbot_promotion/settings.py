@@ -3,6 +3,7 @@ from os import getenv, path
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
+from django.templatetags.static import static
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -218,9 +219,36 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 UNFOLD = {
+    "SITE_URL": "/",
     "SITE_TITLE": "ПРО-ДВИЖЕНИЕ",
     "SITE_HEADER": "ПРО-ДВИЖЕНИЕ",
-    "SITE_ICON": "staticfiles/admin_logo.svg"
+    "SITE_LOGO": {
+        "light": lambda request: static("admin_logo.svg"),
+        "dark": lambda request: static("admin_logo_dark.svg"),
+    },
+    "SITE_FAVICONS": (
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/svg+xml",
+            "href": lambda request: static("favicon.svg"),
+        },
+    ),
+    "COLORS": {
+        "primary": {
+            "50": "239 246 255",
+            "100": "219 234 254",
+            "200": "191 219 254",
+            "300": "147 197 253",
+            "400": "96 165 250",
+            "500": "59 130 246",
+            "600": "37 99 235",
+            "700": "29 78 216",
+            "800": "30 64 175",
+            "900": "30 58 138",
+            "950": "23 37 84",
+        },
+    },
 }
 
 LANGUAGE_CODE = "ru"
@@ -234,7 +262,7 @@ USE_L10N = True
 USE_TZ = True
 
 LOCALE_PATHS = [
-    BASE_DIR / 'locale',
+    BASE_DIR / "locale",
 ]
 
 STATIC_URL = "static/"
@@ -242,8 +270,6 @@ STATIC_ROOT = BASE_DIR / "backend_static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Ya disk token
-DISK_TOKEN = getenv("DISK_TOKEN", "")
 
 TELEGRAM_BOT_TOKEN = getenv(
     "TELEGRAM_BOT_TOKEN",

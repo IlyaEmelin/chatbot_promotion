@@ -21,3 +21,33 @@ msgstr "Добавить"
 
 msgid "This page yielded into no results. Create a new item or reset your filters."
 msgstr "По вашему запросу ничего не найдено. Создайте новый объект или сбросьте фильтры."
+
+msgid "Reset filters"
+msgstr "Сбросить фильтры"
+
+msgid "You have been successfully logged out from the administration"
+msgstr "Вы успешно вышли из системы администрирования"
+
+msgid "Welcome back to"
+msgstr "Добро пожаловать в"
+
+msgid "Return to site"
+msgstr "Вернуться на сайт"
+
+msgid "Dark"
+msgstr "Тёмная тема"
+
+msgid "Light"
+msgstr "Светлая тема"
+
+msgid "System"
+msgstr "Системная"
+
+msgid "Run"
+msgstr "Выполнить"
+
+msgid "Select action"
+msgstr "Выбрать действие"
+
+msgid "Type to search"
+msgstr "Введите текст для поиска"

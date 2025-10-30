@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -7,14 +8,16 @@ from django.utils import timezone
 from django.utils.html import format_html
 from django.urls import path, reverse
 from rest_framework.authtoken.models import TokenProxy
+from unfold.admin import ModelAdmin
 
+from api.yadisk import YandexDiskUploader
 from questionnaire.constant import SurveyStatus
 from questionnaire.models import (
     AnswerChoice,
+    Comment,
     Document,
     Survey,
     Question,
-    Comment,
 )
 from questionnaire.utils import get_docs_zip, get_excel_file
 
@@ -24,6 +27,7 @@ admin.site.unregister(Group)
 admin.site.unregister(TokenProxy)
 
 logger = logging.getLogger(__name__)
+DOWNLOAD_URL_ERROR = "Ошибка при получении URL для скачивания файла: {}"
 
 
 class StatusFilter(admin.SimpleListFilter):
@@ -50,23 +54,46 @@ class DocumentInline(admin.TabularInline):
 
     @admin.display(description="Предпросмотр")
     def image_preview(self, obj):
-        if obj.image:
+        if obj and obj.image:
+            try:
+                uploader = YandexDiskUploader(settings.DISK_TOKEN)
+                download_url = uploader.get_download_url(obj.image)
+                if download_url and download_url != "#":
+                    return format_html(
+                        '<a href="{}" target="_blank"><img src="{}"'
+                        'style="max-height: 100px; max-width: 100px;" /></a>',
+                        download_url,
+                        download_url,
+                    )
+            except Exception as e:
+                logger.error(DOWNLOAD_URL_ERROR.format(e))
+
             return format_html(
-                '<a href="{}" target="_blank"><img src="{}"'
-                'style="max-height: 100px; max-width: 100px;" /></a>',
-                obj.image,
-                obj.image,
+                '<span style="color: #666;">Файл: {}</span>',
+                obj.image
             )
         return "—"
 
     @admin.display(description="Скачать")
     def download_link(self, obj):
-        if obj.image:
+        if obj and obj.image:
+            try:
+                uploader = YandexDiskUploader(settings.DISK_TOKEN)
+                download_url = uploader.get_download_url(obj.image)
+                if download_url and download_url != "#":
+                    return format_html(
+                        '<a class="text-primary-600 dark:text-primary-500" '
+                        'href="{}" target="_blank" download>Скачать</a>',
+                        download_url,
+                    )
+            except Exception as e:
+                logger.error(DOWNLOAD_URL_ERROR.format(e))
+
             return format_html(
-                '<a href="{}" target="_blank" download>' "Скачать</a>",
-                obj.image,
+                '<span style="color: #666;">Недоступно</span>'
             )
         return "—"
+
 
 
 class CommentInline(admin.TabularInline):
@@ -119,7 +146,7 @@ class CommentInline(admin.TabularInline):
 
 
 @admin.register(Survey)
-class SurveyAdmin(admin.ModelAdmin):
+class SurveyAdmin(ModelAdmin):
     list_display = (
         "id",
         "user_info",
@@ -203,7 +230,8 @@ class SurveyAdmin(admin.ModelAdmin):
             return "Документы не загружены"
 
         return format_html(
-            '<a class="button" href="{}">Скачать документы</a>',
+            '<a class="button text-primary-600 dark:text-primary-500" '
+            'href="{}">Скачать документы</a>',
             reverse("admin:download_docs", args=(obj.id,)),
         )
 
@@ -258,7 +286,7 @@ class SurveyAdmin(admin.ModelAdmin):
 
 
 @admin.register(Document)
-class DocumentAdmin(admin.ModelAdmin):
+class DocumentAdmin(ModelAdmin):
     """Документ."""
 
     list_display = ("survey_short", "image_preview")
@@ -269,18 +297,28 @@ class DocumentAdmin(admin.ModelAdmin):
 
     @admin.display(description="Изображение")
     def image_preview(self, obj):
-        if obj.image:
+        if obj and obj.image:
+            try:
+                uploader = YandexDiskUploader(settings.DISK_TOKEN)
+                download_url = uploader.get_download_url(obj.image)
+                if download_url and download_url != "#":
+                    return format_html(
+                        '<a href="{}" target="_blank"><img src="{}" '
+                        'style="max-height: 50px;" /></a>',
+                        download_url,
+                        download_url,
+                    )
+            except Exception as e:
+                logger.error(DOWNLOAD_URL_ERROR.format(e))
+
             return format_html(
-                '<a href="{}" target="_blank"><img src="{}" '
-                'style="max-height: 50px;" /></a>',
-                obj.image,
-                obj.image,
+                '<span style="color: #666;">Недоступно</span>'
             )
         return "—"
 
 
 @admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
+class QuestionAdmin(ModelAdmin):
     """Вопрос."""
 
     list_display = (
@@ -293,7 +331,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 @admin.register(AnswerChoice)
-class AnswerChoiceAdmin(admin.ModelAdmin):
+class AnswerChoiceAdmin(ModelAdmin):
     """Вопрос."""
 
     list_display = (
@@ -305,7 +343,7 @@ class AnswerChoiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(ModelAdmin):
     model = User
     fieldsets = (
         (None, {"fields": ("username", "password")}),
@@ -358,7 +396,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 @admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(ModelAdmin):
     """Комментарии."""
 
     list_display = ("survey_short", "user_info", "text", "created_at")

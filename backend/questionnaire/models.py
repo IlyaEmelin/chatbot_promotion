@@ -205,7 +205,7 @@ class Document(Model):
 
     image = CharField(
         max_length=FILE_URL_MAX_LEN,
-        verbose_name="Изображение документа",
+        verbose_name="Путь к изображению документа на Яндекс-диске",
     )
     survey = ForeignKey(
         Survey,
