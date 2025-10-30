@@ -1,0 +1,23 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ru\n"
+
+# Unfold strings
+msgid "No results found"
+msgstr "Результатов не найдено"
+
+msgid "This page yielded into no results."
+msgstr "По вашему запросу ничего не найдено."
+
+msgid "Create a new item"
+msgstr "Создайте новый элемент"
+
+msgid "or reset your filters."
+msgstr "или сбросьте фильтры."
+
+msgid "Add"
+msgstr "Добавить"
+
+msgid "This page yielded into no results. Create a new item or reset your filters."
+msgstr "По вашему запросу ничего не найдено. Создайте новый объект или сбросьте фильтры."

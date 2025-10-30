@@ -14,7 +14,6 @@ ALLOWED_HOSTS = ["*"]
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOGGING_OUTPUT = getenv("LOGGING_DESTINATION", "console file").split(" ")
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -233,6 +232,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "backend_static"
