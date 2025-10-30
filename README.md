@@ -123,11 +123,32 @@ ssh -l fondprodvizhenie 158.160.185.86
 
 **Из корневой папки:**
 
+Обычный перезапуск
 ```bash
 sudo docker-compose up -d
 ```
 
+Перезапуск со сборкой нового билда
+```bash
+git pull
+```
+```bash
+sudo docker-compose up -d --build
+```
+
 #### При необходимости: зачистка базы и создание тестовых пользователей
+
+Получаем список контейнеров
+```bash
+sudo docker container ls
+```
+
+Открываем терминал bash внутри контейнера
+```bash
+sudo docker exec -it <id контейнера из списка выше> /bin/bash
+```
+
+Очищаем базу и создаём mock данные
 ```bash
 python manage.py clear_data_base --add_user --add_survey_data
 ```
