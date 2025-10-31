@@ -138,14 +138,9 @@ sudo docker-compose up -d --build
 
 #### При необходимости: зачистка базы и создание тестовых пользователей
 
-Получаем список контейнеров
-```bash
-sudo docker container ls
-```
-
 Открываем терминал bash внутри контейнера
 ```bash
-sudo docker exec -it <id контейнера из списка выше> /bin/bash
+sudo docker exec -it chatbot_promotion-backend-1 /bin/bash
 ```
 
 Очищаем базу и создаём mock данные
