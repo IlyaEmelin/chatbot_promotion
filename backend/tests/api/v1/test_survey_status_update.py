@@ -9,7 +9,6 @@ from rest_framework.status import (
     HTTP_405_METHOD_NOT_ALLOWED,
 )
 from django.contrib.auth import get_user_model
-from questionnaire.models import Survey
 from questionnaire.constant import SurveyStatus
 
 User = get_user_model()
@@ -17,12 +16,6 @@ User = get_user_model()
 
 class TestSurveyProcessing:
     """Тесты для метода processing SurveyViewSet"""
-
-    other_user_data = {
-        "username": "otheruser",
-        "email": "other@example.com",
-        "password": "otherpass123",
-    }
 
     @staticmethod
     def get_url(survey_id: UUID) -> str:
@@ -107,18 +100,10 @@ class TestSurveyProcessing:
 
     @pytest.mark.django_db
     def test_processing_different_users_surveys(
-        self, authenticated_client, question
+        self, authenticated_client, survey_other_user
     ):
         """Тест, что пользователь может изменять только свои опросы"""
-        other_user = User.objects.create_user(**self.other_user_data)
-        other_user_survey = Survey.objects.create(
-            user=other_user,
-            current_question=question,
-            status=SurveyStatus.NEW.value,
-            result=[],
-            questions_version_uuid=uuid4(),
-        )
-        url = self.get_url(other_user_survey.id)
+        url = self.get_url(survey_other_user.id)
 
         response = authenticated_client.patch(url)
 

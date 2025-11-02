@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from django.urls import reverse
@@ -39,7 +39,7 @@ class TestSurveyRevert:
         )
 
     @pytest.mark.django_db
-    def test_processing_revert(
+    def test_revert_success1(
         self,
         authenticated_client: APIClient,
         survey: Survey,
@@ -60,7 +60,7 @@ class TestSurveyRevert:
         assert survey.updated_at == question.updated_at
 
     @pytest.mark.django_db
-    def test_processing_revert(
+    def test_revert_success2(
         self,
         authenticated_client,
         survey_with_custom_answer_second_step,
@@ -93,3 +93,41 @@ class TestSurveyRevert:
             survey_with_custom_answer_second_step.updated_at
             == next_question.updated_at
         )
+
+    @pytest.mark.django_db
+    def test_revert_unauthorized(self, api_client, survey):
+        """Тест доступа без аутентификации"""
+        url = self.__get_url(survey.id)
+
+        response = api_client.patch(url)
+
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+
+    @pytest.mark.django_db
+    def test_revert_survey_not_found(self, authenticated_client):
+        """
+        Тест попытки откатить несуществующий опрос
+
+        Args:
+            authenticated_client: аутентифицированный клиент
+
+        """
+        non_existent_id = uuid4()
+        url = self.__get_url(non_existent_id)
+
+        response = authenticated_client.patch(url)
+
+        assert response.status_code == HTTP_404_NOT_FOUND
+
+    @pytest.mark.django_db
+    def test_revert_different_users_surveys(
+        self,
+        authenticated_client,
+        survey_other_user,
+    ):
+        """Тест, что пользователь может откатить только свои опросы"""
+        url = self.__get_url(survey_other_user.id)
+
+        response = authenticated_client.patch(url)
+
+        assert response.status_code == HTTP_404_NOT_FOUND
