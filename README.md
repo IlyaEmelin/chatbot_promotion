@@ -127,7 +127,7 @@ ssh -l fondprodvizhenie 158.160.185.86
 
 Обычный перезапуск
 ```bash
-sudo docker-compose up -d
+sudo docker compose up -d
 ```
 
 Перезапуск со сборкой нового билда
@@ -135,7 +135,7 @@ sudo docker-compose up -d
 git pull
 ```
 ```bash
-sudo docker-compose up -d --build
+sudo docker compose up -d --build
 ```
 
 #### При необходимости: зачистка базы и создание тестовых пользователей
@@ -145,9 +145,13 @@ sudo docker-compose up -d --build
 sudo docker exec -it chatbot_promotion-backend-1 /bin/bash
 ```
 
-Очищаем базу и создаём mock данные
+Очистка базы и создаём mock данные
 ```bash
 python manage.py clear_data_base --add_user --add_survey_data
+```
+Или перезапись списка вопросов из файла steps.json
+```bash
+python manage.py add_survey_data --overwrite
 ```
 
 ### Локальный запуск front-end приложения
