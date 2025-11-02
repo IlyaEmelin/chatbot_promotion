@@ -2,6 +2,7 @@ import hashlib
 import logging
 from functools import lru_cache
 
+from django import forms
 from django.conf import settings
 from django.contrib import admin
 # from django.contrib.admin.models import LogEntry
@@ -579,7 +580,7 @@ class DocumentAdmin(ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(ModelAdmin):
-    """Вопрос."""
+    """Вопросы."""
 
     list_display = (
         "id",
@@ -592,9 +593,10 @@ class QuestionAdmin(ModelAdmin):
 
 @admin.register(AnswerChoice)
 class AnswerChoiceAdmin(ModelAdmin):
-    """Вопрос."""
+    """Ответы."""
 
     list_display = (
+        "id",
         "current_question",
         "next_question",
         "answer",
