@@ -1,5 +1,5 @@
 # conftest.py
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -166,9 +166,9 @@ def survey_with_custom_answer_start_step(
 @pytest.fixture
 def survey_with_custom_answer_second_step(
     user,
-    question,
-    next_question,
-    answer_choice,
+    question: Question,
+    next_question: Question,
+    answer_choice: AnswerChoice,
 ) -> Survey:
     """
     Опрос с вопросом, имеющим пользовательский ответ
@@ -187,10 +187,13 @@ def survey_with_custom_answer_second_step(
         user=user,
         current_question=next_question,
         status=SurveyStatus.NEW.value,
-        result=[question.text, answer_choice.text],
+        result=[question.text, answer_choice.answer],
         questions_version_uuid=(
-            question.updated_uuid ^ next_question.updated_uuid
+            UUID(
+                int=question.updated_uuid.int ^ next_question.updated_uuid.int
+            )
         ),
+        updated_at=max(question.updated_at, next_question.updated_at),
     )
 
 

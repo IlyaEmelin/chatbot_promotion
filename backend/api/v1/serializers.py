@@ -452,7 +452,7 @@ class SurveyRevertSerializer(ModelSerializer):
             result := instance.result
         ):
             question_text, answer_text = result[-2], result[-1]
-            if previous_answers := current_question.previous_answers:
+            if previous_answers := current_question.previous_answers.all():
                 new_question = None
                 for previous_answer in previous_answers:
                     if (
