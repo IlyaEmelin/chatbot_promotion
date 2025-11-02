@@ -325,27 +325,30 @@ class TestSurveyUpdateExternalFields:
     def test_update_survey_with_custom_answer_saves_user_field(
         self,
         authenticated_client,
-        survey_with_custom_answer,
-        question_with_custom_answer,
+        survey_with_custom_answer_start_step,
+        question,
+        answer_choice,
     ):
         """Тест сохранения поля пользователя с пользовательским ответом"""
-        question_with_custom_answer.external_table_field_name = (
-            "User.residence"
-        )
-        question_with_custom_answer.save()
+        question.external_table_field_name = "User.residence"
+        question.save()
 
         url = reverse(
-            "survey-detail", kwargs={"pk": survey_with_custom_answer.id}
+            "survey-detail",
+            kwargs={"pk": survey_with_custom_answer_start_step.id},
         )
-        custom_answer = "Санкт-Петербург"
+        custom_answer = answer_choice.answer
         data = {"answer": custom_answer}
 
         response = authenticated_client.put(url, data, format="json")
 
         assert response.status_code == HTTP_200_OK
 
-        survey_with_custom_answer.user.refresh_from_db()
-        assert survey_with_custom_answer.user.residence == custom_answer
+        survey_with_custom_answer_start_step.user.refresh_from_db()
+        assert (
+            survey_with_custom_answer_start_step.user.residence
+            == custom_answer
+        )
 
     def test_update_survey_external_field_empty_value(
         self,

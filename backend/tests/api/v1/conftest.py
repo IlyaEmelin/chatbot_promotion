@@ -89,26 +89,27 @@ def next_question() -> Question:
     """
 
     return Question.objects.create(
-        text="Следующий вопрос",
+        text="Следующий вопрос?",
         updated_uuid="42345678-1234-1234-1234-123456789013",
     )
 
 
 @pytest.fixture
-def answer_choice(question: Question, next_question: Question) -> Question:
+def answer_choice(question: Question, next_question: Question) -> AnswerChoice:
     """
     Второй вопрос
 
     Args:
         question: первый вопрос
+        next_question: второй вопрос
 
     Returns:
-        Question: второй вопрос
+        AnswerChoice: вариант ответа
     """
     return AnswerChoice.objects.create(
         current_question=question,
         next_question=next_question,
-        answer="test_answer",
+        answer="вариант ответа",
     )
 
 
@@ -134,35 +135,62 @@ def survey(user, question) -> Survey:
 
 
 @pytest.fixture
-def question_with_custom_answer() -> Question:
-    """Вопрос с вариантом для пользовательского ответа"""
-    question = Question.objects.create(
-        text="Вопрос с пользовательским ответом?",
-        updated_uuid="52345678-1234-1234-1234-123456789012",
-    )
+def survey_with_custom_answer_start_step(
+    user,
+    question,
+    next_question,
+    answer_choice,
+) -> Survey:
+    """
+    Опрос с вопросом, имеющим пользовательский ответ
+    на этапе первого вопроса
 
-    # Создаем AnswerChoice для пользовательского ответа
-    next_question = Question.objects.create(
-        text="Следующий вопрос после пользовательского",
-        updated_uuid="62345678-1234-1234-1234-123456789012",
-    )
-    AnswerChoice.objects.create(
+    Args:
+        user: пользователь
+        question: 1-й вопрос с ответом
+        next_question: 2-й следующий вопрос
+        answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
         current_question=question,
-        next_question=next_question,
-        answer=None,  # Для пользовательских ответов
+        status=SurveyStatus.NEW.value,
+        result=[],
+        questions_version_uuid=question.updated_uuid,
     )
-    return question
 
 
 @pytest.fixture
-def survey_with_custom_answer(user, question_with_custom_answer) -> Survey:
-    """Опрос с вопросом, имеющим пользовательский ответ"""
+def survey_with_custom_answer_second_step(
+    user,
+    question,
+    next_question,
+    answer_choice,
+) -> Survey:
+    """
+    Опрос с вопросом, имеющим пользовательский ответ
+    на этапе второго вопроса
+
+    Args:
+        user: пользователь
+        question: 1-й вопрос с ответом
+        next_question: 2-й следующий вопрос
+        answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
+
+    Returns:
+        Survey: опрос
+    """
     return Survey.objects.create(
         user=user,
-        current_question=question_with_custom_answer,
+        current_question=next_question,
         status=SurveyStatus.NEW.value,
-        result=[],
-        questions_version_uuid="72345678-1234-1234-1234-123456789012",
+        result=[question.text, answer_choice.text],
+        questions_version_uuid=(
+            question.updated_uuid ^ next_question.updated_uuid
+        ),
     )
 
 

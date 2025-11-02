@@ -56,7 +56,7 @@ class TestSurveyCreate:
         assert response.data["id"] is not None
         assert response.data["current_question_text"] == question.text
         assert "answers" in response.data
-        assert response.data["answers"] == ["test_answer"]
+        assert response.data["answers"] == ["вариант ответа"]
 
         # Проверяем, что опрос создался в базе
         survey = Survey.objects.get(id=response.data["id"])

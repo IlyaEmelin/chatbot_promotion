@@ -22,27 +22,30 @@ class TestSurveyUpdate:
         authenticated_client: APIClient,
         survey: Survey,
         answer_choice: AnswerChoice,
+        question: Question,
+        next_question: Question,
     ):
         """Тест успешного обновления опроса с ответом"""
         url = reverse(
             viewname="survey-detail",
             kwargs={"pk": survey.id},
         )
-        data = {"answer": "test_answer"}
+        data = {"answer": answer_choice.answer}
 
         response = authenticated_client.put(url, data, format="json")
 
         assert response.status_code == HTTP_200_OK
         assert response.data["id"] == str(survey.id)
-        assert "current_question_text" in response.data
-        assert "answers" in response.data
+        assert response.data.get("current_question_text") == next_question.text
+        assert response.data.get("answers") == []
 
         # Проверяем обновление опроса в базе
         updated_survey = Survey.objects.get(id=survey.id)
         assert updated_survey.current_question == answer_choice.next_question
-        assert len(updated_survey.result) == 2  # question.text и answer
-        assert updated_survey.result[0] == survey.current_question.text
-        assert updated_survey.result[1] == "test_answer"
+        assert len(updated_survey.result) == 2
+        # question.text и answer_choice.answer
+        assert updated_survey.result[0] == question.text
+        assert updated_survey.result[1] == answer_choice.answer
 
     def test_update_survey_custom_answer(
         self,

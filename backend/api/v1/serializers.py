@@ -2,6 +2,7 @@ from datetime import datetime
 from random import choices
 from string import digits
 from uuid import UUID
+from typing import Any
 import base64
 import logging
 
@@ -157,27 +158,62 @@ class SurveyUpdateSerializer(ModelSerializer):
         model = Survey
         fields = (
             "answer",
+            "add_telegram",
             "current_question_text",
             "answers",
-            "add_telegram",
         )
         read_only_fields = ("current_question_text", "answers")
 
-    def get_current_question_text(self, obj):
+    def get_current_question_text(self, obj: Survey) -> str:
+        """
+        Получить текст текущего вопроса
+
+        Args:
+            obj: опрос
+
+        Returns:
+            str: текст текущего вопроса
+        """
         return obj.current_question.text if obj.current_question else None
 
-    def get_answers(self, obj):
-        if obj.current_question:
+    def get_answers(self, obj: Survey) -> list[str | None]:
+        """
+        Получить варианты ответа для текущего вопроса
+
+        Args:
+            obj: опрос
+
+        Returns:
+            list[str|None]: варианты ответа
+        """
+        if current_question := obj.current_question:
             return list(
-                obj.current_question.answers.all().values_list(
-                    "answer", flat=True
+                current_question.answers.all().values_list(
+                    "answer",
+                    flat=True,
                 )
             )
         return []
 
-    def update(self, instance, validated_data):
-        answer = validated_data.get("answer")
-        add_telegram = validated_data.pop("add_telegram", True)
+    def update(
+        self,
+        instance: Survey,
+        validated_data: dict[str, Any],
+    ) -> Survey:
+        """
+        Обновление данных
+
+        Args:
+            instance: обновляемый объект
+            validated_data: провалидированные данные
+
+        Returns:
+            Survey: обновляемый объект
+        """
+        answer, add_telegram = (
+            validated_data.get("answer"),
+            validated_data.pop("add_telegram", True),
+        )
 
         if current_question := instance.current_question:
             next_question, new_status, answer_text = (
@@ -209,12 +245,13 @@ class SurveyUpdateSerializer(ModelSerializer):
                 )
 
             instance.current_question = next_question
+            instance.result = result
+
             instance.status = (
                 SurveyStatus.NEW.value
                 if next_question and next_question.answers.exists()
                 else SurveyStatus.WAITING_DOCS.value
             )
-            instance.result = result
             if new_status:
                 instance.status = new_status
 
@@ -346,6 +383,120 @@ class SurveyUpdateSerializer(ModelSerializer):
 
         question.text = "Некорректный ответ. Ответьте снова.\n" + question.text
         return question, None, None
+
+    def to_representation(self, instance):
+        return SurveyReadSerializer(instance, context=self.context).data
+
+
+class SurveyRevertSerializer(ModelSerializer):
+    """Сериализатор отката действия в опросе"""
+
+    current_question_text = SerializerMethodField(read_only=True)
+    answers = SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Survey
+        fields = (
+            "current_question_text",
+            "answers",
+        )
+        read_only_fields = ("current_question_text", "answers")
+
+    def get_current_question_text(self, obj: Survey) -> str:
+        """
+        Получить текст текущего вопроса
+
+        Args:
+            obj: опрос
+
+        Returns:
+            str: текст текущего вопроса
+        """
+        return obj.current_question.text if obj.current_question else None
+
+    def get_answers(self, obj: Survey) -> list[str | None]:
+        """
+        Получить варианты ответа на текущий вопрос
+
+        Args:
+            obj: опрос
+
+        Returns:
+            list[str|None]: варианты ответа
+        """
+        if current_question := obj.current_question:
+            return list(
+                current_question.answers.all().values_list(
+                    "answer",
+                    flat=True,
+                )
+            )
+
+    def update(
+        self,
+        instance: Survey,
+        validated_data: dict[str, Any],
+    ) -> Survey:
+        """
+        Обновление данных
+
+        Args:
+            instance: обновляемый объект
+            validated_data: провалидированные данные
+
+        Returns:
+            Survey: обновляемый объект
+
+        """
+        if (current_question := instance.current_question) and (
+            result := instance.result
+        ):
+            question_text, answer_text = result[-2], result[-1]
+            if previous_answers := current_question.previous_answers:
+                new_question = None
+                for previous_answer in previous_answers:
+                    if (
+                        previous_answer.answer == answer_text
+                        and (
+                            new_question := previous_answer.current_question
+                        ).text
+                        == question_text
+                    ):
+                        break
+                else:
+                    for previous_answer in previous_answers:
+                        if (
+                            previous_answer.answer is None
+                            and (
+                                new_question := previous_answer.current_question
+                            ).text
+                            == question_text
+                        ):
+                            break
+
+                if new_question:
+                    instance.current_question = new_question
+                    instance.status = SurveyStatus.NEW.value
+                    instance.result = result[:-2]
+
+                    logger.debug(
+                        "Откат добавления последнего UUID "
+                        "так раза применение xor одного и того же значения 2 "
+                        "дает начальное число."
+                    )
+                    instance.questions_version_uuid = UUID(
+                        int=(
+                            instance.questions_version_uuid.int
+                            ^ current_question.updated_uuid.int
+                        )
+                    )
+                    # TODO поле instance.updated_at пока не обновляет так как
+                    #  нам придется пробежать все вопросы включая новый текущий
+                    # TODO так же не будет происходить
+                    #  откат external_table_field_name
+                    instance.save()
+
+        return instance
 
     def to_representation(self, instance):
         return SurveyReadSerializer(instance, context=self.context).data
