@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -29,6 +30,7 @@ from .permissions import (
 from .serializers import (
     SurveyCreateSerializer,
     SurveyUpdateSerializer,
+    SurveyRevertSerializer,
     SurveyReadSerializer,
     DocumentSerializer,
     CommentSerializer,
@@ -55,15 +57,49 @@ class SurveyViewSet(
     )
 
     @action(
-        ("patch",),
+        methods=("patch",),
         detail=True,
     )
-    def processing(self, request, pk):
+    def processing(self, request: Request, pk: UUID) -> Response:
+        """
+        Метод смены статуса опроса на <В обработке> .
+
+        Args:
+            request: запрос
+            pk: первичный ключ
+
+        Returns:
+            Response: ответ
+        """
         """Метод смены статуса опроса на <В обработке>."""
         survey = self.get_object()
         survey.status = SurveyStatus.PROCESSING.value
         survey.save()
         return Response(self.get_serializer(survey).data)
+
+    @action(
+        methods=("patch",),
+        detail=True,
+    )
+    def revert(self, request: Request, pk: UUID) -> Response:
+        """
+        Метод отката текущего вопроса на предыдущий
+
+        Args:
+            request: запрос
+            pk: первичный ключ
+
+        Returns:
+            Response: ответ
+        """
+        serializer = SurveyRevertSerializer(
+            instance=self.get_object(),
+            data=request.data or {},
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        return Response(serializer.data)
 
     def get_serializer_class(self):
         """
@@ -105,11 +141,10 @@ class SurveyViewSet(
         Returns:
             Response: ответ на запрос создания
         """
-        user = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save(user=user)
+        serializer.save(user=request.user)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):

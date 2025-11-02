@@ -1,5 +1,5 @@
 # conftest.py
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -30,6 +30,7 @@ def api_client():
     return APIClient()
 
 
+# user
 @pytest.fixture
 def user() -> User:
     """
@@ -45,6 +46,22 @@ def user() -> User:
     )
 
 
+@pytest.fixture
+def other_user() -> User:
+    """
+    Другой пользователь
+
+    Returns:
+        User: пользователь
+    """
+    return User.objects.create_user(
+        username="otheruser",
+        email="other@example.com",
+        password="otherpass123",
+    )
+
+
+# client
 @pytest.fixture
 def authenticated_client(
     api_client: APIClient,
@@ -64,6 +81,7 @@ def authenticated_client(
     return api_client
 
 
+# question
 @pytest.fixture
 def question() -> Question:
     """
@@ -89,29 +107,50 @@ def next_question() -> Question:
     """
 
     return Question.objects.create(
-        text="Следующий вопрос",
+        text="Следующий вопрос?",
         updated_uuid="42345678-1234-1234-1234-123456789013",
     )
 
 
 @pytest.fixture
-def answer_choice(question: Question, next_question: Question) -> Question:
+def question_with_final_answer() -> Question:
+    """Вопрос с завершающим ответом"""
+    question_final_answer = Question.objects.create(
+        text="Финальный вопрос?",
+        updated_uuid="82345678-1234-1234-1234-123456789012",
+    )
+
+    # Создаем AnswerChoice без next_question (конец опроса)
+    AnswerChoice.objects.create(
+        current_question=question_final_answer,
+        next_question=None,  # Конец опроса
+        answer="final_answer",
+    )
+
+    return question_final_answer
+
+
+# answer choice
+@pytest.fixture
+def answer_choice(question: Question, next_question: Question) -> AnswerChoice:
     """
     Второй вопрос
 
     Args:
         question: первый вопрос
+        next_question: второй вопрос
 
     Returns:
-        Question: второй вопрос
+        AnswerChoice: вариант ответа
     """
     return AnswerChoice.objects.create(
         current_question=question,
         next_question=next_question,
-        answer="test_answer",
+        answer="вариант ответа",
     )
 
 
+# survey
 @pytest.fixture
 def survey(user, question) -> Survey:
     """
@@ -129,59 +168,93 @@ def survey(user, question) -> Survey:
         current_question=question,
         status=SurveyStatus.NEW.value,
         result=[],
-        questions_version_uuid="32345678-1234-1234-1234-123456789012",
+        questions_version_uuid=question.updated_uuid,
+        updated_at=question.updated_at,
     )
 
 
 @pytest.fixture
-def question_with_custom_answer() -> Question:
-    """Вопрос с вариантом для пользовательского ответа"""
-    question = Question.objects.create(
-        text="Вопрос с пользовательским ответом?",
-        updated_uuid="52345678-1234-1234-1234-123456789012",
-    )
+def survey_with_custom_answer_start_step(
+    user,
+    question,
+    next_question,
+    answer_choice,
+) -> Survey:
+    """
+    Опрос с вопросом, имеющим пользовательский ответ
+    на этапе первого вопроса
 
-    # Создаем AnswerChoice для пользовательского ответа
-    next_question = Question.objects.create(
-        text="Следующий вопрос после пользовательского",
-        updated_uuid="62345678-1234-1234-1234-123456789012",
-    )
-    AnswerChoice.objects.create(
-        current_question=question,
-        next_question=next_question,
-        answer=None,  # Для пользовательских ответов
-    )
-    return question
+    Args:
+        user: пользователь
+        question: 1-й вопрос с ответом
+        next_question: 2-й следующий вопрос
+        answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
 
-
-@pytest.fixture
-def survey_with_custom_answer(user, question_with_custom_answer) -> Survey:
-    """Опрос с вопросом, имеющим пользовательский ответ"""
+    Returns:
+        Survey: опрос
+    """
     return Survey.objects.create(
         user=user,
-        current_question=question_with_custom_answer,
+        current_question=question,
         status=SurveyStatus.NEW.value,
         result=[],
-        questions_version_uuid="72345678-1234-1234-1234-123456789012",
+        questions_version_uuid=question.updated_uuid,
     )
 
 
 @pytest.fixture
-def question_with_final_answer() -> Question:
-    """Вопрос с завершающим ответом"""
-    question = Question.objects.create(
-        text="Финальный вопрос?",
-        updated_uuid="82345678-1234-1234-1234-123456789012",
+def survey_with_custom_answer_second_step(
+    user,
+    question: Question,
+    next_question: Question,
+    answer_choice: AnswerChoice,
+) -> Survey:
+    """
+    Опрос с вопросом, имеющим пользовательский ответ
+    на этапе второго вопроса
+
+    Args:
+        user: пользователь
+        question: 1-й вопрос с ответом
+        next_question: 2-й следующий вопрос
+        answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
+        current_question=next_question,
+        status=SurveyStatus.NEW.value,
+        result=[question.text, answer_choice.answer],
+        questions_version_uuid=(
+            UUID(
+                int=question.updated_uuid.int ^ next_question.updated_uuid.int
+            )
+        ),
+        updated_at=max(question.updated_at, next_question.updated_at),
     )
 
-    # Создаем AnswerChoice без next_question (конец опроса)
-    AnswerChoice.objects.create(
+
+@pytest.fixture
+def survey_other_user(other_user, question) -> Survey:
+    """
+    Получить опрос от другого пользователя
+
+    Args:
+        other_user: пользователь
+        question: первый вопрос
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=other_user,
         current_question=question,
-        next_question=None,  # Конец опроса
-        answer="final_answer",
+        status=SurveyStatus.NEW.value,
+        result=[],
+        questions_version_uuid="32345678-1234-1234-1234-123456789012",
     )
-
-    return question
 
 
 @pytest.fixture
@@ -197,8 +270,6 @@ def survey_with_final_question(user, question_with_final_answer) -> Survey:
 
 
 # Фикстуры для API Яндекс-диска
-
-
 @pytest.fixture
 def document(survey):
     """Фикстура для создания документа"""
