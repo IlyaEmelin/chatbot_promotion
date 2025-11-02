@@ -15,10 +15,12 @@ from telegram.ext import ContextTypes
 
 from questionnaire.models import Survey
 from questionnaire.constant import SurveyStatus, TelegramCommand
+from .constant import MSG_REVERT_PREVIOUS_QUESTION
 from .menu_handlers import help_command, load_command
 from .sync_to_async import (
     write_document_db,
     save_survey_data,
+    revert_survey_data,
     get_or_create_user,
     change_processing,
     get_or_create_survey,
@@ -142,6 +144,43 @@ async def _inform_msg(survey_obj: Survey, update) -> None:
                 f"Используйте {TelegramCommand.START.get_call_name()} "
                 "для нового опроса."
             )
+
+
+async def _delete_last_bot_messages(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    count=4,
+) -> None:
+    """
+    Удаляет последние <count> сообщения бота из сохраненной истории
+
+    Args:
+        update: обновление от Telegram
+        context: контекст
+        count: количество удаляемых сообщений
+    """
+    try:
+        chat_id = update.effective_chat.id
+
+        # Удаляем 2 последних сообщения бота перед текущим сообщением пользователя
+        for offset in range(0, count):
+            message_id_to_delete = update.message.message_id - offset
+
+            try:
+                await context.bot.delete_message(
+                    chat_id=chat_id, message_id=message_id_to_delete
+                )
+                logger.debug(f"Удалено сообщение {message_id_to_delete}")
+            except Exception as e:
+                logger.debug(
+                    f"Не удалось удалить сообщение {message_id_to_delete}: {e}"
+                )
+
+    except Exception as e:
+        logger.error(
+            f"Ошибка при удалении сообщений: {e}",
+            exc_info=True,
+        )
 
 
 async def start_command(
@@ -344,11 +383,19 @@ async def handle_message(
                 logger.debug("Опрос")
                 new_status = None
                 try:
-                    text, answers, new_status = await save_survey_data(
-                        user_obj,
-                        survey_obj,
-                        user_message,
-                    )
+                    if user_message == MSG_REVERT_PREVIOUS_QUESTION:
+                        await _delete_last_bot_messages(update, context)
+
+                        text, answers, new_status = await revert_survey_data(
+                            user_obj,
+                            survey_obj,
+                        )
+                    else:
+                        text, answers, new_status = await save_survey_data(
+                            user_obj,
+                            survey_obj,
+                            user_message,
+                        )
                     if (
                         settings.TELEGRAM_SHOW_RESPONSE_CHOICE
                         and answers
@@ -359,6 +406,8 @@ async def handle_message(
                         text += "\n".join(
                             f"🔘 - {answer}" for answer in answers
                         )
+                    if settings.TELEGRAM_SHOW_REVERT_PREVIOUS_QUESTION:
+                        answers.append(MSG_REVERT_PREVIOUS_QUESTION)
                 except ValidationError as exp:
                     text, answers = "\n".join(exp.messages), []
 

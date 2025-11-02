@@ -142,24 +142,20 @@ WSGI_APPLICATION = "chatbot_promotion.wsgi.application"
 # SWAGGER_USE_COMPAT_RENDERERS = False
 
 SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
-        }
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
-    'USE_SESSION_AUTH': False,
-    'JSON_EDITOR': True,
-    'OPERATIONS_SORTER': 'alpha',
-    'TAGS_SORTER': 'alpha',
-    'DOC_EXPANSION': 'none',
-    'DEEP_LINKING': True,
+    "USE_SESSION_AUTH": False,
+    "JSON_EDITOR": True,
+    "OPERATIONS_SORTER": "alpha",
+    "TAGS_SORTER": "alpha",
+    "DOC_EXPANSION": "none",
+    "DEEP_LINKING": True,
 }
 
 # Дополнительно для Redoc
 REDOC_SETTINGS = {
-    'SPEC_URL': ('schema-json', {'format': '.json'}),
+    "SPEC_URL": ("schema-json", {"format": ".json"}),
 }
 
 
@@ -254,6 +250,10 @@ TELEGRAM_SHOW_RESPONSE_CHOICE = (
         "false",
     ).lower()
     == "true"
+)
+# Отображать в телеграмм боте ответ "Вернуться к предыдущему вопросу"
+TELEGRAM_SHOW_REVERT_PREVIOUS_QUESTION = (
+    getenv("TELEGRAM_SHOW_REVERT_PREVIOUS_QUESTION", "false").lower() == "true"
 )
 
 DEFAULT_DISK_TOKEN = "dummy-key-for-dev"
