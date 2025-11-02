@@ -9,6 +9,7 @@ from api.v1.serializers import (
     SurveyUpdateSerializer,
     SurveyCreateSerializer,
     DocumentSerializer,
+    SurveyRevertSerializer,
 )
 
 from questionnaire.models import Survey, Question, Document
@@ -79,6 +80,38 @@ def save_survey_data(
 
 
 @sync_to_async
+def revert_survey_data(
+    user_obj: User,
+    survey_obj: Survey,
+):
+    """
+    Вернуться к предыдущему вопросу
+
+    Args:
+        user_obj: пользователь
+        survey_obj: опрос
+
+    Returns:
+        str: Вопрос
+        list[None|str]: варианты ответа
+        list[None|str]]: новый статус
+    """
+    serializer = SurveyRevertSerializer(
+        instance=survey_obj,
+        data={},
+        partial=True,
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save(user=user_obj)
+    data = serializer.data
+    return (
+        data.get("current_question_text"),
+        data.get("answers"),
+        data.get("new_status"),
+    )
+
+
+@sync_to_async
 def get_or_create_user(user: TelegramUser) -> User:
     """
     Создать найти пользователя
@@ -132,12 +165,7 @@ def change_processing(survey_obj: Survey) -> None:
 def get_or_create_survey(
     user_obj: User,
     restart_question: bool,
-) -> tuple[
-    str,
-    list[str | None],
-    list[str],
-    Survey,
-]:
+) -> tuple[str, list[str | None], list[str], Survey]:
     """
     Получить или создать опрос
 

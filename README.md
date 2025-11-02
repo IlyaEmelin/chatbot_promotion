@@ -94,6 +94,8 @@ TELEGRAM_WEBHOOK_URL=https://<yourdomain.com>/telegram/webhook/
 ADMIN_IDS=< TelegramID >
 # Отображать в текстовом сообщение варианты ответа
 TELEGRAM_SHOW_RESPONSE_CHOICE=true
+# Отображать в телеграмм боте ответ "Вернуться к предыдущему вопросу"
+TELEGRAM_SHOW_REVERT_PREVIOUS_QUESTION=true 
 
 # Я.Диск токен
 DISK_TOKEN=< Токен Яндекс-диска >

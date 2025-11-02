@@ -1,4 +1,5 @@
 import logging
+
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ContextTypes
 
@@ -26,6 +27,7 @@ def _get_default_help_keyboard(status: SurveyStatus) -> ReplyKeyboardMarkup:
         [KeyboardButton(command.get_call_name())]
         for command in status.available_commands
     ]
+
     return ReplyKeyboardMarkup(
         keyboard,
         resize_keyboard=True,
