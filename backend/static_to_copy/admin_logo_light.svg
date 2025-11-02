@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="120" height="32" viewBox="0 0 120 32">
-    <style>
-        .logo-bg { fill: #1a56db; }
-        .logo-text { fill: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; }
-    </style>
-    <rect class="logo-bg" width="120" height="32" rx="6"/>
-    <text class="logo-text" x="60" y="20" text-anchor="middle">MyAdmin</text>
-</svg>

@@ -236,9 +236,26 @@ UNFOLD = {
     "SITE_FAVICONS": (
         {
             "rel": "icon",
+            "sizes": "166x166",
+            "type": "image/png",
+            "href": lambda request: static("favicon-166x166.png"),
+        },
+        {
+            "rel": "icon",
             "sizes": "32x32",
-            "type": "image/svg+xml",
-            "href": lambda request: static("favicon.svg"),
+            "type": "image/png",
+            "href": lambda request: static("favicon-166x166.png"),
+        },
+        {
+            "rel": "icon",
+            "sizes": "16x16",
+            "type": "image/png",
+            "href": lambda request: static("favicon-166x166.png"),
+        },
+        {
+            "rel": "apple-touch-icon",
+            "sizes": "166x166",
+            "href": lambda request: static("favicon-166x166.png"),
         },
     ),
     "COLORS": {

@@ -1,20 +1,13 @@
-import hashlib
 import logging
-from functools import lru_cache
 
-from django import forms
-from django.conf import settings
 from django.contrib import admin
-# from django.contrib.admin.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.core.cache import cache
 from django.utils import timezone
 from django.utils.html import format_html
 from django.urls import path, reverse
 from rest_framework.authtoken.models import TokenProxy
 from unfold.admin import ModelAdmin
-from unfold.decorators import display
 
 from questionnaire.constant import SurveyStatus
 from questionnaire.models import (
@@ -24,50 +17,11 @@ from questionnaire.models import (
     Survey,
     Question,
 )
-from questionnaire.utils import get_docs_zip, get_excel_file, get_url
-
-
-# @admin.register(LogEntry)
-# class LogEntryAdmin(ModelAdmin):
-#     list_display = [
-#         'action_time',
-#         'get_user_email',  # Используем метод вместо прямого поля
-#         'get_content_type_name',  # Используем метод вместо прямого поля
-#         'get_object_repr_short',
-#         'get_action_flag_display'
-#     ]
-#
-#     def get_queryset(self, request):
-#         return super().get_queryset(request).select_related('user', 'content_type')
-#
-#     @display(description="Пользователь")
-#     def get_user_email(self, obj):
-#         # obj.user уже загружен через select_related
-#         return obj.user.email if obj.user else "—"
-#
-#     @display(description="Тип объекта")
-#     def get_content_type_name(self, obj):
-#         # obj.content_type уже загружен через select_related
-#         return str(obj.content_type) if obj.content_type else "—"
-#
-#     @display(description="Объект")
-#     def get_object_repr_short(self, obj):
-#         return obj.object_repr[:50] + '...' if len(obj.object_repr) > 50 else obj.object_repr
-#
-#     @display(description="Действие")
-#     def get_action_flag_display(self, obj):
-#         return {
-#             1: "Добавление",
-#             2: "Изменение",
-#             3: "Удаление"
-#         }.get(obj.action_flag, "Неизвестно")
-#
-#
-# # Регистрируем кастомную админку
-# admin.site.unregister(LogEntry)  # Сначала отменяем стандартную регистрацию
-# admin.site.register(LogEntry, LogEntryAdmin)
-
-
+from questionnaire.utils import (
+    get_cached_yadisk_url,
+    get_docs_zip,
+    get_excel_file,
+)
 
 User = get_user_model()
 admin.site.unregister(Group)
@@ -98,60 +52,10 @@ class DocumentInline(admin.TabularInline):
     extra = 0
     readonly_fields = ("image_preview", "download_link")
 
-    @lru_cache(maxsize=100)
-    def _get_url_cached(self, document_id, file_path):
-        """Кешируем URL в памяти процесса на ~25 минут."""
-        if not file_path:
-            return None
-
-        # Получаем URL от Яндекс-диска
-        # Создаем временный объект с нужными атрибутами для get_url
-        class TempDoc:
-            def __init__(self, file_path):
-                self.image = file_path
-
-        temp_doc = TempDoc(file_path)
-        download_url = get_url(temp_doc)
-
-        return download_url if download_url and download_url != "#" else None
-
-    def get_url_cached(self, obj):
-        """Получаем URL с двухуровневым кешированием."""
-        if not obj or not obj.image:
-            return None
-
-        # Ключ для кеша
-        cache_key = f"yadisk_url_{hashlib.md5(str(obj.image).encode()).hexdigest()}"
-
-        # 1. Проверяем Django cache (redis/memcached)
-        cached_url = cache.get(cache_key)
-        if cached_url is not None:
-            return cached_url
-
-        # 2. Проверяем in-memory LRU cache
-        try:
-            lru_cached_url = self._get_url_cached(obj.id, str(obj.image))
-            if lru_cached_url:
-                # Сохраняем также в Django cache на 25 минут
-                cache.set(cache_key, lru_cached_url, 1500)  # 25 минут
-                return lru_cached_url
-        except Exception:
-            # Если LRU cache не сработал, получаем напрямую
-            pass
-
-        # 3. Получаем новый URL
-        download_url = get_url(obj)
-        if download_url and download_url != "#":
-            # Сохраняем в оба кеша
-            cache.set(cache_key, download_url, 1500)  # 25 минут
-        return download_url
-
     @admin.display(description="Предпросмотр")
     def image_preview(self, obj):
         if obj and obj.image:
-            download_url = self.get_url_cached(obj)
-            # download_url = get_url(obj)
-            # download_url = self.download_url or get_url(obj)
+            download_url = get_cached_yadisk_url(obj.image)
 
             if not download_url or download_url == "#":
                 return format_html(
@@ -160,29 +64,37 @@ class DocumentInline(admin.TabularInline):
                 )
 
             # Получаем расширение файла
-            file_extension = str(obj.image).lower().split('.')[-1] if '.' in str(obj.image) else ''
+            file_extension = (
+                obj.image.lower().split('.')[-1]
+                if '.' in obj.image else ''
+            )
 
             # Если это PDF - показываем иконку PDF
             if file_extension == 'pdf':
                 return format_html(
-                    '<a href="{}" target="_blank" style="text-decoration: none;">'
-                    '<div style="border: 1px solid #e0e0e0; padding: 15px; text-align: center; '
-                    'background: #f8f9fa; border-radius: 8px; max-width: 100px; '
-                    'transition: all 0.2s ease;" '
-                    'onmouseover="this.style.backgroundColor=\'#e9ecef\'; this.style.borderColor=\'#007bff\'" '
-                    'onmouseout="this.style.backgroundColor=\'#f8f9fa\'; this.style.borderColor=\'#e0e0e0\'">'
-                    '<span style="font-size: 32px; color: #e74c3c;">📄</span><br>'
-                    '<span style="font-size: 11px; color: #666; font-weight: 500;">PDF файл</span>'
+                    '<a href="{}" target="_blank" '
+                    'style="text-decoration: none;">'
+                    '<div style="border: 1px solid #e0e0e0; padding: 15px; '
+                    'text-align: center; background: #f8f9fa; border-radius: '
+                    '8px; max-width: 100px; transition: all 0.2s ease;" '
+                    'onmouseover="this.style.backgroundColor=\'#e9ecef\'; '
+                    'this.style.borderColor=\'#007bff\'" onmouseout='
+                    '"this.style.backgroundColor=\'#f8f9fa\'; this.style.'
+                    'borderColor=\'#e0e0e0\'"><span style="font-size: 32px; '
+                    'color: #e74c3c;">📄</span><br><span style="font-size: '
+                    '11px; color: #666; font-weight: 500;">PDF файл</span>'
                     '</div></a>',
                     download_url
                 )
 
             # Если это изображение - показываем превью
-            elif file_extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']:
+            elif file_extension in [
+                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'
+            ]:
                 return format_html(
                     '<a href="{}" target="_blank"><img src="{}" '
-                    'style="max-height: 100px; max-width: 100px; border: 1px solid #ddd; '
-                    'border-radius: 4px;" /></a>',
+                    'style="max-height: 100px; max-width: 100px; '
+                    'border: 1px solid #ddd; border-radius: 4px;" /></a>',
                     download_url,
                     download_url,
                 )
@@ -190,11 +102,13 @@ class DocumentInline(admin.TabularInline):
             # Для других типов файлов показываем общую иконку
             else:
                 return format_html(
-                    '<a href="{}" target="_blank" style="text-decoration: none;">'
-                    '<div style="border: 1px solid #e0e0e0; padding: 15px; text-align: center; '
-                    'background: #f8f9fa; border-radius: 8px; max-width: 100px;">'
-                    '<span style="font-size: 32px; color: #3498db;">📎</span><br>'
-                    '<span style="font-size: 11px; color: #666; font-weight: 500;">{}</span>'
+                    '<a href="{}" target="_blank" '
+                    'style="text-decoration: none;">'
+                    '<div style="border: 1px solid #e0e0e0; padding: 15px; '
+                    'text-align: center; background: #f8f9fa; border-radius: '
+                    '8px; max-width: 100px;"><span style="font-size: 32px; '
+                    'color: #3498db;">📎</span><br><span style="font-size: '
+                    '11px; color: #666; font-weight: 500;">{}</span>'
                     '</div></a>',
                     download_url,
                     file_extension.upper() if file_extension else 'ФАЙЛ'
@@ -205,57 +119,17 @@ class DocumentInline(admin.TabularInline):
     @admin.display(description="Скачать")
     def download_link(self, obj):
         if obj and obj.image:
-            download_url = self.get_url_cached(obj)
-            # download_url = get_url(obj)
-            # download_url = self.download_url or get_url(obj)
+            download_url = self.get_url_cached(obj.image)
             if download_url and download_url != "#":
                 return format_html(
                     '<a class="text-primary-600 dark:text-primary-500" '
                     'href="{}" target="_blank" download>Скачать</a>',
                     download_url,
                 )
-            return format_html('<span style="color: #666;">Недоступно</span>')
+            return format_html(
+                '<span style="color: #666;">Недоступно</span>'
+            )
         return "—"
-            # class DocumentInline(admin.TabularInline):
-            #     """Документы."""
-            #
-            #     model = Document
-            #     extra = 0
-            #     readonly_fields = ("image_preview", "download_link")
-            #
-            #     def __init__(self, *args, **kwargs):
-            #         super().__init__(*args, **kwargs)
-            #         self.download_url = None
-            #
-            #     @admin.display(description="Предпросмотр")
-            #     def image_preview(self, obj):
-            #         if obj and obj.image:
-            #             download_url = self.download_url or get_url(obj)
-            #             if download_url and download_url != "#":
-            #                 return format_html(
-            #                     '<a href="{}" target="_blank"><img src="{}"'
-            #                     'style="max-height: 100px; max-width: 100px;" /></a>',
-            #                     download_url,
-            #                     download_url,
-            #                 )
-            #             return format_html(
-            #                 '<span style="color: #666;">Файл: {}</span>',
-            #                 obj.image
-            #             )
-            #         return "—"
-            #
-            #     @admin.display(description="Скачать")
-            #     def download_link(self, obj):
-            #         if obj and obj.image:
-            #             download_url = self.download_url or get_url(obj)
-            #             if download_url and download_url != "#":
-            #                 return format_html(
-            #                     '<a class="text-primary-600 dark:text-primary-500" '
-            #                     'href="{}" target="_blank" download>Скачать</a>',
-            #                     download_url,
-            #                 )
-            #             return format_html('<span style="color: #666;">Недоступно</span>')
-            #         return "—"
 
 
 class CommentInline(admin.TabularInline):
@@ -341,7 +215,9 @@ class SurveyAdmin(ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related("user", "current_question").prefetch_related("docs", "comments")
+        return qs.select_related(
+            "user", "current_question"
+        ).prefetch_related("docs", "comments")
 
     @admin.action(description="Скачать результаты опроса в формате Excel")
     def download_servey(self, request, queryset):
@@ -456,29 +332,8 @@ class SurveyAdmin(ModelAdmin):
 class DocumentAdmin(ModelAdmin):
     """Документ."""
 
-    list_display = ("survey_short", "image_preview", "file_type",)# "cached_status")
+    list_display = ("survey_short", "image_preview", "file_type",)
     list_select_related = ("survey",)  # Добавляем для оптимизации запросов
-
-    def get_url_cached(self, obj):
-        """Кеширование URL на 25 минут."""
-        if not obj or not obj.image:
-            return None
-
-        # Создаем уникальный ключ для файла
-        cache_key = f"yadisk_url_{hashlib.md5(str(obj.image).encode()).hexdigest()}"
-
-        # Пробуем получить из кеша
-        cached_url = cache.get(cache_key)
-        if cached_url is not None:
-            return cached_url
-
-        # Если нет в кеше, получаем новый URL
-        download_url = get_url(obj)
-        if download_url and download_url != "#":
-            # Кешируем на 25 минут (1500 секунд)
-            cache.set(cache_key, download_url, 1500)
-
-        return download_url
 
     @admin.display(description="Опрос")
     def survey_short(self, obj):
@@ -487,58 +342,61 @@ class DocumentAdmin(ModelAdmin):
     @admin.display(description="Тип файла")
     def file_type(self, obj):
         if obj and obj.image:
-            file_extension = str(obj.image).lower().split('.')[-1] if '.' in str(obj.image) else ''
+            file_extension = obj.image.lower().split('.')[-1] \
+                if '.' in obj.image else ''
             return file_extension.upper() if file_extension else '—'
         return "—"
-
-    # @admin.display(description="Статус кеша")
-    # def cached_status(self, obj):
-    #     if not obj or not obj.image:
-    #         return "—"
-    #
-    #     cache_key = f"yadisk_url_{hashlib.md5(str(obj.image).encode()).hexdigest()}"
-    #     if cache.get(cache_key):
-    #         return "🟢 В кеше"
-    #     else:
-    #         return "🔴 Нет в кеше"
 
     @admin.display(description="Изображение")
     def image_preview(self, obj):
         if obj and obj.image:
-            download_url = self.get_url_cached(obj)
+            download_url = get_cached_yadisk_url(obj.image)
 
             if not download_url or download_url == "#":
-                return format_html('<span style="color: #666;">Недоступно</span>')
+                return format_html(
+                    '<span style="color: #666;">Недоступно</span>'
+                )
 
             # Определяем тип файла для разного отображения
-            file_extension = str(obj.image).lower().split('.')[-1] if '.' in str(obj.image) else ''
+            file_extension = obj.image.lower().split('.')[-1] \
+                if '.' in obj.image else ''
 
             if file_extension == 'pdf':
                 return format_html(
-                    '<a href="{}" target="_blank" style="text-decoration: none;">'
-                    '<div style="border: 1px solid #e0e0e0; padding: 10px; text-align: center; '
-                    'background: #f8f9fa; border-radius: 6px; max-width: 80px;">'
-                    '<span style="font-size: 24px; color: #e74c3c;">📄</span><br>'
+                    '<a href="{}" target="_blank" '
+                    'style="text-decoration: none;">'
+                    '<div style="border: 1px solid #e0e0e0; '
+                    'padding: 10px; text-align: center; '
+                    'background: #f8f9fa; border-radius: 6px; '
+                    'max-width: 80px;">'
+                    '<span style="font-size: 24px; color: #e74c3c;">📄'
+                    '</span><br>'
                     '<span style="font-size: 10px; color: #666;">PDF</span>'
                     '</div></a>',
                     download_url
                 )
-            elif file_extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']:
+            elif file_extension in [
+                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'
+            ]:
                 return format_html(
                     '<a href="{}" target="_blank"><img src="{}" '
-                    'style="max-height: 80px; max-width: 80px; border: 1px solid #ddd; '
-                    'border-radius: 4px;" /></a>',
+                    'style="max-height: 80px; max-width: 80px; '
+                    'border: 1px solid #ddd; border-radius: 4px;" /></a>',
                     download_url,
                     download_url,
                 )
             else:
                 return format_html(
-                    '<a href="{}" target="_blank" style="text-decoration: none;">'
-                    '<div style="border: 1px solid #e0e0e0; padding: 10px; text-align: center; '
-                    'background: #f8f9fa; border-radius: 6px; max-width: 80px;">'
-                    '<span style="font-size: 24px; color: #3498db;">📎</span><br>'
-                    '<span style="font-size: 10px; color: #666;">{}</span>'
-                    '</div></a>',
+                    '<a href="{}" target="_blank" '
+                    'style="text-decoration: none;">'
+                    '<div style="border: 1px solid #e0e0e0; '
+                    'padding: 10px; text-align: center; '
+                    'background: #f8f9fa; border-radius: 6px; '
+                    'max-width: 80px;">'
+                    '<span style="font-size: 24px; color: #3498db;">📎'
+                    '</span><br>'
+                    '<span style="font-size: 10px; color: #666;">{}'
+                    '</span></div></a>',
                     download_url,
                     file_extension.upper() if file_extension else 'FILE'
                 )
@@ -548,34 +406,6 @@ class DocumentAdmin(ModelAdmin):
     def get_queryset(self, request):
         """Оптимизируем запросы к БД."""
         return super().get_queryset(request).select_related("survey")
-
-            # @admin.register(Document)
-            # class DocumentAdmin(ModelAdmin):
-            #     """Документ."""
-            #
-            #     list_display = ("survey_short", "image_preview")
-            #
-            #     def __init__(self, *args, **kwargs):
-            #         super().__init__(*args, **kwargs)
-            #         self.download_url = None
-            #
-            #     @admin.display(description="Опрос")
-            #     def survey_short(self, obj):
-            #         return f"Опрос {obj.survey.id}"
-            #
-            #     @admin.display(description="Изображение")
-            #     def image_preview(self, obj):
-            #         if obj and obj.image:
-            #             download_url = self.download_url or get_url(obj)
-            #             if download_url and download_url != "#":
-            #                 return format_html(
-            #                     '<a href="{}" target="_blank"><img src="{}" '
-            #                     'style="max-height: 50px;" /></a>',
-            #                     download_url,
-            #                     download_url,
-            #                 )
-            #             return format_html('<span style="color: #666;">Недоступно</span>')
-            #         return "—"
 
 
 @admin.register(Question)
