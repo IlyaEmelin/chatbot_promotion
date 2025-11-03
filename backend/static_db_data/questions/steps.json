@@ -163,6 +163,10 @@
         {
           "text": null,
           "next_question_index": 12
+        },
+        {
+          "text": "нет",
+          "next_question_index": 12
         }
       ],
       "external_table_field_name": "User.telegram_username"

@@ -96,7 +96,7 @@ class User(AbstractUser):
         max_length=TELEGRAM_USERNAME_LENGTH,
         validators=[
             RegexValidator(
-                regex=r"^@[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)*$",
+                regex=r"^(?:@[a-zA-Z0-9]+(_?[a-zA-Z0-9]+)*|нет)$",
                 message="Укажите корректное имя пользователя начиная с @",
             )
         ],
