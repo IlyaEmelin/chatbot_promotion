@@ -3,6 +3,7 @@ from os import getenv, path
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
+from django.templatetags.static import static
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,7 +15,6 @@ ALLOWED_HOSTS = ["*"]
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOGGING_OUTPUT = getenv("LOGGING_DESTINATION", "console file").split(" ")
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -89,6 +89,7 @@ CSRF_TRUSTED_ORIGINS = getenv("CSRF_TRUSTED", "http://localhost").split(",")
 AUTH_USER_MODEL = "users.User"
 
 INSTALLED_APPS = [
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -96,6 +97,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    'debug_toolbar',
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
@@ -107,6 +109,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "django.middleware.locale.LocaleMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -115,6 +119,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+    'localhost',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -216,6 +225,56 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+UNFOLD = {
+    "SITE_URL": "/",
+    "SITE_TITLE": "ПРО-ДВИЖЕНИЕ",
+    "SITE_HEADER": "ПРО-ДВИЖЕНИЕ",
+    "SITE_LOGO": {
+        "light": lambda request: static("admin_logo.svg"),
+        "dark": lambda request: static("admin_logo_dark.svg"),
+    },
+    "SITE_FAVICONS": (
+        {
+            "rel": "icon",
+            "sizes": "166x166",
+            "type": "image/png",
+            "href": lambda request: static("favicon-166x166.png"),
+        },
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/png",
+            "href": lambda request: static("favicon-166x166.png"),
+        },
+        {
+            "rel": "icon",
+            "sizes": "16x16",
+            "type": "image/png",
+            "href": lambda request: static("favicon-166x166.png"),
+        },
+        {
+            "rel": "apple-touch-icon",
+            "sizes": "166x166",
+            "href": lambda request: static("favicon-166x166.png"),
+        },
+    ),
+    "COLORS": {
+        "primary": {
+            "50": "239 246 255",
+            "100": "219 234 254",
+            "200": "191 219 254",
+            "300": "147 197 253",
+            "400": "96 165 250",
+            "500": "59 130 246",
+            "600": "37 99 235",
+            "700": "29 78 216",
+            "800": "30 64 175",
+            "900": "30 58 138",
+            "950": "23 37 84",
+        },
+    },
+}
+
 LANGUAGE_CODE = "ru"
 
 TIME_ZONE = "Europe/Moscow"
@@ -226,13 +285,15 @@ USE_L10N = True
 
 USE_TZ = True
 
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
+
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "backend_static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Ya disk token
-DISK_TOKEN = getenv("DISK_TOKEN", "")
 
 TELEGRAM_BOT_TOKEN = getenv(
     "TELEGRAM_BOT_TOKEN",

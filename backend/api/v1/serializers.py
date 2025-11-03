@@ -8,19 +8,19 @@ import logging
 
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.db import IntegrityError, DatabaseError
+from django.db import DatabaseError, IntegrityError
 from django.core.exceptions import ValidationError
 from rest_framework.serializers import (
-    ModelSerializer,
-    CharField,
     BooleanField,
+    CharField,
+    ImageField,
+    ModelSerializer,
     SerializerMethodField,
     SlugRelatedField,
-    ImageField,
 )
 
-from api.yadisk import YandexDiskUploader
-from questionnaire.models import Survey, Question, Document, Comment
+from common.utils.yadisk import YandexDiskUploader
+from questionnaire.models import Comment, Document, Question, Survey
 from questionnaire.constant import SurveyStatus
 from users.models import User
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from drf_yasg.views import get_schema_view
@@ -20,6 +21,7 @@ schema_view = get_schema_view(
     generator_class=DividedСategoriesSchemaGenerator,
 )
 
+
 urlpatterns = [
     path("pro-admin-dvizh/", admin.site.urls),
     path("telegram/webhook/", include("telegram_bot.urls")),
@@ -40,3 +42,9 @@ urlpatterns = [
         name="schema-redoc",
     ),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

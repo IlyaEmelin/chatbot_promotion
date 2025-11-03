@@ -44,7 +44,7 @@ class YandexDiskUploader:
     def get_upload_url(self, filename):
         """Метод получения URL для загрузки файла"""
         try:
-            logging.debug(UPLOAD_URL_MSG)
+            logger.debug(UPLOAD_URL_MSG)
             response = requests.get(
                 f"{self.base_url}/resources/upload",
                 headers=self.headers,
@@ -54,34 +54,32 @@ class YandexDiskUploader:
                 },
             )
             if response.status_code in (401, 403):
-                logging.error(TOKEN_ERROR)
+                logger.error(TOKEN_ERROR)
                 raise self.TokenError(TOKEN_ERROR)
             response.raise_for_status()
             return response.json().get("href")
         except Exception as e:
-            logging.error(UPLOAD_URL_ERROR.format(e))
+            logger.error(UPLOAD_URL_ERROR.format(e))
             raise self.UploadUrlError(UPLOAD_URL_ERROR.format(e))
 
     def upload_file(self, filename, file_data):
         """Метод загрузки файла на Яндекс-диск"""
         upload_url = self.get_upload_url(filename)
         try:
-            logging.debug(UPLOAD_MSG)
+            logger.debug(UPLOAD_MSG)
             response = requests.put(upload_url, data=file_data)
             response.raise_for_status()
-            return self.get_download_url(
-                urllib.parse.unquote(response.headers["Location"]).replace(
-                    "/disk", ""
-                )
-            )
+            return urllib.parse.unquote(
+                response.headers["Location"]
+            ).replace("/disk", "")
         except Exception as e:
-            logging.error(UPLOAD_ERROR.format(e))
+            logger.error(UPLOAD_ERROR.format(e))
             raise self.UploadError(UPLOAD_ERROR.format(e))
 
     def get_download_url(self, file_path):
         """Метод получения URL для скачивания файла с Яндекс-диска"""
         try:
-            logging.debug(DOWNLOAD_URL_MSG)
+            logger.debug(DOWNLOAD_URL_MSG)
             response = requests.get(
                 f"{self.base_url}/resources/download",
                 headers=self.headers,
@@ -90,13 +88,13 @@ class YandexDiskUploader:
             response.raise_for_status()
             return response.json().get("href")
         except requests.RequestException as e:
-            logging.error(DOWNLOAD_URL_ERROR.format(e))
+            logger.error(DOWNLOAD_URL_ERROR.format(e))
             raise self.DownloadUrlError(DOWNLOAD_URL_ERROR.format(e))
 
     def check_file_exists(self, file_path):
         """Метод проверки существования файла"""
         try:
-            logging.debug(EXIST_MSG)
+            logger.debug(EXIST_MSG)
             response = requests.get(
                 f"{self.base_url}/resources",
                 headers=self.headers,
@@ -104,5 +102,5 @@ class YandexDiskUploader:
             )
             return response.status_code == status.HTTP_200_OK
         except Exception as e:
-            logging.error(EXIST_ERROR.format(e))
+            logger.error(EXIST_ERROR.format(e))
             raise self.FileCheckError(EXIST_ERROR.format(e))

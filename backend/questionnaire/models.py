@@ -16,6 +16,7 @@ from django.db.models import (
 from django.contrib.auth import get_user_model
 from uuid import uuid4
 
+from django.db import models
 from .constant import (
     ANSWER_LEN,
     FILE_URL_MAX_LEN,
@@ -75,9 +76,27 @@ class Question(Model):
     class Meta:
         verbose_name = "Вопрос"
         verbose_name_plural = "Вопросы"
+        ordering = ("id",)
 
     def __str__(self) -> str:
         return f"{self.text[:MAX_LEN_STRING-10]} ({self.type})"
+
+
+class AnswerChoiceManager(models.Manager):
+    def get_queryset(self):
+        from django.db.models import Case, When, Value, IntegerField
+
+        return super().get_queryset().annotate(
+            sort_order=Case(
+                # 1. current_question.type == "start"
+                When(current_question__type="start", then=Value(1)),
+                # 2. current_question == next_question (рекурсивные)
+                When(current_question=models.F('next_question'), then=Value(2)),
+                # 3. Все остальные
+                default=Value(3),
+                output_field=IntegerField(),
+            )
+        ).order_by('sort_order', 'current_question_id', 'id')
 
 
 class AnswerChoice(Model):
@@ -86,7 +105,7 @@ class AnswerChoice(Model):
     current_question = ForeignKey(
         Question,
         on_delete=CASCADE,
-        verbose_name="Предыдущий вопрос",
+        verbose_name="Текущий вопрос",
         related_name="answers",
     )
     next_question = ForeignKey(
@@ -111,6 +130,7 @@ class AnswerChoice(Model):
         null=True,
         blank=True,
     )
+    objects = AnswerChoiceManager()
 
     class Meta:
         verbose_name = "Вариант ответа"
@@ -205,7 +225,7 @@ class Document(Model):
 
     image = CharField(
         max_length=FILE_URL_MAX_LEN,
-        verbose_name="Изображение документа",
+        verbose_name="Путь к изображению документа на Яндекс-диске",
     )
     survey = ForeignKey(
         Survey,
