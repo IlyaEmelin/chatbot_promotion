@@ -7,11 +7,10 @@ from rest_framework.status import (
     HTTP_200_OK,
     HTTP_401_UNAUTHORIZED,
     HTTP_404_NOT_FOUND,
-    HTTP_405_METHOD_NOT_ALLOWED,
 )
 
 from questionnaire.constant import SurveyStatus
-from questionnaire.models import Survey, Question
+from questionnaire.models import Survey, Question, AnswerChoice
 
 
 class TestSurveyRevert:
@@ -52,6 +51,14 @@ class TestSurveyRevert:
 
         assert response.status_code == HTTP_200_OK
 
+        data = response.data
+        assert data.get("id") == str(survey.id)
+        assert data.get("current_question_text") == question.text
+        assert data.get("answers") == []
+        assert data.get("result") == []
+        assert data.get("status") == "new"
+        assert data.get("revert_success") is False
+
         survey.refresh_from_db()
         assert survey.current_question == question
         assert survey.result == []
@@ -66,6 +73,7 @@ class TestSurveyRevert:
         survey_with_custom_answer_second_step,
         question: Question,
         next_question: Question,
+        answer_choice: AnswerChoice,
     ):
         """Тест успешного отката ответа из опроса, когда опрос не пустой"""
         url = self.__get_url(survey_with_custom_answer_second_step.id)
@@ -73,6 +81,14 @@ class TestSurveyRevert:
         response = authenticated_client.patch(url)
 
         assert response.status_code == HTTP_200_OK
+
+        data = response.data
+        assert data.get("id") == str(survey_with_custom_answer_second_step.id)
+        assert data.get("current_question_text") == question.text
+        assert data.get("answers") == [answer_choice.answer]
+        assert data.get("result") == []
+        assert data.get("status") == "new"
+        assert data.get("revert_success") is True
 
         survey_with_custom_answer_second_step.refresh_from_db()
         assert (

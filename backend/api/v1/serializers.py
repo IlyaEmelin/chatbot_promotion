@@ -36,6 +36,7 @@ class QuestionSerializer(ModelSerializer):
         fields = "__all__"
 
 
+# Survey
 class SurveyReadSerializer(ModelSerializer):
     """Сериализатор для чтения опроса"""
 
@@ -69,6 +70,27 @@ class SurveyReadSerializer(ModelSerializer):
             )
         else:
             return []
+
+
+class SurveyRevertReadSerializer(SurveyReadSerializer):
+    """Сериализатор для чтения отката"""
+
+    revert_success = SerializerMethodField()
+
+    class Meta(SurveyReadSerializer.Meta):
+        fields = SurveyReadSerializer.Meta.fields + ("revert_success",)
+
+    def get_revert_success(self, obj: Survey) -> bool:
+        """
+        Успешность отката
+
+        Args:
+            obj: опрос
+
+        Returns:
+            bool: успешность отката
+        """
+        return self.context.get("revert_success", False)
 
 
 class SurveyCreateSerializer(ModelSerializer):
@@ -400,19 +422,10 @@ class SurveyRevertSerializer(ModelSerializer):
             "current_question_text",
             "answers",
         )
-        read_only_fields = ("current_question_text", "answers")
-
-    def get_current_question_text(self, obj: Survey) -> str:
-        """
-        Получить текст текущего вопроса
-
-        Args:
-            obj: опрос
-
-        Returns:
-            str: текст текущего вопроса
-        """
-        return obj.current_question.text if obj.current_question else None
+        read_only_fields = (
+            "current_question_text",
+            "answers",
+        )
 
     def get_answers(self, obj: Survey) -> list[str | None]:
         """
@@ -448,6 +461,8 @@ class SurveyRevertSerializer(ModelSerializer):
             Survey: обновляемый объект
 
         """
+        revert_success = False
+
         if (current_question := instance.current_question) and (
             result := instance.result
         ):
@@ -495,11 +510,13 @@ class SurveyRevertSerializer(ModelSerializer):
                     # TODO так же не будет происходить
                     #  откат external_table_field_name
                     instance.save()
+                    revert_success = True
 
+        self.context["revert_success"] = revert_success
         return instance
 
     def to_representation(self, instance):
-        return SurveyReadSerializer(instance, context=self.context).data
+        return SurveyRevertReadSerializer(instance, context=self.context).data
 
 
 class Base64ImageField(ImageField):
