@@ -107,7 +107,14 @@ def _get_reply_markup(answers: list[str]) -> ReplyKeyboardMarkup | None:
     Returns:
         ReplyKeyboardMarkup | None: клавиатура с возможными ответами
     """
-    keyboard = [[KeyboardButton(answer)] for answer in answers if answer]
+    keyboard = []
+    for i, answer in enumerate(answer for answer in answers if answer):
+        index = i % 4
+        try:
+            keyboard[index].append(KeyboardButton(answer))
+        except IndexError:
+            keyboard.append([KeyboardButton(answer)])
+
     reply_markup = ReplyKeyboardMarkup(
         keyboard,
         resize_keyboard=True,
@@ -384,12 +391,15 @@ async def handle_message(
                 new_status = None
                 try:
                     if user_message == MSG_REVERT_PREVIOUS_QUESTION:
-                        await _delete_last_bot_messages(update, context)
-
-                        text, answers, new_status = await revert_survey_data(
-                            user_obj,
-                            survey_obj,
+                        text, answers, new_status, revert_success = (
+                            await revert_survey_data(
+                                user_obj,
+                                survey_obj,
+                            )
                         )
+                        if revert_success:
+                            await _delete_last_bot_messages(update, context)
+
                     else:
                         text, answers, new_status = await save_survey_data(
                             user_obj,

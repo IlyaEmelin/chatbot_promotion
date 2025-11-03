@@ -83,7 +83,7 @@ def save_survey_data(
 def revert_survey_data(
     user_obj: User,
     survey_obj: Survey,
-):
+) -> tuple[str, list[None | str], str, bool]:
     """
     Вернуться к предыдущему вопросу
 
@@ -94,7 +94,8 @@ def revert_survey_data(
     Returns:
         str: Вопрос
         list[None|str]: варианты ответа
-        list[None|str]]: новый статус
+        str: новый статус
+        bool: произошел ли откат
     """
     serializer = SurveyRevertSerializer(
         instance=survey_obj,
@@ -108,6 +109,7 @@ def revert_survey_data(
         data.get("current_question_text"),
         data.get("answers"),
         data.get("new_status"),
+        data.get("revert_success"),
     )
 
 
