@@ -13,7 +13,7 @@ class TelegramCommand(Enum):
 
     START = ("start", "Пройти(Перепройти) опрос")
     STATUS = ("status", "Получить статус опроса")
-    PROCESSING = ("processing", "Закончить загрузку документов")
+    PROCESSING = ("processing", "Завершить загрузку документов")
     HELP = ("help", "Показать это сообщение помощи")
     LOG = ("log", "Скачать логи сервера")
 
@@ -47,6 +47,15 @@ class TelegramCommand(Enum):
             str: текст доступной команды
         """
         return f"{self.get_call_name()} - {self.__help_msg}"
+
+    def get_button_text(self) -> str:
+        """
+        Получить текст для кнопки
+
+        Returns:
+            str: текст для отображения на кнопке
+        """
+        return self.__help_msg
 
 
 class SurveyStatus(Enum):
