@@ -1,13 +1,16 @@
 import { StoredState } from '../types';
+import { getCookie } from '../api/surveyAPI';
 
 export const STORAGE_KEY = 'survey_chat_bot_state';
 
 export const storage = {
   save: (state: StoredState) => {
     try {
+      const authToken = getCookie('auth_token');
       const dataToStore = {
         ...state,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        authToken // Сохраняем токен пользователя
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
       console.log('💾 Saved to localStorage:', dataToStore);
@@ -21,9 +24,17 @@ export const storage = {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return null;
       
-      const parsed: StoredState = JSON.parse(stored);
+      const parsed: StoredState & { authToken?: string } = JSON.parse(stored);
       
-      // Проверяем, не слишком ли старые данные (например, старше 7 дней)
+      // Проверяем, что это данные текущего пользователя
+      const currentAuthToken = getCookie('auth_token');
+      if (parsed.authToken !== currentAuthToken) {
+        console.log('🗑️ User changed, clearing old data');
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      
+      // Проверяем, не слишком ли старые данные
       const lastUpdated = new Date(parsed.lastUpdated);
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       

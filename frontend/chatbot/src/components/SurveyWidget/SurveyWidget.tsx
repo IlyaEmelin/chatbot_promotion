@@ -3,33 +3,60 @@ import { Provider } from 'react-redux';
 import { MessageCircle, X } from 'lucide-react';
 import { store } from '../../store';
 import { useAppDispatch } from '../../hooks/redux';
-import { loadFromStorage } from '../../store/surveySlice';
+import { loadFromStorage, resetSurvey } from '../../store/surveySlice';
 import { storage } from '../../utils/storage';
+import { getCookie } from '../../api/surveyAPI';
 import Chat from '../Chat/Chat';
 import styles from './SurveyWidget.module.css';
 
 const SurveyWidgetInner: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    // Загружаем сохраненное состояние при инициализации
-    const savedState = storage.load();
-    if (savedState) {
-      // Восстанавливаем даты в сообщениях
-      const messagesWithDates = savedState.messages.map(msg => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      }));
-      
-      dispatch(loadFromStorage({
-        ...savedState,
-        messages: messagesWithDates,
-        isLoading: false,
-        error: null
-      }));
+    // Проверяем текущего пользователя
+    const authToken = getCookie('auth_token');
+    
+    // Если пользователь изменился - сбрасываем состояние
+    if (authToken !== currentUser) {
+      storage.clear();
+      dispatch(resetSurvey());
+      setCurrentUser(authToken || null);
+      return;
     }
-  }, [dispatch]);
+    
+    // Загружаем сохраненное состояние только если пользователь тот же
+    if (authToken) {
+      const savedState = storage.load();
+      if (savedState) {
+        const messagesWithDates = savedState.messages.map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        
+        dispatch(loadFromStorage({
+          ...savedState,
+          messages: messagesWithDates,
+          isLoading: false,
+          error: null
+        }));
+      }
+    }
+  }, [dispatch, currentUser]);
+
+  // Следим за изменением токена авторизации
+  useEffect(() => {
+    const checkAuthInterval = setInterval(() => {
+      const authToken = getCookie('auth_token');
+      if (authToken !== currentUser) {
+        console.log('🔄 Auth token changed');
+        setCurrentUser(authToken || null);
+      }
+    }, 1000); // Проверяем каждую секунду
+
+    return () => clearInterval(checkAuthInterval);
+  }, [currentUser]);
 
   return (
     <div className={styles.container}>

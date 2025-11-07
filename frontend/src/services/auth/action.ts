@@ -44,6 +44,13 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   const response = await logoutApi();
   console.log('logout action', response);
   deleteCookie('auth_token');
+
+  try {
+    localStorage.removeItem('survey_chat_bot_state');
+  } catch (e) {
+    console.warn('Failed to clear widget storage:', e);
+  }
+
   return response;
 });
 
