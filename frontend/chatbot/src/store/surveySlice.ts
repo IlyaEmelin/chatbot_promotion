@@ -4,7 +4,18 @@ import { SurveyState, Message } from '../types';
 
 // Функция для определения, есть ли опции у текущего вопроса
 const hasValidOptions = (answers: string[]): boolean => {
-  return answers.length > 1 && answers.some(answer => answer !== null && answer.trim() !== '');
+  if (!answers || answers.length === 0) return false;
+  
+  // Фильтруем null и пустые строки
+  const validAnswers = answers.filter(answer => 
+    answer !== null && 
+    answer !== undefined && 
+    String(answer).trim() !== '' &&
+    String(answer).toLowerCase() !== 'none'
+  );
+  
+  // Если остался только один вариант или меньше - не показываем кнопки
+  return validAnswers.length > 1;
 };
 
 // Async thunks для работы с новым API
