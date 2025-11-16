@@ -151,7 +151,7 @@ python manage.py clear_data_base --add_user --add_survey_data
 ```
 Или перезапись списка вопросов из файла steps.json
 ```bash
-python manage.py add_survey_data --overwrite
+python manage.py add_survey_data --overwrite true
 ```
 
 ### Локальный запуск front-end приложения

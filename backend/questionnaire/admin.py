@@ -52,6 +52,12 @@ class DocumentInline(admin.TabularInline):
     extra = 0
     readonly_fields = ("image_preview", "download_link")
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
     @admin.display(description="Предпросмотр")
     def image_preview(self, obj):
         if obj and obj.image:
@@ -59,37 +65,40 @@ class DocumentInline(admin.TabularInline):
 
             if not download_url or download_url == "#":
                 return format_html(
-                    '<span style="color: #666;">Файл: {}</span>',
-                    obj.image
+                    '<span style="color: #666;">Файл: {}</span>', obj.image
                 )
 
             # Получаем расширение файла
             file_extension = (
-                obj.image.lower().split('.')[-1]
-                if '.' in obj.image else ''
+                obj.image.lower().split(".")[-1] if "." in obj.image else ""
             )
 
             # Если это PDF - показываем иконку PDF
-            if file_extension == 'pdf':
+            if file_extension == "pdf":
                 return format_html(
                     '<a href="{}" target="_blank" '
                     'style="text-decoration: none;">'
                     '<div style="border: 1px solid #e0e0e0; padding: 15px; '
-                    'text-align: center; background: #f8f9fa; border-radius: '
+                    "text-align: center; background: #f8f9fa; border-radius: "
                     '8px; max-width: 100px; transition: all 0.2s ease;" '
-                    'onmouseover="this.style.backgroundColor=\'#e9ecef\'; '
-                    'this.style.borderColor=\'#007bff\'" onmouseout='
-                    '"this.style.backgroundColor=\'#f8f9fa\'; this.style.'
-                    'borderColor=\'#e0e0e0\'"><span style="font-size: 32px; '
+                    "onmouseover=\"this.style.backgroundColor='#e9ecef'; "
+                    "this.style.borderColor='#007bff'\" onmouseout="
+                    "\"this.style.backgroundColor='#f8f9fa'; this.style."
+                    "borderColor='#e0e0e0'\"><span style=\"font-size: 32px; "
                     'color: #e74c3c;">📄</span><br><span style="font-size: '
                     '11px; color: #666; font-weight: 500;">PDF файл</span>'
-                    '</div></a>',
-                    download_url
+                    "</div></a>",
+                    download_url,
                 )
 
             # Если это изображение - показываем превью
             elif file_extension in [
-                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'
+                "jpg",
+                "jpeg",
+                "png",
+                "gif",
+                "bmp",
+                "webp",
             ]:
                 return format_html(
                     '<a href="{}" target="_blank"><img src="{}" '
@@ -105,13 +114,13 @@ class DocumentInline(admin.TabularInline):
                     '<a href="{}" target="_blank" '
                     'style="text-decoration: none;">'
                     '<div style="border: 1px solid #e0e0e0; padding: 15px; '
-                    'text-align: center; background: #f8f9fa; border-radius: '
+                    "text-align: center; background: #f8f9fa; border-radius: "
                     '8px; max-width: 100px;"><span style="font-size: 32px; '
                     'color: #3498db;">📎</span><br><span style="font-size: '
                     '11px; color: #666; font-weight: 500;">{}</span>'
-                    '</div></a>',
+                    "</div></a>",
                     download_url,
-                    file_extension.upper() if file_extension else 'ФАЙЛ'
+                    file_extension.upper() if file_extension else "ФАЙЛ",
                 )
 
         return "—"
@@ -126,9 +135,7 @@ class DocumentInline(admin.TabularInline):
                     'href="{}" target="_blank" download>Скачать</a>',
                     download_url,
                 )
-            return format_html(
-                '<span style="color: #666;">Недоступно</span>'
-            )
+            return format_html('<span style="color: #666;">Недоступно</span>')
         return "—"
 
 
@@ -215,9 +222,9 @@ class SurveyAdmin(ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related(
-            "user", "current_question"
-        ).prefetch_related("docs", "comments")
+        return qs.select_related("user", "current_question").prefetch_related(
+            "docs", "comments"
+        )
 
     @admin.action(description="Скачать результаты опроса в формате Excel")
     def download_servey(self, request, queryset):
@@ -328,12 +335,23 @@ class SurveyAdmin(ModelAdmin):
         html += "</div>"
         return format_html(html)
 
+
 @admin.register(Document)
 class DocumentAdmin(ModelAdmin):
     """Документ."""
 
-    list_display = ("survey_short", "image_preview", "file_type",)
+    list_display = (
+        "survey_short",
+        "image_preview",
+        "file_type",
+    )
     list_select_related = ("survey",)  # Добавляем для оптимизации запросов
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
     @admin.display(description="Опрос")
     def survey_short(self, obj):
@@ -342,9 +360,10 @@ class DocumentAdmin(ModelAdmin):
     @admin.display(description="Тип файла")
     def file_type(self, obj):
         if obj and obj.image:
-            file_extension = obj.image.lower().split('.')[-1] \
-                if '.' in obj.image else ''
-            return file_extension.upper() if file_extension else '—'
+            file_extension = (
+                obj.image.lower().split(".")[-1] if "." in obj.image else ""
+            )
+            return file_extension.upper() if file_extension else "—"
         return "—"
 
     @admin.display(description="Изображение")
@@ -358,25 +377,31 @@ class DocumentAdmin(ModelAdmin):
                 )
 
             # Определяем тип файла для разного отображения
-            file_extension = obj.image.lower().split('.')[-1] \
-                if '.' in obj.image else ''
+            file_extension = (
+                obj.image.lower().split(".")[-1] if "." in obj.image else ""
+            )
 
-            if file_extension == 'pdf':
+            if file_extension == "pdf":
                 return format_html(
                     '<a href="{}" target="_blank" '
                     'style="text-decoration: none;">'
                     '<div style="border: 1px solid #e0e0e0; '
-                    'padding: 10px; text-align: center; '
-                    'background: #f8f9fa; border-radius: 6px; '
+                    "padding: 10px; text-align: center; "
+                    "background: #f8f9fa; border-radius: 6px; "
                     'max-width: 80px;">'
                     '<span style="font-size: 24px; color: #e74c3c;">📄'
-                    '</span><br>'
+                    "</span><br>"
                     '<span style="font-size: 10px; color: #666;">PDF</span>'
-                    '</div></a>',
-                    download_url
+                    "</div></a>",
+                    download_url,
                 )
             elif file_extension in [
-                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'
+                "jpg",
+                "jpeg",
+                "png",
+                "gif",
+                "bmp",
+                "webp",
             ]:
                 return format_html(
                     '<a href="{}" target="_blank"><img src="{}" '
@@ -390,15 +415,15 @@ class DocumentAdmin(ModelAdmin):
                     '<a href="{}" target="_blank" '
                     'style="text-decoration: none;">'
                     '<div style="border: 1px solid #e0e0e0; '
-                    'padding: 10px; text-align: center; '
-                    'background: #f8f9fa; border-radius: 6px; '
+                    "padding: 10px; text-align: center; "
+                    "background: #f8f9fa; border-radius: 6px; "
                     'max-width: 80px;">'
                     '<span style="font-size: 24px; color: #3498db;">📎'
-                    '</span><br>'
+                    "</span><br>"
                     '<span style="font-size: 10px; color: #666;">{}'
-                    '</span></div></a>',
+                    "</span></div></a>",
                     download_url,
-                    file_extension.upper() if file_extension else 'FILE'
+                    file_extension.upper() if file_extension else "FILE",
                 )
 
         return "—"
