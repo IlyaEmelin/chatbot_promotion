@@ -151,6 +151,7 @@ class SurveyCreateSerializer(ModelSerializer):
                 SurveyStatus.PROCESSING.value,
                 SurveyStatus.COMPLETED.value,
             )
+            or survey_obj.current_question is None
         ):
             survey_obj.current_question = question_start
             survey_obj.status = SurveyStatus.NEW.value
