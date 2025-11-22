@@ -12,7 +12,7 @@
         {
           "text": "Отказываюсь",
           "next_question_index": null,
-          "new_status": "completed"
+          "new_status": "rejected"
         }
       ]
     },
