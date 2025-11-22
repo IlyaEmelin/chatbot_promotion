@@ -205,15 +205,15 @@
       "answers": [
         {
           "text": "Коляска",
-          "next_question_index": 15
+          "next_question_index": 16
         },
         {
           "text": "Приставка",
-          "next_question_index": 15
+          "next_question_index": 16
         },
         {
           "text": "Комплектующие",
-          "next_question_index": 15
+          "next_question_index": 16
         },
         {
           "text": "Другое ТСР",
