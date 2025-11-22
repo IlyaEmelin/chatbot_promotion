@@ -522,7 +522,7 @@
         {
           "text": "Другое",
           "next_question_index": 58,
-          "new_status": "completed"
+          "new_status": "rejected"
         }
       ]
     },

@@ -91,6 +91,16 @@ class SurveyStatus(Enum):
             TelegramCommand.HELP,
         ),
     )
+    Rejected = (
+        "rejected",
+        "Отклонена",
+        "❌",
+        (
+            TelegramCommand.START,
+            TelegramCommand.STATUS,
+            TelegramCommand.HELP,
+        ),
+    )
 
     def __init__(
         self,
