@@ -233,7 +233,7 @@ class SurveyAdmin(ModelAdmin):
     @admin.display(description="Пользователь")
     def user_info(self, obj):
         user = obj.user
-        phone = getattr(user, "phone", "—")
+        phone = getattr(user, "phone_number", "—")
         return format_html(
             "{} {}<br><small>Почта: {}<br>" "Телефон: {}</small>",
             user.first_name or "",
@@ -557,7 +557,7 @@ class CommentAdmin(ModelAdmin):
     @admin.display(description="Пользователь")
     def user_info(self, obj):
         user = obj.user
-        phone = getattr(user, "phone", "—")
+        phone = getattr(user, "phone_number", "—")
         return format_html(
             "{} ({} {})<br><small>Почта: {}<br>" "Телефон: {}</small>",
             user.username,
