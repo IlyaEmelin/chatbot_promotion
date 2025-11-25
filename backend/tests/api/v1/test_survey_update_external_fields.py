@@ -14,7 +14,7 @@ class TestSurveyUpdateExternalFields:
     """
 
     def test_update_survey_saves_user_first_name(
-        self, authenticated_client, survey, question, next_question
+        self, authenticated_client, survey, question, second_question
     ):
         """
         Тест сохранения имени пользователя через external_table_field_name.
@@ -27,7 +27,7 @@ class TestSurveyUpdateExternalFields:
         # Создаем AnswerChoice для перехода к следующему вопросу
         AnswerChoice.objects.create(
             current_question=question,
-            next_question=next_question,
+            next_question=second_question,
             answer=None,
         )
 

@@ -392,7 +392,11 @@ async def handle_message(
         __, ___, ____, survey_obj = await get_or_create_survey(user_obj, False)
         logger.debug(f"Статус опроса: {survey_obj.status}")
         match survey_obj.status:
-            case SurveyStatus.NEW.value:
+            case (
+                SurveyStatus.NEW.value
+                | SurveyStatus.COMPLETED.value
+                | SurveyStatus.REJECTED.value
+            ):
                 logger.debug("Опрос")
                 new_status = None
                 try:

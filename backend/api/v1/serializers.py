@@ -295,11 +295,9 @@ class SurveyUpdateSerializer(ModelSerializer):
             instance.current_question = next_question
             instance.result = result
 
-            instance.status = (
-                SurveyStatus.NEW.value
-                if next_question and next_question.answers.exists()
-                else SurveyStatus.WAITING_DOCS.value
-            )
+            if not (next_question and next_question.answers.exists()):
+                instance.status = SurveyStatus.WAITING_DOCS.value
+
             if new_status:
                 instance.status = new_status
 

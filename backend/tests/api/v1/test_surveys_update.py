@@ -26,7 +26,7 @@ class TestSurveyUpdate:
         survey_with_custom_answer_start_step: Survey,
         answer_choice: AnswerChoice,
         question: Question,
-        next_question: Question,
+        second_question: Question,
     ) -> None:
         """
         Тест успешного обновления опроса с ответом
@@ -50,7 +50,9 @@ class TestSurveyUpdate:
         assert response.data["id"] == str(
             survey_with_custom_answer_start_step.id
         )
-        assert response.data.get("current_question_text") == next_question.text
+        assert (
+            response.data.get("current_question_text") == second_question.text
+        )
         assert response.data.get("answers") == []
 
         # Проверяем обновление опроса в базе
@@ -69,7 +71,7 @@ class TestSurveyUpdate:
         survey_with_custom_answer_second_step_reset: Survey,
         answer_choice: AnswerChoice,
         question: Question,
-        next_question: Question,
+        second_question: Question,
     ) -> None:
         """
         Опрос с вопросом, имеющий пользовательский ответ
@@ -99,7 +101,9 @@ class TestSurveyUpdate:
         assert response.data["id"] == str(
             survey_with_custom_answer_second_step_reset.id
         )
-        assert response.data.get("current_question_text") == next_question.text
+        assert (
+            response.data.get("current_question_text") == second_question.text
+        )
         assert response.data.get("answers") == []
 
         updated_survey = Survey.objects.get(
@@ -115,7 +119,7 @@ class TestSurveyUpdate:
         authenticated_client,
         survey,
         question,
-    ):
+    ) -> None:
         """Тест обновления опроса с пользовательским ответом"""
         # Создаем AnswerChoice с answer=None для пользовательского ответа
         next_question = Question.objects.create(
@@ -143,6 +147,41 @@ class TestSurveyUpdate:
         assert updated_survey.current_question == next_question
         assert len(updated_survey.result) == 2
         assert updated_survey.result[1] == "мой_пользовательский_ответ"
+
+    def test_update_survey_with_final_question(
+        self,
+        authenticated_client: APIClient,
+        survey_with_final_question: Survey,
+        question_with_final_answer: Question,
+        answer_choice_final: AnswerChoice,
+    ) -> None:
+        """
+        Тест обновления опроса для финального вопроса
+
+        Args:
+            authenticated_client: авторизованный клиент
+            survey_with_final_question: финальный опрос
+            question_with_final_answer: вопрос финального опроса
+            answer_choice_final: финальный вариант ответа
+        """
+        url = reverse(
+            viewname="survey-detail",
+            kwargs={"pk": survey_with_final_question.id},
+        )
+        data = {"answer": answer_choice_final.answer}
+
+        response = authenticated_client.put(url, data, format="json")
+
+        assert response.status_code == HTTP_200_OK
+        assert response.data["id"] == str(survey_with_final_question.id)
+        assert response.data.get("current_question_text") is None
+        assert response.data.get("answers") == []
+
+        updated_survey = Survey.objects.get(id=survey_with_final_question.id)
+        assert updated_survey.current_question is None
+        assert len(updated_survey.result) == 2
+        assert updated_survey.result[0] == question_with_final_answer.text
+        assert updated_survey.result[1] == answer_choice_final.answer
 
     def test_update_survey_invalid_answer(
         self,
