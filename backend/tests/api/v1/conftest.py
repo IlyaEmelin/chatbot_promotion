@@ -1,4 +1,5 @@
 # conftest.py
+from datetime import datetime
 from uuid import uuid4, UUID
 
 from django.contrib.auth import get_user_model
@@ -94,6 +95,7 @@ def question() -> Question:
         text="Тестовый вопрос?",
         updated_uuid="12345678-1234-1234-1234-123456789012",
         type="start",
+        updated_at=datetime(2013, 1, 11),
     )
 
 
@@ -103,24 +105,29 @@ def second_question() -> Question:
     Второй вопрос
 
     Returns:
-        Question: следующий вопрос
+        Question: второй вопрос
     """
 
     return Question.objects.create(
-        text="Следующий вопрос?",
+        text="Второй вопрос?",
         updated_uuid="42345678-1234-1234-1234-123456789013",
+        updated_at=datetime(2013, 1, 12),
     )
 
 
 @pytest.fixture
 def third_question() -> Question:
     """
-
+    Третий вопрос
 
     Returns:
-
+        Question: третий вопрос
     """
-    pass
+    return Question.objects.create(
+        text="Третий вопрос?",
+        updated_uuid="42345678-3333-4444-1234-123456789013",
+        updated_at=datetime(2013, 1, 1),
+    )
 
 
 @pytest.fixture
@@ -189,7 +196,7 @@ def answer_choice_change_status(
 
     Args:
         question: текущий вопрос
-        next_question: следующий вопрос
+        second_question: следующий вопрос
 
     Returns:
         AnswerChoice: вариант ответа
@@ -199,6 +206,28 @@ def answer_choice_change_status(
         next_question=second_question,
         answer="вариант ответа со сменой статуса",
         new_status=SurveyStatus.REJECTED.value,
+    )
+
+
+@pytest.fixture
+def answer_choice_2to3(
+    second_question: Question,
+    third_question: Question,
+) -> AnswerChoice:
+    """
+    Вариант ответа от второго к третьему вопросу
+
+    Args:
+        second_question: второй вопрос
+        third_question: третий вопрос
+
+    Returns:
+        AnswerChoice: вариант ответа от второго к третьему вопросу
+    """
+    return AnswerChoice.objects.create(
+        current_question=second_question,
+        next_question=third_question,
+        answer="вариант ответа от второго к третьему вопросу",
     )
 
 
@@ -317,7 +346,7 @@ def survey_with_custom_answer_second_step_reset(
     Структура опроса:
     - Тестовый вопрос?
         ** вариант ответа
-        - Следующий вопрос?
+        - Второй вопрос?
 
     Args:
         user: пользователь
@@ -402,15 +431,26 @@ def survey_with_change_status_question(
     question: Question,
     second_question: Question,
     answer_choice_change_status: AnswerChoice,
+    third_question: Question,
+    answer_choice_2to3: AnswerChoice,
 ) -> Survey:
     """
-    Вопрос со сменой статуса
+    Опрос со сменой статуса
+
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа со сменой статуса
+        - Второй вопрос?
+            ** вариант ответа от второго к третьему вопросу
+            -Третий вопрос?
 
     Args:
         user: пользователь
         question: текущий вопрос
         second_question: второй вопрос
         answer_choice_change_status: ответ со сменой статуса
+        third_question: третий вопрос
+        answer_choice_2to3: ответ от второго к третьему вопросу
 
     Returns:
         Survey: опрос
