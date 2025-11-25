@@ -16,34 +16,97 @@ from questionnaire.constant import SurveyStatus
 
 @pytest.mark.django_db
 class TestSurveyUpdate:
+    """
+    Тест обновления опроса
+    """
 
     def test_update_survey_success(
         self,
         authenticated_client: APIClient,
-        survey: Survey,
+        survey_with_custom_answer_start_step: Survey,
         answer_choice: AnswerChoice,
         question: Question,
         next_question: Question,
-    ):
-        """Тест успешного обновления опроса с ответом"""
+    ) -> None:
+        """
+        Тест успешного обновления опроса с ответом
+
+        Args:
+            authenticated_client: авторизованный клиент
+            survey_with_custom_answer_start_step: опрос
+            answer_choice: вариант ответа
+            question: текущий вопрос
+            next_question: следующий вопрос
+        """
         url = reverse(
             viewname="survey-detail",
-            kwargs={"pk": survey.id},
+            kwargs={"pk": survey_with_custom_answer_start_step.id},
         )
         data = {"answer": answer_choice.answer}
 
         response = authenticated_client.put(url, data, format="json")
 
         assert response.status_code == HTTP_200_OK
-        assert response.data["id"] == str(survey.id)
+        assert response.data["id"] == str(
+            survey_with_custom_answer_start_step.id
+        )
         assert response.data.get("current_question_text") == next_question.text
         assert response.data.get("answers") == []
 
         # Проверяем обновление опроса в базе
-        updated_survey = Survey.objects.get(id=survey.id)
+        updated_survey = Survey.objects.get(
+            id=survey_with_custom_answer_start_step.id
+        )
         assert updated_survey.current_question == answer_choice.next_question
         assert len(updated_survey.result) == 2
         # question.text и answer_choice.answer
+        assert updated_survey.result[0] == question.text
+        assert updated_survey.result[1] == answer_choice.answer
+
+    def test_update_survey_success_reset(
+        self,
+        authenticated_client: APIClient,
+        survey_with_custom_answer_second_step_reset: Survey,
+        answer_choice: AnswerChoice,
+        question: Question,
+        next_question: Question,
+    ) -> None:
+        """
+        Опрос с вопросом, имеющий пользовательский ответ
+        на этапе не заданного вопроса
+
+        Структура опроса:
+        - Тестовый вопрос?
+            ** вариант ответа
+            - Следующий вопрос?
+
+        Args:
+            authenticated_client: авторизованный клиент
+            survey_with_custom_answer_second_step_reset: опрос
+            answer_choice: вариант ответа
+            question: текущий вопрос
+            next_question: следующий вопрос
+        """
+        url = reverse(
+            viewname="survey-detail",
+            kwargs={"pk": survey_with_custom_answer_second_step_reset.id},
+        )
+        data = {"answer": answer_choice.answer}
+
+        response = authenticated_client.put(url, data, format="json")
+
+        assert response.status_code == HTTP_200_OK
+        assert response.data["id"] == str(
+            survey_with_custom_answer_second_step_reset.id
+        )
+        assert response.data.get("current_question_text") == next_question.text
+        assert response.data.get("answers") == []
+
+        updated_survey = Survey.objects.get(
+            id=survey_with_custom_answer_second_step_reset.id
+        )
+        assert updated_survey.current_question == answer_choice.next_question
+        assert len(updated_survey.result) == 2
         assert updated_survey.result[0] == question.text
         assert updated_survey.result[1] == answer_choice.answer
 

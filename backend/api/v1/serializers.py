@@ -136,6 +136,7 @@ class SurveyCreateSerializer(ModelSerializer):
                 "status": SurveyStatus.NEW.value,
                 "result": [],
                 "questions_version_uuid": question_start.updated_uuid,
+                "created_at": datetime.now(),
             },
         )
         if created:
@@ -150,6 +151,7 @@ class SurveyCreateSerializer(ModelSerializer):
             in (
                 SurveyStatus.PROCESSING.value,
                 SurveyStatus.COMPLETED.value,
+                SurveyStatus.REJECTED.value,
             )
             or survey_obj.current_question is None
         ):
@@ -186,6 +188,21 @@ class SurveyUpdateSerializer(ModelSerializer):
             "answers",
         )
         read_only_fields = ("current_question_text", "answers")
+
+    @staticmethod
+    def __get_question_start() -> Question:
+        """
+        Получить стартовый вопрос
+
+        Returns:
+            Question: стартовый вопрос
+        """
+        question_start = Question.objects.filter(type="start").first()
+        if not question_start:
+            text = "Не существует стартового вопроса для опроса."
+            logger.error(text)
+            raise ValidationError(text)
+        return question_start
 
     def get_current_question_text(self, obj: Survey) -> str:
         """
@@ -237,8 +254,16 @@ class SurveyUpdateSerializer(ModelSerializer):
             validated_data.get("answer"),
             validated_data.pop("add_telegram", True),
         )
+        current_question = instance.current_question
+        if current_question is None:
+            current_question = self.__get_question_start()
+            instance.current_question = current_question
+            instance.status = SurveyStatus.NEW.value
+            instance.result = []
+            instance.questions_version_uuid = current_question.updated_uuid
+            instance.created_at = datetime.now()
 
-        if current_question := instance.current_question:
+        if current_question:
             next_question, new_status, answer_text = (
                 self.__get_next_answer_choice(answer, current_question)
             )

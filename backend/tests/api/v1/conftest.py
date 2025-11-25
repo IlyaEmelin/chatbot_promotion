@@ -155,6 +155,10 @@ def answer_choice(question: Question, next_question: Question) -> AnswerChoice:
 def survey(user, question) -> Survey:
     """
     Получить опрос
+    на этапе первого вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
 
     Args:
         user: пользователь
@@ -184,6 +188,10 @@ def survey_with_custom_answer_start_step(
     Опрос с вопросом, имеющим пользовательский ответ
     на этапе первого вопроса
 
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа
+        - Следующий вопрос?
     Args:
         user: пользователь
         question: 1-й вопрос с ответом
@@ -199,12 +207,13 @@ def survey_with_custom_answer_start_step(
         status=SurveyStatus.NEW.value,
         result=[],
         questions_version_uuid=question.updated_uuid,
+        updated_at=question.updated_at,
     )
 
 
 @pytest.fixture
 def survey_with_custom_answer_second_step(
-    user,
+    user: User,
     question: Question,
     next_question: Question,
     answer_choice: AnswerChoice,
@@ -212,6 +221,11 @@ def survey_with_custom_answer_second_step(
     """
     Опрос с вопросом, имеющим пользовательский ответ
     на этапе второго вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа
+        - Следующий вопрос?
 
     Args:
         user: пользователь
@@ -237,12 +251,55 @@ def survey_with_custom_answer_second_step(
 
 
 @pytest.fixture
+def survey_with_custom_answer_second_step_reset(
+    user: User,
+    question: Question,
+    next_question: Question,
+    answer_choice: AnswerChoice,
+) -> Survey:
+    """
+    Опрос с вопросом, имеющим пользовательский ответ
+    на этапе не заданного вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа
+        - Следующий вопрос?
+
+    Args:
+        user: пользователь
+        question: 1-й вопрос с ответом
+        next_question: 2-й следующий вопрос
+        answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
+        current_question=None,
+        status=SurveyStatus.NEW.value,
+        result=[question.text, answer_choice.answer],
+        questions_version_uuid=(
+            UUID(
+                int=question.updated_uuid.int ^ next_question.updated_uuid.int
+            )
+        ),
+        updated_at=max(question.updated_at, next_question.updated_at),
+    )
+
+
+@pytest.fixture
 def survey_other_user(other_user, question) -> Survey:
     """
     Получить опрос от другого пользователя
+    на этапе первого вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
 
     Args:
-        other_user: пользователь
+        other_user: пользовательl
         question: первый вопрос
 
     Returns:
@@ -253,7 +310,8 @@ def survey_other_user(other_user, question) -> Survey:
         current_question=question,
         status=SurveyStatus.NEW.value,
         result=[],
-        questions_version_uuid="32345678-1234-1234-1234-123456789012",
+        questions_version_uuid=question.updated_uuid,
+        updated_at=question.updated_at,
     )
 
 
@@ -265,7 +323,8 @@ def survey_with_final_question(user, question_with_final_answer) -> Survey:
         current_question=question_with_final_answer,
         status=SurveyStatus.NEW.value,
         result=[],
-        questions_version_uuid="92345678-1234-1234-1234-123456789012",
+        questions_version_uuid=question_with_final_answer.updated_uuid,
+        updated_at=question_with_final_answer.updated_at,
     )
 
 
