@@ -213,7 +213,7 @@ def survey_with_custom_answer_start_step(
 
 @pytest.fixture
 def survey_with_custom_answer_second_step(
-    user,
+    user: User,
     question: Question,
     next_question: Question,
     answer_choice: AnswerChoice,
@@ -239,6 +239,45 @@ def survey_with_custom_answer_second_step(
     return Survey.objects.create(
         user=user,
         current_question=next_question,
+        status=SurveyStatus.NEW.value,
+        result=[question.text, answer_choice.answer],
+        questions_version_uuid=(
+            UUID(
+                int=question.updated_uuid.int ^ next_question.updated_uuid.int
+            )
+        ),
+        updated_at=max(question.updated_at, next_question.updated_at),
+    )
+
+
+@pytest.fixture
+def survey_with_custom_answer_second_step_reset(
+    user: User,
+    question: Question,
+    next_question: Question,
+    answer_choice: AnswerChoice,
+) -> Survey:
+    """
+    Опрос с вопросом, имеющим пользовательский ответ
+    на этапе не заданного вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа
+        - Следующий вопрос?
+
+    Args:
+        user: пользователь
+        question: 1-й вопрос с ответом
+        next_question: 2-й следующий вопрос
+        answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
+        current_question=None,
         status=SurveyStatus.NEW.value,
         result=[question.text, answer_choice.answer],
         questions_version_uuid=(
