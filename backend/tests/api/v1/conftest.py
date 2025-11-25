@@ -155,6 +155,10 @@ def answer_choice(question: Question, next_question: Question) -> AnswerChoice:
 def survey(user, question) -> Survey:
     """
     Получить опрос
+    на этапе первого вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
 
     Args:
         user: пользователь
@@ -184,6 +188,10 @@ def survey_with_custom_answer_start_step(
     Опрос с вопросом, имеющим пользовательский ответ
     на этапе первого вопроса
 
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа
+        - Следующий вопрос?
     Args:
         user: пользователь
         question: 1-й вопрос с ответом
@@ -199,6 +207,7 @@ def survey_with_custom_answer_start_step(
         status=SurveyStatus.NEW.value,
         result=[],
         questions_version_uuid=question.updated_uuid,
+        updated_at=question.updated_at,
     )
 
 
@@ -212,6 +221,11 @@ def survey_with_custom_answer_second_step(
     """
     Опрос с вопросом, имеющим пользовательский ответ
     на этапе второго вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа
+        - Следующий вопрос?
 
     Args:
         user: пользователь
@@ -240,9 +254,13 @@ def survey_with_custom_answer_second_step(
 def survey_other_user(other_user, question) -> Survey:
     """
     Получить опрос от другого пользователя
+    на этапе первого вопроса
+
+    Структура опроса:
+    - Тестовый вопрос?
 
     Args:
-        other_user: пользователь
+        other_user: пользовательl
         question: первый вопрос
 
     Returns:
@@ -253,7 +271,8 @@ def survey_other_user(other_user, question) -> Survey:
         current_question=question,
         status=SurveyStatus.NEW.value,
         result=[],
-        questions_version_uuid="32345678-1234-1234-1234-123456789012",
+        questions_version_uuid=question.updated_uuid,
+        updated_at=question.updated_at,
     )
 
 
@@ -265,7 +284,8 @@ def survey_with_final_question(user, question_with_final_answer) -> Survey:
         current_question=question_with_final_answer,
         status=SurveyStatus.NEW.value,
         result=[],
-        questions_version_uuid="92345678-1234-1234-1234-123456789012",
+        questions_version_uuid=question_with_final_answer.updated_uuid,
+        updated_at=question_with_final_answer.updated_at,
     )
 
 

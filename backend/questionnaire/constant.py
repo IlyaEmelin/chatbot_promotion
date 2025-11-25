@@ -91,7 +91,7 @@ class SurveyStatus(Enum):
             TelegramCommand.HELP,
         ),
     )
-    Rejected = (
+    REJECTED = (
         "rejected",
         "Отклонена",
         "❌",

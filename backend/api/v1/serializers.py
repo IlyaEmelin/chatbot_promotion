@@ -150,6 +150,7 @@ class SurveyCreateSerializer(ModelSerializer):
             in (
                 SurveyStatus.PROCESSING.value,
                 SurveyStatus.COMPLETED.value,
+                SurveyStatus.REJECTED.value,
             )
             or survey_obj.current_question is None
         ):

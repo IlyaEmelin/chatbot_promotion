@@ -151,6 +151,12 @@ async def _inform_msg(survey_obj: Survey, update) -> None:
                 f"Используйте {TelegramCommand.START.get_call_name()} "
                 "для нового опроса."
             )
+        case SurveyStatus.REJECTED.value:
+            await update.message.reply_text(
+                "❌ Опрос завершен! Заявка отклонена.\n"
+                f"Используйте {TelegramCommand.START.get_call_name()} "
+                "для нового опроса."
+            )
 
 
 async def _delete_last_bot_messages(
