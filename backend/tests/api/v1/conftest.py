@@ -154,7 +154,7 @@ def answer_choice(
 
     Args:
         question: первый вопрос
-        next_question: второй вопрос
+        second_question: второй вопрос
 
     Returns:
         AnswerChoice: вариант ответа
@@ -459,6 +459,46 @@ def survey_with_change_status_question(
         user=user,
         current_question=question,
         status=SurveyStatus.NEW.value,
+        result=[],
+        questions_version_uuid=question.updated_uuid,
+        updated_at=question.updated_at,
+    )
+
+
+@pytest.fixture
+def survey_with_save_last_status_question(
+    user: User,
+    question: Question,
+    second_question: Question,
+    answer_choice: AnswerChoice,
+    third_question: Question,
+    answer_choice_2to3: AnswerChoice,
+) -> Survey:
+    """
+    Опрос со сохранением старого статуса
+
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа со сменой статуса
+        - Второй вопрос?
+            ** вариант ответа от второго к третьему вопросу
+            -Третий вопрос?
+
+    Args:
+        user: пользователь
+        question: текущий вопрос
+        second_question: второй вопрос
+        answer_choice: ответ
+        third_question: третий вопрос
+        answer_choice_2to3: ответ от второго к третьему вопросу
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
+        current_question=question,
+        status=SurveyStatus.REJECTED.value,
         result=[],
         questions_version_uuid=question.updated_uuid,
         updated_at=question.updated_at,

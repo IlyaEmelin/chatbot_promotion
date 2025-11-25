@@ -173,6 +173,66 @@ class TestSurveyUpdate:
         assert updated_survey.result[1] == answer_choice_change_status.answer
         assert updated_survey.status == SurveyStatus.REJECTED.value
 
+    def test_update_survey_save_last_status_question(
+        self,
+        authenticated_client: APIClient,
+        survey_with_save_last_status_question: Survey,
+        question: Question,
+        second_question: Question,
+        answer_choice: AnswerChoice,
+        third_question: Question,
+        answer_choice_2to3: AnswerChoice,
+    ) -> None:
+        """
+        Опрос со сохранением старого статуса
+
+        Структура опроса:
+        - Тестовый вопрос?
+            ** вариант ответа со сменой статуса
+            - Второй вопрос?
+                ** вариант ответа от второго к третьему вопросу
+                -Третий вопрос?
+
+        Args:
+            authenticated_client: аутентифицированный клиент
+            survey_with_save_last_status_question: опрос сохранением
+                старого статуса
+            question: стартовый вопрос
+            second_question: второй вопрос
+            answer_choice: ответ от 1-го к 2-му вопросу
+            third_question: третий вопрос
+            answer_choice_2to3: ответ от 2-го к 3-му вопросу
+        """
+        url = reverse(
+            viewname="survey-detail",
+            kwargs={"pk": survey_with_save_last_status_question.id},
+        )
+        data = {"answer": answer_choice.answer}
+
+        response = authenticated_client.put(url, data, format="json")
+
+        assert response.status_code == HTTP_200_OK
+        assert response.data["id"] == str(
+            survey_with_save_last_status_question.id
+        )
+        assert (
+            response.data.get("current_question_text") == second_question.text
+        )
+        assert response.data.get("answers") == [answer_choice_2to3.answer]
+        assert response.data.get("result") == [
+            question.text,
+            answer_choice.answer,
+        ]
+
+        updated_survey = Survey.objects.get(
+            id=survey_with_save_last_status_question.id
+        )
+        assert updated_survey.current_question == second_question
+        assert len(updated_survey.result) == 2
+        assert updated_survey.result[0] == question.text
+        assert updated_survey.result[1] == answer_choice.answer
+        assert updated_survey.status == SurveyStatus.REJECTED.value
+
     def test_update_survey_custom_answer(
         self,
         authenticated_client,
