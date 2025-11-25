@@ -1,4 +1,5 @@
 # conftest.py
+from datetime import datetime
 from uuid import uuid4, UUID
 
 from django.contrib.auth import get_user_model
@@ -94,47 +95,62 @@ def question() -> Question:
         text="Тестовый вопрос?",
         updated_uuid="12345678-1234-1234-1234-123456789012",
         type="start",
+        updated_at=datetime(2013, 1, 11),
     )
 
 
 @pytest.fixture
-def next_question() -> Question:
+def second_question() -> Question:
     """
-    Следующий вопрос
+    Второй вопрос
 
     Returns:
-        Question: следующий вопрос
+        Question: второй вопрос
     """
 
     return Question.objects.create(
-        text="Следующий вопрос?",
+        text="Второй вопрос?",
         updated_uuid="42345678-1234-1234-1234-123456789013",
+        updated_at=datetime(2013, 1, 12),
+    )
+
+
+@pytest.fixture
+def third_question() -> Question:
+    """
+    Третий вопрос
+
+    Returns:
+        Question: третий вопрос
+    """
+    return Question.objects.create(
+        text="Третий вопрос?",
+        updated_uuid="42345678-3333-4444-1234-123456789013",
+        updated_at=datetime(2013, 1, 1),
     )
 
 
 @pytest.fixture
 def question_with_final_answer() -> Question:
-    """Вопрос с завершающим ответом"""
-    question_final_answer = Question.objects.create(
+    """
+    Вопрос с завершающим ответом
+
+    Returns:
+        Question: Вопрос с завершающим ответом
+    """
+    return Question.objects.create(
         text="Финальный вопрос?",
-        updated_uuid="82345678-1234-1234-1234-123456789012",
+        updated_uuid="82345678-1234-1234-1234-123456789014",
     )
-
-    # Создаем AnswerChoice без next_question (конец опроса)
-    AnswerChoice.objects.create(
-        current_question=question_final_answer,
-        next_question=None,  # Конец опроса
-        answer="final_answer",
-    )
-
-    return question_final_answer
 
 
 # answer choice
 @pytest.fixture
-def answer_choice(question: Question, next_question: Question) -> AnswerChoice:
+def answer_choice(
+    question: Question, second_question: Question
+) -> AnswerChoice:
     """
-    Второй вопрос
+    Вариант ответа
 
     Args:
         question: первый вопрос
@@ -145,8 +161,73 @@ def answer_choice(question: Question, next_question: Question) -> AnswerChoice:
     """
     return AnswerChoice.objects.create(
         current_question=question,
-        next_question=next_question,
+        next_question=second_question,
         answer="вариант ответа",
+    )
+
+
+@pytest.fixture
+def answer_choice_final(question_with_final_answer: Question) -> AnswerChoice:
+    """
+    Вариант ответа финишного вопроса
+    нет следующего вопроса
+
+    Args:
+        question_with_final_answer: Вопрос с завершающим ответом
+
+    Returns:
+        AnswerChoice:
+    """
+    # Создаем AnswerChoice без next_question (конец опроса)
+    return AnswerChoice.objects.create(
+        current_question=question_with_final_answer,
+        next_question=None,  # Конец опроса
+        answer="завершающий ответ",
+    )
+
+
+@pytest.fixture
+def answer_choice_change_status(
+    question: Question,
+    second_question: Question,
+) -> AnswerChoice:
+    """
+    Вариант ответа со сменой статуса
+
+    Args:
+        question: текущий вопрос
+        second_question: следующий вопрос
+
+    Returns:
+        AnswerChoice: вариант ответа
+    """
+    return AnswerChoice.objects.create(
+        current_question=question,
+        next_question=second_question,
+        answer="вариант ответа со сменой статуса",
+        new_status=SurveyStatus.REJECTED.value,
+    )
+
+
+@pytest.fixture
+def answer_choice_2to3(
+    second_question: Question,
+    third_question: Question,
+) -> AnswerChoice:
+    """
+    Вариант ответа от второго к третьему вопросу
+
+    Args:
+        second_question: второй вопрос
+        third_question: третий вопрос
+
+    Returns:
+        AnswerChoice: вариант ответа от второго к третьему вопросу
+    """
+    return AnswerChoice.objects.create(
+        current_question=second_question,
+        next_question=third_question,
+        answer="вариант ответа от второго к третьему вопросу",
     )
 
 
@@ -181,7 +262,7 @@ def survey(user, question) -> Survey:
 def survey_with_custom_answer_start_step(
     user,
     question,
-    next_question,
+    second_question,
     answer_choice,
 ) -> Survey:
     """
@@ -215,7 +296,7 @@ def survey_with_custom_answer_start_step(
 def survey_with_custom_answer_second_step(
     user: User,
     question: Question,
-    next_question: Question,
+    second_question: Question,
     answer_choice: AnswerChoice,
 ) -> Survey:
     """
@@ -238,15 +319,16 @@ def survey_with_custom_answer_second_step(
     """
     return Survey.objects.create(
         user=user,
-        current_question=next_question,
+        current_question=second_question,
         status=SurveyStatus.NEW.value,
         result=[question.text, answer_choice.answer],
         questions_version_uuid=(
             UUID(
-                int=question.updated_uuid.int ^ next_question.updated_uuid.int
+                int=question.updated_uuid.int
+                ^ second_question.updated_uuid.int
             )
         ),
-        updated_at=max(question.updated_at, next_question.updated_at),
+        updated_at=max(question.updated_at, second_question.updated_at),
     )
 
 
@@ -254,7 +336,7 @@ def survey_with_custom_answer_second_step(
 def survey_with_custom_answer_second_step_reset(
     user: User,
     question: Question,
-    next_question: Question,
+    second_question: Question,
     answer_choice: AnswerChoice,
 ) -> Survey:
     """
@@ -264,7 +346,7 @@ def survey_with_custom_answer_second_step_reset(
     Структура опроса:
     - Тестовый вопрос?
         ** вариант ответа
-        - Следующий вопрос?
+        - Второй вопрос?
 
     Args:
         user: пользователь
@@ -282,10 +364,11 @@ def survey_with_custom_answer_second_step_reset(
         result=[question.text, answer_choice.answer],
         questions_version_uuid=(
             UUID(
-                int=question.updated_uuid.int ^ next_question.updated_uuid.int
+                int=question.updated_uuid.int
+                ^ second_question.updated_uuid.int
             )
         ),
-        updated_at=max(question.updated_at, next_question.updated_at),
+        updated_at=max(question.updated_at, second_question.updated_at),
     )
 
 
@@ -316,8 +399,22 @@ def survey_other_user(other_user, question) -> Survey:
 
 
 @pytest.fixture
-def survey_with_final_question(user, question_with_final_answer) -> Survey:
-    """Опрос с финальным вопросом"""
+def survey_with_final_question(
+    user: User,
+    question_with_final_answer: Question,
+    answer_choice_final: AnswerChoice,
+) -> Survey:
+    """
+    Опрос с финальным вопросом
+
+    Args:
+        user: пользователь
+        question_with_final_answer: финальный вопрос
+        answer_choice_final: финальный вариант ответа
+
+    Returns:
+        Survey: опрос с финальным вопросом
+    """
     return Survey.objects.create(
         user=user,
         current_question=question_with_final_answer,
@@ -325,6 +422,46 @@ def survey_with_final_question(user, question_with_final_answer) -> Survey:
         result=[],
         questions_version_uuid=question_with_final_answer.updated_uuid,
         updated_at=question_with_final_answer.updated_at,
+    )
+
+
+@pytest.fixture
+def survey_with_change_status_question(
+    user: User,
+    question: Question,
+    second_question: Question,
+    answer_choice_change_status: AnswerChoice,
+    third_question: Question,
+    answer_choice_2to3: AnswerChoice,
+) -> Survey:
+    """
+    Опрос со сменой статуса
+
+    Структура опроса:
+    - Тестовый вопрос?
+        ** вариант ответа со сменой статуса
+        - Второй вопрос?
+            ** вариант ответа от второго к третьему вопросу
+            -Третий вопрос?
+
+    Args:
+        user: пользователь
+        question: текущий вопрос
+        second_question: второй вопрос
+        answer_choice_change_status: ответ со сменой статуса
+        third_question: третий вопрос
+        answer_choice_2to3: ответ от второго к третьему вопросу
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
+        current_question=question,
+        status=SurveyStatus.NEW.value,
+        result=[],
+        questions_version_uuid=question.updated_uuid,
+        updated_at=question.updated_at,
     )
 
 

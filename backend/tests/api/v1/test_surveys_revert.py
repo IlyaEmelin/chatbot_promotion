@@ -72,7 +72,7 @@ class TestSurveyRevert:
         authenticated_client,
         survey_with_custom_answer_second_step,
         question: Question,
-        next_question: Question,
+        second_question: Question,
         answer_choice: AnswerChoice,
     ):
         """Тест успешного отката ответа из опроса, когда опрос не пустой"""
@@ -107,7 +107,7 @@ class TestSurveyRevert:
         #  нам придется пробежать все вопросы включая новый текущий
         assert (
             survey_with_custom_answer_second_step.updated_at
-            == next_question.updated_at
+            == second_question.updated_at
         )
 
     @pytest.mark.django_db
