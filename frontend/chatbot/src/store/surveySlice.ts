@@ -13,9 +13,8 @@ const hasValidOptions = (answers: string[]): boolean => {
     String(answer).trim() !== '' &&
     String(answer).toLowerCase() !== 'none'
   );
-  
-  // Если остался только один вариант или меньше - не показываем кнопки
-  return validAnswers.length > 1;
+  // Если нет валидных ответов - не показываем кнопки
+  return validAnswers.length >= 1;
 };
 
 // Async thunks для работы с новым API
@@ -169,7 +168,7 @@ const surveySlice = createSlice({
             !state.messages.some(m => m.text === currentSurvey.current_question_text)) {
           
           const hasOptions = hasValidOptions(currentSurvey.answers);
-          const options = hasOptions ? currentSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : undefined;
+          const options = hasOptions ? currentSurvey.answers.filter(answer => answer === null || answer.trim() !== '') : undefined;
           
           const currentMessage: Message = {
             id: `current-${Date.now()}`,
@@ -222,7 +221,7 @@ const surveySlice = createSlice({
           if (questionText) {
             const hasOptions = updatedSurvey && hasValidOptions(updatedSurvey.answers);
             const options = hasOptions && updatedSurvey ? 
-              updatedSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : 
+              updatedSurvey.answers.filter(answer => answer === null || answer.trim() !== '') : 
               undefined;
             
             const newMessage: Message = {
@@ -289,7 +288,7 @@ const surveySlice = createSlice({
               !state.messages.some(m => m.text === lastSurvey.current_question_text)) {
             
             const hasOptions = hasValidOptions(lastSurvey.answers);
-            const options = hasOptions ? lastSurvey.answers.filter(answer => answer !== null && answer.trim() !== '') : undefined;
+            const options = hasOptions ? lastSurvey.answers.filter(answer => answer !== null || answer.trim() !== '') : undefined;
             
             const currentMessage: Message = {
               id: `current-${Date.now()}`,
