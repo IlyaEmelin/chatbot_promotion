@@ -98,8 +98,8 @@ export const Input: React.FC = () => {
   };
 
   const lastMessage = messages[messages.length - 1];
-  const hasOptions = lastMessage?.options && lastMessage.options.length > 0;
-  
+  const hasOnlyTextOptions = lastMessage?.options && lastMessage.options.length > 0 && !lastMessage.options.includes(null);
+
   if (isCompleted) {
     return null;
   }
@@ -140,8 +140,8 @@ export const Input: React.FC = () => {
     );
   }
 
-  // ЕСЛИ ЕСТЬ ОПЦИИ - НЕ ПОКАЗЫВАЕМ ПОЛЕ ВВОДА
-  if (hasOptions && !isLoading) {
+  // ЕСЛИ ЕСТЬ ТОЛЬКО ТЕКСТОВЫЕ ОПЦИИ (без null) - НЕ ПОКАЗЫВАЕМ ПОЛЕ ВВОДА
+  if (hasOnlyTextOptions && !isLoading) {
     return null;
   }
 
@@ -150,31 +150,36 @@ export const Input: React.FC = () => {
     (isLoading || !inputText.trim()) ? styles.sendButtonDisabled : ''
   }`;
 
+  // ПОКАЗЫВАЕМ ПОЛЕ ВВОДА, ЕСЛИ НЕТ ОПЦИЙ ИЛИ ОДИН ИЗ ВАРИАНТОВ ОПЦИЙ = NULL
+  const showInput = lastMessage?.options === undefined && !isLoading || lastMessage?.options && lastMessage.options.includes(null) && !isLoading
+  
   return (
-    <div className={styles.container}>
-      <div className={styles.wrapper}>
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Введите ответ..."
-          className={inputClass}
-          disabled={isLoading}
-        />
-        
-        <button
-          onClick={handleSendMessage}
-          disabled={isLoading || !inputText.trim()}
-          className={sendButtonClass}
-          title="Отправить"
-          type="button"
-        >
-          <Send size={18} />
-        </button>
+    showInput && (
+      <div className={styles.container}>
+        <div className={styles.wrapper}>
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Введите ответ..."
+            className={inputClass}
+            disabled={isLoading}
+          />
+          
+          <button
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputText.trim()}
+            className={sendButtonClass}
+            title="Отправить"
+            type="button"
+          >
+            <Send size={18} />
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    )
+  )
 };
 
 export default Input;

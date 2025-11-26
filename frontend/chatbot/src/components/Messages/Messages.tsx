@@ -14,8 +14,11 @@ export const Messages: React.FC = () => {
   }, [messages, isLoading]);
 
   const lastMessage = messages[messages.length - 1];
-  const shouldShowOptions = lastMessage?.options && 
-                           lastMessage.options.length > 0 && 
+
+  // в опциях может быть null, кроме варианта ответа, отфильтровываем его
+  const lastMessageOptions = lastMessage?.options?.filter(option => option !== null);
+  const shouldShowOptions = lastMessageOptions && 
+                           lastMessageOptions.length > 0 && 
                            !isLoading;
 
   return (
@@ -25,7 +28,7 @@ export const Messages: React.FC = () => {
       ))}
 
       {shouldShowOptions && (
-        <Options options={lastMessage.options} />
+        <Options options={lastMessageOptions} />
       )}
 
       {isLoading && <Loading />}
