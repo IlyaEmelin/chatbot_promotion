@@ -1,6 +1,7 @@
 # test_surveys_update.py
 import pytest
 
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
@@ -12,6 +13,8 @@ from rest_framework.test import APIClient
 
 from questionnaire.models import Survey, Question, AnswerChoice
 from questionnaire.constant import SurveyStatus
+
+User = get_user_model()
 
 
 @pytest.mark.django_db
@@ -305,6 +308,58 @@ class TestSurveyUpdate:
         assert len(updated_survey.result) == 2
         assert updated_survey.result[0] == question_with_final_answer.text
         assert updated_survey.result[1] == answer_choice_final.answer
+
+    def test_update_survey_question_phone(
+        self,
+        user: User,
+        authenticated_client: APIClient,
+        survey_question_phone: Survey,
+        question_phone: Question,
+        second_question: Question,
+        answer_choice_phone: AnswerChoice,
+    ) -> None:
+        """
+        Тест сохранения телефона в пользователя
+
+        Args:
+            user: пользователь
+            authenticated_client: авторизованный клиент
+            survey_question_phone: опрос со сохранением старого статуса
+            question_phone:  Вопрос с запросом номера телефона
+            second_question: Второй вопрос
+            answer_choice_phone: вариант ответа телефона с номером телефона
+        """
+        url = reverse(
+            viewname="survey-detail",
+            kwargs={"pk": survey_question_phone.id},
+        )
+        new_phone_number = "+79206548807"
+        data = {"answer": new_phone_number}
+
+        response_set_phone = authenticated_client.put(url, data, format="json")
+
+        assert response_set_phone.status_code == HTTP_200_OK
+        assert response_set_phone.data["id"] == str(survey_question_phone.id)
+        assert (
+            response_set_phone.data.get("current_question_text")
+            == second_question.text
+        )
+        assert response_set_phone.data.get("answers") == []
+        assert response_set_phone.data.get("result") == [
+            question_phone.text,
+            new_phone_number,
+        ]
+
+        updated_survey = Survey.objects.get(id=survey_question_phone.id)
+        assert updated_survey.current_question == second_question
+        assert len(updated_survey.result) == 2
+        assert updated_survey.result == [
+            question_phone.text,
+            new_phone_number,
+        ]
+
+        user.refresh_from_db()
+        assert user.phone_number == new_phone_number
 
     def test_update_survey_invalid_answer(
         self,

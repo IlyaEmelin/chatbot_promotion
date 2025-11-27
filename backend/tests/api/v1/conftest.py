@@ -141,6 +141,22 @@ def question_with_final_answer() -> Question:
     return Question.objects.create(
         text="Финальный вопрос?",
         updated_uuid="82345678-1234-1234-1234-123456789014",
+        updated_at=datetime(1984, 10, 1),
+    )
+
+
+@pytest.fixture
+def question_phone() -> Question:
+    """
+    Вопрос с запросом номера телефона
+
+    Returns:
+        Question: Вопрос с запросом номера телефона
+    """
+    return Question.objects.create(
+        text="Укажите номер телефона в формате +7ХХХХХХХХХХ?",
+        updated_uuid="82399978-1234-1234-1234-123457779014",
+        external_table_field_name="User.phone_number",
     )
 
 
@@ -228,6 +244,28 @@ def answer_choice_2to3(
         current_question=second_question,
         next_question=third_question,
         answer="вариант ответа от второго к третьему вопросу",
+    )
+
+
+@pytest.fixture
+def answer_choice_phone(
+    question_phone: Question,
+    second_question: Question,
+) -> AnswerChoice:
+    """
+    Вариант ответа первый вопрос запрос номера телефона
+
+    Args:
+        question_phone: вопрос с запросом номера телефона
+        second_question: второй вопрос
+
+    Returns:
+        AnswerChoice: вариант ответа
+    """
+    return AnswerChoice.objects.create(
+        current_question=question_phone,
+        next_question=second_question,
+        answer=None,
     )
 
 
@@ -502,6 +540,40 @@ def survey_with_save_last_status_question(
         result=[],
         questions_version_uuid=question.updated_uuid,
         updated_at=question.updated_at,
+    )
+
+
+@pytest.fixture
+def survey_question_phone(
+    user: User,
+    question_phone: Question,
+    second_question: Question,
+    answer_choice_phone: AnswerChoice,
+) -> Survey:
+    """
+    Опрос со сохранением старого статуса
+
+    Структура опроса:
+    - Укажите номер телефона в формате +7ХХХХХХХХХХ?
+        ** None
+        - Второй вопрос?
+
+    Args:
+        user: пользователь
+        question_phone: текущий вопрос
+        second_question: второй вопрос
+        answer_choice_phone: ответ
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
+        current_question=question_phone,
+        status=SurveyStatus.NEW.value,
+        result=[],
+        questions_version_uuid=question_phone.updated_uuid,
+        updated_at=question_phone.updated_at,
     )
 
 
