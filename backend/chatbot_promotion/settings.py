@@ -97,7 +97,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    'debug_toolbar',
+    "debug_toolbar",
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
@@ -109,7 +109,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -122,8 +122,8 @@ MIDDLEWARE = [
 ]
 
 INTERNAL_IPS = [
-    '127.0.0.1',
-    'localhost',
+    "127.0.0.1",
+    "localhost",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -199,6 +199,7 @@ REST_FRAMEWORK = {
         "user": "10000/day",
         "anon": "1000/day",
     },
+    "EXCEPTION_HANDLER": "api.v1.exceptions.custom_exception_handler",
 }
 
 AUTH_PASSWORD_VALIDATORS = [

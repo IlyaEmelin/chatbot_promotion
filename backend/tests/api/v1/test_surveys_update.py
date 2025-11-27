@@ -1,17 +1,21 @@
 # test_surveys_update.py
 import pytest
 
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
     HTTP_405_METHOD_NOT_ALLOWED,
     HTTP_401_UNAUTHORIZED,
+    HTTP_400_BAD_REQUEST,
 )
 from rest_framework.test import APIClient
 
 from questionnaire.models import Survey, Question, AnswerChoice
 from questionnaire.constant import SurveyStatus
+
+User = get_user_model()
 
 
 @pytest.mark.django_db
@@ -62,8 +66,7 @@ class TestSurveyUpdate:
         assert updated_survey.current_question == answer_choice.next_question
         assert len(updated_survey.result) == 2
         # question.text и answer_choice.answer
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice.answer
+        assert updated_survey.result == [question.text, answer_choice.answer]
 
     def test_update_survey_success_reset(
         self,
@@ -111,8 +114,7 @@ class TestSurveyUpdate:
         )
         assert updated_survey.current_question == answer_choice.next_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice.answer
+        assert updated_survey.result == [question.text, answer_choice.answer]
 
     def test_update_survey_change_status_question(
         self,
@@ -169,8 +171,10 @@ class TestSurveyUpdate:
         )
         assert updated_survey.current_question == second_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice_change_status.answer
+        assert updated_survey.result == [
+            question.text,
+            answer_choice_change_status.answer,
+        ]
         assert updated_survey.status == SurveyStatus.REJECTED.value
 
     def test_update_survey_save_last_status_question(
@@ -229,8 +233,10 @@ class TestSurveyUpdate:
         )
         assert updated_survey.current_question == second_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice.answer
+        assert updated_survey.result == [
+            question.text,
+            answer_choice.answer,
+        ]
         assert updated_survey.status == SurveyStatus.REJECTED.value
 
     def test_update_survey_custom_answer(
@@ -265,7 +271,10 @@ class TestSurveyUpdate:
         updated_survey = Survey.objects.get(id=survey.id)
         assert updated_survey.current_question == next_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[1] == "мой_пользовательский_ответ"
+        assert updated_survey.result == [
+            "Тестовый вопрос?",
+            "мой_пользовательский_ответ",
+        ]
 
     def test_update_survey_with_final_question(
         self,
@@ -303,8 +312,103 @@ class TestSurveyUpdate:
         updated_survey = Survey.objects.get(id=survey_with_final_question.id)
         assert updated_survey.current_question is None
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question_with_final_answer.text
-        assert updated_survey.result[1] == answer_choice_final.answer
+        assert updated_survey.result == [
+            question_with_final_answer.text,
+            answer_choice_final.answer,
+        ]
+
+    def test_update_survey_question_phone(
+        self,
+        user: User,
+        authenticated_client: APIClient,
+        survey_question_phone: Survey,
+        question_phone: Question,
+        second_question: Question,
+        answer_choice_phone: AnswerChoice,
+    ) -> None:
+        """
+        Тест сохранения телефона в пользователя
+
+        Args:
+            user: пользователь
+            authenticated_client: авторизованный клиент
+            survey_question_phone: опрос со сохранением старого статуса
+            question_phone:  Вопрос с запросом номера телефона
+            second_question: Второй вопрос
+            answer_choice_phone: вариант ответа телефона с номером телефона
+        """
+        url = reverse(
+            viewname="survey-detail",
+            kwargs={"pk": survey_question_phone.id},
+        )
+        new_phone_number = "+79206548807"
+        data = {"answer": new_phone_number}
+
+        response_set_phone = authenticated_client.put(url, data, format="json")
+
+        assert response_set_phone.status_code == HTTP_200_OK
+        assert response_set_phone.data["id"] == str(survey_question_phone.id)
+        assert (
+            response_set_phone.data.get("current_question_text")
+            == second_question.text
+        )
+        assert response_set_phone.data.get("answers") == []
+        assert response_set_phone.data.get("result") == [
+            question_phone.text,
+            new_phone_number,
+        ]
+
+        updated_survey = Survey.objects.get(id=survey_question_phone.id)
+        assert updated_survey.current_question == second_question
+        assert len(updated_survey.result) == 2
+        assert updated_survey.result == [
+            question_phone.text,
+            new_phone_number,
+        ]
+
+        user.refresh_from_db()
+        assert user.phone_number == new_phone_number
+
+    def test_update_survey_question_phone2(
+        self,
+        user: User,
+        authenticated_client: APIClient,
+        survey_question_phone: Survey,
+        question_phone: Question,
+        second_question: Question,
+        answer_choice_phone: AnswerChoice,
+    ) -> None:
+        """
+        Тест сохранения не корректного телефона
+
+        Args:
+            user: пользователь
+            authenticated_client: авторизованный клиент
+            survey_question_phone: опрос со сохранением старого статуса
+            question_phone:  Вопрос с запросом номера телефона
+            second_question: Второй вопрос
+            answer_choice_phone: вариант ответа телефона с номером телефона
+        """
+        url = reverse(
+            viewname="survey-detail",
+            kwargs={"pk": survey_question_phone.id},
+        )
+        new_phone_number = "724433"
+        data = {"answer": new_phone_number}
+
+        response_set_phone = authenticated_client.put(url, data, format="json")
+
+        assert response_set_phone.status_code == HTTP_400_BAD_REQUEST
+        assert response_set_phone.data == {
+            "phone_number": ["Укажите номер в формате: +7ХХХХХХХХХХ"]
+        }
+
+        updated_survey = Survey.objects.get(id=survey_question_phone.id)
+        assert updated_survey.current_question == question_phone
+        assert updated_survey.result == []
+
+        user.refresh_from_db()
+        assert user.phone_number is None
 
     def test_update_survey_invalid_answer(
         self,
