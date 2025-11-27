@@ -65,8 +65,7 @@ class TestSurveyUpdate:
         assert updated_survey.current_question == answer_choice.next_question
         assert len(updated_survey.result) == 2
         # question.text и answer_choice.answer
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice.answer
+        assert updated_survey.result == [question.text, answer_choice.answer]
 
     def test_update_survey_success_reset(
         self,
@@ -114,8 +113,7 @@ class TestSurveyUpdate:
         )
         assert updated_survey.current_question == answer_choice.next_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice.answer
+        assert updated_survey.result == [question.text, answer_choice.answer]
 
     def test_update_survey_change_status_question(
         self,
@@ -172,8 +170,10 @@ class TestSurveyUpdate:
         )
         assert updated_survey.current_question == second_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice_change_status.answer
+        assert updated_survey.result == [
+            question.text,
+            answer_choice_change_status.answer,
+        ]
         assert updated_survey.status == SurveyStatus.REJECTED.value
 
     def test_update_survey_save_last_status_question(
@@ -232,8 +232,10 @@ class TestSurveyUpdate:
         )
         assert updated_survey.current_question == second_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question.text
-        assert updated_survey.result[1] == answer_choice.answer
+        assert updated_survey.result == [
+            question.text,
+            answer_choice.answer,
+        ]
         assert updated_survey.status == SurveyStatus.REJECTED.value
 
     def test_update_survey_custom_answer(
@@ -268,7 +270,10 @@ class TestSurveyUpdate:
         updated_survey = Survey.objects.get(id=survey.id)
         assert updated_survey.current_question == next_question
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[1] == "мой_пользовательский_ответ"
+        assert updated_survey.result == [
+            "Тестовый вопрос?",
+            "мой_пользовательский_ответ",
+        ]
 
     def test_update_survey_with_final_question(
         self,
@@ -306,8 +311,10 @@ class TestSurveyUpdate:
         updated_survey = Survey.objects.get(id=survey_with_final_question.id)
         assert updated_survey.current_question is None
         assert len(updated_survey.result) == 2
-        assert updated_survey.result[0] == question_with_final_answer.text
-        assert updated_survey.result[1] == answer_choice_final.answer
+        assert updated_survey.result == [
+            question_with_final_answer.text,
+            answer_choice_final.answer,
+        ]
 
     def test_update_survey_question_phone(
         self,
