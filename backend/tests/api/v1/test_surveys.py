@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_401_UNAUTHORIZED,
+    HTTP_400_BAD_REQUEST,
 )
 from questionnaire.models import Survey
 from questionnaire.constant import SurveyStatus
@@ -79,10 +80,11 @@ class TestSurveyCreate:
         url = reverse("survey-list")
         data = {}
 
-        with raises(ValidationError) as exp:
-            authenticated_client.post(url, data, format="json")
+        response = authenticated_client.post(url, data, format="json")
 
-        assert (
-            exp.value.message == "Не существует стартового вопроса для опроса."
-        )
-        assert exp.type == ValidationError
+        assert response.status_code == HTTP_400_BAD_REQUEST
+        assert response.data == {
+            "non_field_errors": [
+                "Не существует стартового вопроса для опроса."
+            ],
+        }

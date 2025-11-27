@@ -8,6 +8,7 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
     HTTP_405_METHOD_NOT_ALLOWED,
     HTTP_401_UNAUTHORIZED,
+    HTTP_400_BAD_REQUEST,
 )
 from rest_framework.test import APIClient
 
@@ -367,6 +368,47 @@ class TestSurveyUpdate:
 
         user.refresh_from_db()
         assert user.phone_number == new_phone_number
+
+    def test_update_survey_question_phone2(
+        self,
+        user: User,
+        authenticated_client: APIClient,
+        survey_question_phone: Survey,
+        question_phone: Question,
+        second_question: Question,
+        answer_choice_phone: AnswerChoice,
+    ) -> None:
+        """
+        Тест сохранения не корректного телефона
+
+        Args:
+            user: пользователь
+            authenticated_client: авторизованный клиент
+            survey_question_phone: опрос со сохранением старого статуса
+            question_phone:  Вопрос с запросом номера телефона
+            second_question: Второй вопрос
+            answer_choice_phone: вариант ответа телефона с номером телефона
+        """
+        url = reverse(
+            viewname="survey-detail",
+            kwargs={"pk": survey_question_phone.id},
+        )
+        new_phone_number = "724433"
+        data = {"answer": new_phone_number}
+
+        response_set_phone = authenticated_client.put(url, data, format="json")
+
+        assert response_set_phone.status_code == HTTP_400_BAD_REQUEST
+        assert response_set_phone.data == {
+            "phone_number": ["Укажите номер в формате: +7ХХХХХХХХХХ"]
+        }
+
+        updated_survey = Survey.objects.get(id=survey_question_phone.id)
+        assert updated_survey.current_question == question_phone
+        assert updated_survey.result == []
+
+        user.refresh_from_db()
+        assert user.phone_number is None
 
     def test_update_survey_invalid_answer(
         self,
