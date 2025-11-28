@@ -38,6 +38,8 @@ async function handleApiError(response: Response): Promise<never> {
       errorMessage = errorData.message;
     } else if (errorData.error) {
       errorMessage = errorData.error;
+    } else if (errorData.phone_number) {
+      errorMessage = errorData.phone_number;
     } else {
       errorMessage = JSON.stringify(errorData);
     }
