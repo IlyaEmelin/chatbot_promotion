@@ -27,22 +27,12 @@ function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<strin
 }
 
 async function handleApiError(response: Response): Promise<never> {
-  let errorMessage = '';
+  let errorMessage = ''
 
   try {
     const errorData = await response.json();
-    
-    if (errorData.detail) {
-      errorMessage = errorData.detail;
-    } else if (errorData.message) {
-      errorMessage = errorData.message;
-    } else if (errorData.error) {
-      errorMessage = errorData.error;
-    } else if (errorData.phone_number) {
-      errorMessage = errorData.phone_number;
-    } else {
-      errorMessage = JSON.stringify(errorData);
-    }
+    // Выбираем значения ошибок и соединяем их в одну строку
+    errorMessage = Object.values(errorData).flat().join('\n');
   } catch {
     // Если не удалось распарсить JSON
     errorMessage = await response.text() || `Ошибка ${response.status}`;

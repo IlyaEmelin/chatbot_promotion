@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 export const config = {
   apiUrl: process.env.VITE_API_URL|| 'http://localhost:8000/api',
   widgetPosition: process.env.REACT_APP_WIDGET_POSITION || 'bottom-right',

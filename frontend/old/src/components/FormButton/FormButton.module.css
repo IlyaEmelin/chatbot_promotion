@@ -1,0 +1,27 @@
+.button {
+    color: var(--bg-color);
+    background-color: var(--accent-color-active);
+    border-style: none;
+    border-radius: 24px;
+    padding: 8px 24px;
+    box-shadow: none;
+    transition-duration: 0.2s;
+    transition-property: background-color, color, border-color, box-shadow, opacity, transform;
+    transition-timing-function: ease-in-out;
+}
+
+.button:hover {
+    background-color: var(--accent-color-hover);
+    cursor: pointer;
+}
+
+.button:focus,
+.button:focus-visible {
+    outline: none;
+    background-color: var(--accent-color-focus);
+}
+
+.button:disabled {
+    background-color: var(--accent-color-disabled);
+    cursor: not-allowed;
+}

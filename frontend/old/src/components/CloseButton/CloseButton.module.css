@@ -1,0 +1,29 @@
+.closeMenu {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    z-index: 999;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.line {
+    width: 100%;
+    height: 2px;
+    margin: -1px;
+}
+
+.line:nth-child(1) {
+    transform: rotate(-45deg);
+    transform-origin: center center;
+}
+
+.line:nth-child(2) {
+    transform: rotate(45deg);
+    transform-origin: center center;
+}

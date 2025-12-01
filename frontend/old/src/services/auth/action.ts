@@ -57,15 +57,13 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
   try {
-    const response = await logoutApi();
+    await logoutApi();
 
-    if (response.ok) {
-      deleteCookie('auth_token');
-      localStorage.removeItem('survey_chat_bot_state');
-      console.log('Successfully logout');
-      return;
-    } 
-    throw new Error('Failed to logout');
+    deleteCookie('auth_token');
+    localStorage.removeItem('survey_chat_bot_state');
+    
+    return;
+
   } catch (e) {
     console.warn('Failed to clear widget storage:', e);
   }
