@@ -55,7 +55,7 @@ export  const Register = () => {
         if (!user) {
             return;
         }
-        navigate('/');
+        navigate(-1);
     }
     
     useEffect(() => {
