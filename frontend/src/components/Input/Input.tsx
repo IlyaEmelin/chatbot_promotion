@@ -4,7 +4,7 @@ type TInputProps = {
     label: string,
     type: string,
     name: string,
-    placeholder: string
+    placeholder: string,
     handleChangeInput: (e: React.ChangeEvent<HTMLInputElement>) => void,
     error?: string,
     setShowPassword?: React.Dispatch<React.SetStateAction<boolean>>,

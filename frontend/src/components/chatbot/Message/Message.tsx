@@ -1,5 +1,5 @@
 import React from 'react';
-import { Message as MessageType } from '../../types';
+import { Message as MessageType } from '../../../types';
 import styles from './Message.module.css';
 
 interface MessageProps {
