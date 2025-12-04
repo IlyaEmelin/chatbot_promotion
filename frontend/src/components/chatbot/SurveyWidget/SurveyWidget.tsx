@@ -73,6 +73,11 @@ const SurveyWidgetInner: React.FC = () => {
         onClick={() => {
           if(isOpen && user) dispatch(logoutUser());
           setIsOpen(!isOpen)
+          if (!isOpen) {
+            window.parent.postMessage({ type: "openChat" }, "*");
+          } else {
+            window.parent.postMessage({ type: "closeChat" }, "*");
+          }
         }}
         title={isOpen ? 'Закрыть чат' : 'Открыть чат'}
         type="button"
