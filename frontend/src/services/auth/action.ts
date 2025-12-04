@@ -8,6 +8,15 @@ import {
 import { type TLoginData, type TRegisterData } from '../../utils/types';
 import { setCookie, deleteCookie } from '../../utils/cookie';
 
+const handleError = (err) => {
+  let errorMessage = err.message || '';
+  if (typeof err === 'object') {
+    const arrayErrorMessage = Object.values(err).map(value => Array.isArray(value) ? value : [value]);
+    errorMessage = arrayErrorMessage.flat().join('\n');
+  }
+  throw new Error(errorMessage);
+}
+
 export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ email, password, username }: TRegisterData) => {
@@ -22,19 +31,7 @@ export const registerUser = createAsyncThunk(
     const user = await getUserApi();
     return user;
     } catch (err) {
-      let errorMessage = err.details?.[0] || err.message || '';
-      if (err.username) {
-        errorMessage = err.username?.[0];
-      }
-      if (err.email) {
-        const emailError = err.email?.[0];
-        errorMessage = errorMessage + (emailError ? ` ${emailError}` : '');
-      }
-      if (err.password) {
-        const passwordError = err.password?.[0];
-        errorMessage = errorMessage + (passwordError ? ` ${passwordError}` : '');
-      }
-      throw new Error(errorMessage);
+      handleError(err);
     }
   }
 );
@@ -48,9 +45,7 @@ export const loginUser = createAsyncThunk(
       const user = await getUserApi();
       return user;
     } catch (err) {
-      let errorMessage = err.details?.[0] || err.message;
-      errorMessage = err.non_field_errors?.[0] || errorMessage;
-      throw new Error(errorMessage);
+      handleError(err);
     }
   }
 );
