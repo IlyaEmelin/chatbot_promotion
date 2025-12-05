@@ -1,4 +1,3 @@
-# conftest.py
 from datetime import datetime
 from uuid import uuid4, UUID
 
@@ -585,7 +584,7 @@ def document(survey):
 
 
 @pytest.fixture
-def document_factory(document):
+def document_factory():
     """Фабрика для создания документов"""
 
     def _factory(survey):
@@ -593,14 +592,13 @@ def document_factory(document):
             survey=survey, image=TEST_IMAGES_URLS.format(uuid4())
         )
 
-    _factory.create_batch = lambda size, survey: [
-        _factory(survey) for _ in range(size)
-    ]
+    def _create_batch(size, survey):
+        return [_factory(survey) for _ in range(size)]
+
+    _factory.create_batch = _create_batch
     return _factory
 
-
-patch_path = "api.yadisk.requests"
-
+patch_path = "common.utils.yadisk.requests"
 
 @pytest.fixture
 def mock_yandex_disk_uploader():
@@ -623,8 +621,13 @@ def mock_yandex_disk_uploader():
         mock_response_put.raise_for_status.return_value = None
         mock_response_put.headers = {"Location": LOCATION}
 
-        # Настройка side_effect для последовательных вызовов
-        mock_get.side_effect = [mock_response_upload, mock_response_download]
+        # side_effect как функция, чтобы не падать при >2 вызовах
+        def get_side_effect(url, *args, **kwargs):
+            if "upload" in url:
+                return mock_response_upload
+            return mock_response_download
+
+        mock_get.side_effect = get_side_effect
         mock_put.return_value = mock_response_put
         yield {
             "mock_get": mock_get,
@@ -636,7 +639,6 @@ def mock_yandex_disk_uploader():
 
 
 # Фикстуры для комментариев
-
 
 @pytest.fixture
 def admin_user():

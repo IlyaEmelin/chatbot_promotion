@@ -2,7 +2,7 @@ import pytest
 import django
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "your_project.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chatbot_promotion.settings")
 
 
 def pytest_configure():
@@ -12,7 +12,6 @@ def pytest_configure():
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
     """Включение доступа к БД для всех тестов"""
-    pass
 
 
 @pytest.fixture

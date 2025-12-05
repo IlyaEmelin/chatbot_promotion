@@ -94,7 +94,7 @@ class TestTelegramBot(TestCase):
         assert "CommandHandler" == handler_types[0]
         assert "CommandHandler" == handler_types[1]
         assert "CommandHandler" == handler_types[2]
-        assert "CommandHandler" == handler_types[3]
+        assert "MessageHandler" == handler_types[3]
         assert "CommandHandler" == handler_types[4]
         assert "MessageHandler" == handler_types[5]
         assert "MessageHandler" == handler_types[6]
@@ -112,13 +112,13 @@ class TestKeyboardFunctions:
         # Assert
         assert keyboard is not None
         assert len(keyboard.keyboard) == 3
-        assert TelegramCommand.START.get_call_name() in str(
+        assert TelegramCommand.START.get_button_text() in str(
             keyboard.keyboard[0][0]
         )
-        assert TelegramCommand.STATUS.get_call_name() in str(
+        assert TelegramCommand.STATUS.get_button_text() in str(
             keyboard.keyboard[1][0]
         )
-        assert TelegramCommand.HELP.get_call_name() in str(
+        assert TelegramCommand.HELP.get_button_text() in str(
             keyboard.keyboard[2][0]
         )
 
@@ -131,16 +131,16 @@ class TestKeyboardFunctions:
         # Assert
         assert keyboard is not None
         assert len(keyboard.keyboard) == 4
-        assert TelegramCommand.START.get_call_name() in str(
+        assert TelegramCommand.START.get_button_text() in str(
             keyboard.keyboard[0][0]
         )
-        assert TelegramCommand.PROCESSING.get_call_name() in str(
+        assert TelegramCommand.PROCESSING.get_button_text() in str(
             keyboard.keyboard[1][0]
         )
-        assert TelegramCommand.STATUS.get_call_name() in str(
+        assert TelegramCommand.STATUS.get_button_text() in str(
             keyboard.keyboard[2][0]
         )
-        assert TelegramCommand.HELP.get_call_name() in str(
+        assert TelegramCommand.HELP.get_button_text() in str(
             keyboard.keyboard[3][0]
         )
 
