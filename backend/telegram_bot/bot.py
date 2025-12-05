@@ -37,11 +37,17 @@ class TelegramBot:
             CommandHandler(TelegramCommand.HELP.value, help_command),
         )
         self.application.add_handler(
-            CommandHandler(
-                TelegramCommand.PROCESSING.value,
-                processing_command,
-            ),
+            MessageHandler(
+                filters.Regex(f'^{TelegramCommand.PROCESSING.get_button_text()}$'),
+                processing_command
+            )
         )
+        # self.application.add_handler(
+        #     CommandHandler(
+        #         TelegramCommand.PROCESSING.value,
+        #         processing_command,
+        #     ),
+        # )
         self.application.add_handler(
             CommandHandler(
                 TelegramCommand.LOG.value,

@@ -24,7 +24,8 @@ def _get_default_help_keyboard(status: SurveyStatus) -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
-        [KeyboardButton(command.get_call_name())]
+        [KeyboardButton(command.get_button_text())]
+        # [KeyboardButton(command.get_call_name())]
         for command in status.available_commands
     ]
 
@@ -104,8 +105,10 @@ def _load_documents_keyboard() -> ReplyKeyboardMarkup:
         ReplyKeyboardMarkup: клавиатура с кнопкой помощи
     """
     keyboard = [
-        [KeyboardButton(TelegramCommand.PROCESSING.get_call_name())],
-        [KeyboardButton(TelegramCommand.HELP.get_call_name())],
+        [KeyboardButton(TelegramCommand.PROCESSING.get_button_text())],
+        # [KeyboardButton(TelegramCommand.PROCESSING.get_call_name())],
+        [KeyboardButton(TelegramCommand.HELP.get_button_text())],
+        # [KeyboardButton(TelegramCommand.HELP.get_call_name())],
     ]
     return ReplyKeyboardMarkup(
         keyboard,
@@ -133,11 +136,19 @@ async def load_command(
     """
     reply_markup = None
     if load_result is None:
+#         help_text = f"""
+# 📋 *Загрузка документов*
+#
+# Команды:
+# {TelegramCommand.PROCESSING.get_button_text()} - завершить загрузку документов
+# {TelegramCommand.HELP.get_call_name()} - помощь
+# """
+
         help_text = f"""
 📋 *Загрузка документов*
 
 Команды:
-{TelegramCommand.PROCESSING.get_call_name()} - закончить загрузку документов
+{TelegramCommand.PROCESSING.get_call_name()} - завершить загрузку документов
 {TelegramCommand.HELP.get_call_name()} - помощь
 """
         reply_markup = _load_documents_keyboard()

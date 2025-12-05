@@ -1,3 +1,4 @@
+from urllib.parse import unquote
 from uuid import uuid4
 
 import pytest
@@ -17,7 +18,8 @@ class TestDocumentViewSet:
     )
     base64_prefix = "data:image/png;base64,"
     invalid_image = f"{base64_prefix},invalid_base64_data"
-    download_url = "https://mock-download.url/test.png"
+    raw_location = "https://disk.yandex.ru/disk/test.png"
+    download_url = unquote(raw_location).replace("/disk", "")
     list_view_name = "document-list"
     detail_view_kwargs = staticmethod(lambda x, y: {"survey_pk": x, "pk": y})
     list_view_kwargs = staticmethod(lambda x: {"survey_pk": x})
@@ -74,7 +76,7 @@ class TestDocumentViewSet:
         response = authenticated_client.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 4
+        assert len(response.data) == 3
 
     def test_admin_list_documents(
         self, authenticated_admin, survey, document_factory
@@ -88,7 +90,7 @@ class TestDocumentViewSet:
         response = authenticated_admin.get(url)
 
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 4
+        assert len(response.data) == 3
 
     def test_delete_document(self, authenticated_client, survey, document):
         """Тест удаления документа"""
