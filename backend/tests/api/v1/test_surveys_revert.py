@@ -11,6 +11,7 @@ from rest_framework.status import (
 
 from questionnaire.constant import SurveyStatus
 from questionnaire.models import Survey, Question, AnswerChoice
+from questionnaire.constant import SurveyStatus
 
 
 class TestSurveyRevert:
@@ -69,8 +70,8 @@ class TestSurveyRevert:
     @pytest.mark.django_db
     def test_revert_success2(
         self,
-        authenticated_client,
-        survey_with_custom_answer_second_step,
+        authenticated_client: APIClient,
+        survey_with_custom_answer_second_step: Survey,
         question: Question,
         second_question: Question,
         answer_choice: AnswerChoice,
@@ -109,6 +110,49 @@ class TestSurveyRevert:
             survey_with_custom_answer_second_step.updated_at
             == second_question.updated_at
         )
+
+    @pytest.mark.django_db
+    def test_revert_cant_find_revert(
+        self,
+        authenticated_client: APIClient,
+        survey_question_2_to3: Survey,
+        third_question: Question,
+    ):
+        """
+        Тест не успешного отката опроса,
+        когда не удается выбрать ветку для отката
+
+        Этап третьего вопроса.
+
+        Структура опроса:
+        Тестовый вопрос?
+        -вариант ответа
+          Второй вопрос?
+          -вариант ответа от второго к третьему вопросу
+              Третий вопрос?
+        -вариант по альтернативной ветке
+          Второй альтернативный вопрос?
+          -вариант ответа от второго к третьему вопросу
+              Третий вопрос?
+
+        Args:
+            authenticated_client: авторизованный клиент
+            survey_question_2_to3: Сложная структура опросов на этапе
+                третьего вопроса
+            third_question: Третий вопрос?
+        """
+        url = self.__get_url(survey_question_2_to3.id)
+
+        response = authenticated_client.patch(url)
+
+        assert response.status_code == HTTP_200_OK
+        assert response.data, {
+            "id": survey_question_2_to3.id,
+            "current_question_text": third_question.text,
+            "answers": [],
+            "status": SurveyStatus.NEW.value,
+            "revert_success": False,
+        }
 
     @pytest.mark.django_db
     def test_revert_unauthorized(self, api_client, survey):

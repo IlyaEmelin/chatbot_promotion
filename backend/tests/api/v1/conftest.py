@@ -82,10 +82,23 @@ def authenticated_client(
 
 
 # question
+# полная структура вопросов
+# Тестовый вопрос?
+# -вариант ответа
+#   Второй вопрос?
+#   -вариант ответа от второго к третьему вопросу
+#       Третий вопрос?
+# -вариант по альтернативной ветке
+#   Второй альтернативный вопрос?
+#   -вариант ответа от второго к третьему вопросу
+#       Третий вопрос?
+# В структуре нет
+# Финальный вопрос?
+# Укажите номер телефона в формате +7ХХХХХХХХХХ?
 @pytest.fixture
 def question() -> Question:
     """
-    Первый вопрос
+    Тестовый вопрос?
 
     Returns:
         Question: первый вопрос
@@ -101,12 +114,11 @@ def question() -> Question:
 @pytest.fixture
 def second_question() -> Question:
     """
-    Второй вопрос
+    Второй вопрос?
 
     Returns:
         Question: второй вопрос
     """
-
     return Question.objects.create(
         text="Второй вопрос?",
         updated_uuid="42345678-1234-1234-1234-123456789013",
@@ -115,9 +127,24 @@ def second_question() -> Question:
 
 
 @pytest.fixture
+def second_alternative_question() -> Question:
+    """
+    Второй альтернативный вопрос?
+
+    Returns:
+        Question: второй вопрос
+    """
+    return Question.objects.create(
+        text="Второй альтернативный вопрос?",
+        updated_uuid="42111178-1234-1234-1234-555456789013",
+        updated_at=datetime(2000, 10, 18),
+    )
+
+
+@pytest.fixture
 def third_question() -> Question:
     """
-    Третий вопрос
+    Третий вопрос?
 
     Returns:
         Question: третий вопрос
@@ -162,7 +189,8 @@ def question_phone() -> Question:
 # answer choice
 @pytest.fixture
 def answer_choice(
-    question: Question, second_question: Question
+    question: Question,
+    second_question: Question,
 ) -> AnswerChoice:
     """
     Вариант ответа
@@ -178,6 +206,28 @@ def answer_choice(
         current_question=question,
         next_question=second_question,
         answer="вариант ответа",
+    )
+
+
+@pytest.fixture
+def answer_alternative_choice(
+    question: Question,
+    second_alternative_question: Question,
+) -> AnswerChoice:
+    """
+    Вариант по альтернативной ветке
+
+    Args:
+        question: первый вопрос
+        second_alternative_question: вопрос по альтернативной ветке
+
+    Returns:
+        AnswerChoice: вариант по альтернативной ветке
+    """
+    return AnswerChoice(
+        current_question=question,
+        next_question=second_alternative_question,
+        answer="вариант по альтернативной ветке",
     )
 
 
@@ -241,6 +291,29 @@ def answer_choice_2to3(
     """
     return AnswerChoice.objects.create(
         current_question=second_question,
+        next_question=third_question,
+        answer="вариант ответа от второго к третьему вопросу",
+    )
+
+
+@pytest.fixture
+def answer_alternative_choice_2to3(
+    second_alternative_question: Question,
+    third_question: Question,
+) -> AnswerChoice:
+    """
+    Вариант ответа от второго к третьему вопросу
+    по альтернативной ветке
+
+    Args:
+        second_alternative_question: второй вопрос альтернативной ветки
+        third_question: третий вопрос
+
+    Returns:
+        AnswerChoice: вариант ответа
+    """
+    return AnswerChoice(
+        current_question=second_alternative_question,
         next_question=third_question,
         answer="вариант ответа от второго к третьему вопросу",
     )
@@ -313,7 +386,7 @@ def survey_with_custom_answer_start_step(
     Args:
         user: пользователь
         question: 1-й вопрос с ответом
-        next_question: 2-й следующий вопрос
+        second_question: 2-й следующий вопрос
         answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
 
     Returns:
@@ -348,7 +421,7 @@ def survey_with_custom_answer_second_step(
     Args:
         user: пользователь
         question: 1-й вопрос с ответом
-        next_question: 2-й следующий вопрос
+        second_question: 2-й следующий вопрос
         answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
 
     Returns:
@@ -388,7 +461,7 @@ def survey_with_custom_answer_second_step_reset(
     Args:
         user: пользователь
         question: 1-й вопрос с ответом
-        next_question: 2-й следующий вопрос
+        second_question: 2-й следующий вопрос
         answer_choice: вариант ответа 1-й вопрос -> 2-й следующий вопрос
 
     Returns:
@@ -576,6 +649,70 @@ def survey_question_phone(
     )
 
 
+@pytest.fixture
+def survey_question_2_to3(
+    user: User,
+    question: Question,
+    second_question: Question,
+    second_alternative_question: Question,
+    third_question: Question,
+    answer_choice: AnswerChoice,
+    answer_choice_2to3: AnswerChoice,
+    answer_alternative_choice_2to3: AnswerChoice,
+) -> Survey:
+    """
+    Сложная структура опросов на этапе третьего вопроса
+
+    Структура опроса:
+    Тестовый вопрос?
+    -вариант ответа
+      Второй вопрос?
+      -вариант ответа от второго к третьему вопросу
+          Третий вопрос?
+    -вариант по альтернативной ветке
+      Второй альтернативный вопрос?
+      -вариант ответа от второго к третьему вопросу
+          Третий вопрос?
+
+    Args:
+        user:
+        question: первый вопрос
+        second_question: Второй вопрос?
+        second_alternative_question: Второй альтернативный вопрос?
+        third_question: Третий вопрос?
+        answer_choice: вариант ответа
+        answer_choice_2to3: вариант ответа от второго к третьему вопросу
+        answer_alternative_choice_2to3: вариант ответа от второго
+            к третьему вопросу
+
+    Returns:
+        Survey: опрос
+    """
+    return Survey.objects.create(
+        user=user,
+        current_question=third_question,
+        status=SurveyStatus.WAITING_DOCS.value,
+        result=[
+            question.text,
+            answer_choice.answer,
+            second_question.text,
+            answer_choice_2to3.answer,
+        ],
+        questions_version_uuid=(
+            UUID(
+                int=question.updated_uuid.int
+                ^ second_question.updated_uuid.int
+                ^ third_question.updated_uuid.int
+            )
+        ),
+        updated_at=max(
+            question.updated_at,
+            second_question.updated_at,
+            third_question.updated_at,
+        ),
+    )
+
+
 # Фикстуры для API Яндекс-диска
 @pytest.fixture
 def document(survey):
@@ -598,7 +735,9 @@ def document_factory():
     _factory.create_batch = _create_batch
     return _factory
 
+
 patch_path = "common.utils.yadisk.requests"
+
 
 @pytest.fixture
 def mock_yandex_disk_uploader():
@@ -639,6 +778,7 @@ def mock_yandex_disk_uploader():
 
 
 # Фикстуры для комментариев
+
 
 @pytest.fixture
 def admin_user():
