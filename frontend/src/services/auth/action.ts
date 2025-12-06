@@ -27,7 +27,8 @@ export const registerUser = createAsyncThunk(
       password
     });
     const token = await loginUserApi({username, password});
-    setCookie('auth_token', token.auth_token);
+    // setCookie('auth_token', token.auth_token);
+    sessionStorage.setItem('auth_token', token.auth_token);
     const user = await getUserApi();
     return user;
     } catch (err) {
@@ -41,7 +42,8 @@ export const loginUser = createAsyncThunk(
   async ({ username, password }: TLoginData) => {
     try {
       const response = await loginUserApi({ username, password });
-      setCookie('auth_token', response.auth_token);
+      // setCookie('auth_token', response.auth_token);
+      sessionStorage.setItem('auth_token', response.auth_token);
       const user = await getUserApi();
       return user;
     } catch (err) {
@@ -55,7 +57,8 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
     const response = await logoutApi();
 
     if (response.ok) {
-      deleteCookie('auth_token');
+      // deleteCookie('auth_token');
+      sessionStorage.removeItem('auth_token');
       localStorage.removeItem('survey_chat_bot_state');
       console.log('Successfully logout');
       return;

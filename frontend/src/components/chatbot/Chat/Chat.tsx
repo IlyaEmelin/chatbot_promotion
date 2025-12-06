@@ -23,7 +23,7 @@ export const Chat: React.FC<ChatProps> = ({ onClose }) => {
   // ПРОВЕРКА АВТОРИЗАЦИИ
   useEffect(() => {
     if (user) {
-      const authToken = getCookie('auth_token');
+      const authToken = sessionStorage.getItem('auth_token');
       setIsAuthenticated(!!authToken);
     }
   }, [user]);

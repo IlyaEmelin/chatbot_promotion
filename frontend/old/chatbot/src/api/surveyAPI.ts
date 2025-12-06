@@ -18,7 +18,7 @@ function getCookie(name: string): string | undefined {
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
-  const accessToken = getCookie('auth_token');
+  const accessToken = sessionStorage.getItem('auth_token');
   
   return {
     ...extraHeaders,
