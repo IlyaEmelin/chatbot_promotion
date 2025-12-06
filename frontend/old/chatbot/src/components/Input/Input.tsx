@@ -16,7 +16,7 @@ export const Input: React.FC = () => {
 
   // ПРОВЕРКА АВТОРИЗАЦИИ
   useEffect(() => {
-    const authToken = getCookie('auth_token');
+    const authToken = sessionStorage.getItem('auth_token');
     setIsAuthenticated(!!authToken);
   }, []);
 

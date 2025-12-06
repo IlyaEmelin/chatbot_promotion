@@ -19,7 +19,7 @@ const SurveyWidgetInner: React.FC = () => {
 
   useEffect(() => {
     // Проверяем текущего пользователя
-    const authToken = getCookie('auth_token');
+    const authToken = sessionStorage.getItem('auth_token');
     
     // Если пользователь изменился - сбрасываем состояние
     if (authToken !== currentUser) {
@@ -51,7 +51,7 @@ const SurveyWidgetInner: React.FC = () => {
   // Следим за изменением токена авторизации
   useEffect(() => {
     const checkAuthInterval = setInterval(() => {
-      const authToken = getCookie('auth_token');
+      const authToken = sessionStorage.getItem('auth_token');
       if (authToken !== currentUser) {
         console.log('🔄 Auth token changed');
         setCurrentUser(authToken || null);

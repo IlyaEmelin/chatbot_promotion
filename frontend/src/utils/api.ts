@@ -57,7 +57,7 @@ export const logoutApi = () => {
     return fetch(`${URL}/auth/token/logout/`, {
         method: 'POST',
         headers: {
-            Authorization: `Token ${getCookie('auth_token')}`
+            Authorization: `Token ${sessionStorage.getItem('auth_token')}`
         },
     })
 };
@@ -65,7 +65,7 @@ export const logoutApi = () => {
 export const getUserApi = (): Promise<TRegisterResponse> =>
     fetch(`${URL}/auth/users/me/`, {
         headers: {
-            Authorization: `Token ${getCookie('auth_token')}`
+            Authorization: `Token ${sessionStorage.getItem('auth_token')}`
         } as HeadersInit
     })
     .then((res) => checkResponse(res));

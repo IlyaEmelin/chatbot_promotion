@@ -6,7 +6,7 @@ export const STORAGE_KEY = 'survey_chat_bot_state';
 export const storage = {
   save: (state: StoredState) => {
     try {
-      const authToken = getCookie('auth_token');
+      const authToken = sessionStorage.getItem('auth_token');
       const dataToStore = {
         ...state,
         lastUpdated: new Date().toISOString(),
@@ -27,7 +27,7 @@ export const storage = {
       const parsed: StoredState & { authToken?: string } = JSON.parse(stored);
       
       // Проверяем, что это данные текущего пользователя
-      const currentAuthToken = getCookie('auth_token');
+      const currentAuthToken = sessionStorage.getItem('auth_token');
       if (parsed.authToken !== currentAuthToken) {
         console.log('🗑️ User changed, clearing old data');
         localStorage.removeItem(STORAGE_KEY);
