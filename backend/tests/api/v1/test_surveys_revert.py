@@ -116,6 +116,10 @@ class TestSurveyRevert:
         self,
         authenticated_client: APIClient,
         survey_question_2_to3: Survey,
+        second_question: Question,
+        second_alternative_question: Question,
+        answer_choice_2to3: AnswerChoice,
+        answer_alternative_choice_2to3: AnswerChoice,
         third_question: Question,
     ):
         """
@@ -146,12 +150,18 @@ class TestSurveyRevert:
         response = authenticated_client.patch(url)
 
         assert response.status_code == HTTP_200_OK
-        assert response.data, {
-            "id": survey_question_2_to3.id,
+        assert response.data == {
+            "id": str(survey_question_2_to3.id),
             "current_question_text": third_question.text,
             "answers": [],
-            "status": SurveyStatus.NEW.value,
+            "status": SurveyStatus.WAITING_DOCS.value,
             "revert_success": False,
+            "result": [
+                "Тестовый вопрос?",
+                "вариант ответа",
+                "Второй вопрос?",
+                "вариант ответа от второго к третьему вопросу",
+            ],
         }
 
     @pytest.mark.django_db

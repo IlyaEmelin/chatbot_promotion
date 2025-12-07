@@ -493,25 +493,34 @@ class SurveyRevertSerializer(ModelSerializer):
             question_text, answer_text = result[-2], result[-1]
             if previous_answers := current_question.previous_answers.all():
                 new_question = None
-                for previous_answer in previous_answers:
+
+                name_match_previous_answer = tuple(
+                    previous_answer
+                    for previous_answer in previous_answers
                     if (
                         previous_answer.answer == answer_text
-                        and (
-                            new_question := previous_answer.current_question
-                        ).text
+                        and previous_answer.current_question.text
                         == question_text
-                    ):
-                        break
+                    )
+                )
+                if len(name_match_previous_answer) == 1:
+                    new_question = name_match_previous_answer[
+                        0
+                    ].current_question
                 else:
-                    for previous_answer in previous_answers:
+                    none_match_previous_answer = tuple(
+                        previous_answer
+                        for previous_answer in previous_answers
                         if (
                             previous_answer.answer is None
-                            and (
-                                new_question := previous_answer.current_question
-                            ).text
+                            and previous_answer.current_question.text
                             == question_text
-                        ):
-                            break
+                        )
+                    )
+                    if len(none_match_previous_answer) == 1:
+                        new_question = none_match_previous_answer[
+                            0
+                        ].current_question
 
                 if new_question:
                     instance.current_question = new_question
