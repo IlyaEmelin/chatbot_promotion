@@ -52,13 +52,14 @@ class TestSurveyRevert:
 
         assert response.status_code == HTTP_200_OK
 
-        data = response.data
-        assert data.get("id") == str(survey.id)
-        assert data.get("current_question_text") == question.text
-        assert data.get("answers") == []
-        assert data.get("result") == []
-        assert data.get("status") == "new"
-        assert data.get("revert_success") is False
+        assert response.data == {
+            "id": str(survey.id),
+            "current_question_text": question.text,
+            "answers": [],
+            "result": [],
+            "status": "new",
+            "revert_success": False,
+        }
 
         survey.refresh_from_db()
         assert survey.current_question == question
@@ -83,14 +84,14 @@ class TestSurveyRevert:
 
         assert response.status_code == HTTP_200_OK
 
-        data = response.data
-        assert data.get("id") == str(survey_with_custom_answer_second_step.id)
-        assert data.get("current_question_text") == question.text
-        assert data.get("answers") == [answer_choice.answer]
-        assert data.get("result") == []
-        assert data.get("status") == "new"
-        assert data.get("revert_success") is True
-
+        assert response.data == {
+            "id": str(survey_with_custom_answer_second_step.id),
+            "current_question_text": question.text,
+            "answers": [answer_choice.answer],
+            "result": [],
+            "status": "new",
+            "revert_success": True,
+        }
         survey_with_custom_answer_second_step.refresh_from_db()
         assert (
             survey_with_custom_answer_second_step.current_question == question
