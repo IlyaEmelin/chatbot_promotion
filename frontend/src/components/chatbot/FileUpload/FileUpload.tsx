@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, FileText, Lock } from 'lucide-react';
 import { useAppSelector } from '../../../hooks/redux';
-import { surveyAPI, getCookie } from '../../../utils/surveyAPI';
+import { surveyAPI } from '../../../utils/surveyAPI';
 import { FileWithPreview, UploadedDocument } from '../../../types';
 import styles from './FileUpload.module.css';
 

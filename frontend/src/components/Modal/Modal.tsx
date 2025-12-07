@@ -8,12 +8,17 @@ type ModalProps = {
 }
 
 export const Modal: React.FC<ModalProps> = ({ title, onClose, children }) => {
+    const handleCloseModal = () => {
+        onClose();
+        window.parent.postMessage({ type: "modalClosed" }, "*");
+    }
+
     return (
         <div className={styles.overlay} data-cy='modalOverlay'>
             <div className={styles.modal}>
                 <div className={styles.modalHeader}>
                     <h1 className={styles.title}>{title}</h1>
-                    <CloseButton onClick={onClose} color='black' />
+                    <CloseButton onClick={handleCloseModal} color='black' />
                 </div>
                 <div className={styles.modalContent}>
                     {children}

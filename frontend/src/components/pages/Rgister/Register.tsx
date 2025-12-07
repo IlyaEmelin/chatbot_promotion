@@ -16,6 +16,7 @@ export  const Register = () => {
         password: ''
     });
     const [validationErrors, setValidationErrors] = useState({
+        username: '',
         email: '',
         password: ''
     });
@@ -41,6 +42,11 @@ export  const Register = () => {
             setValidationErrors({ ...validationErrors, password: passwordError });
             // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             e.target.value === '' ? setValidationErrors({ ...validationErrors, password: '' }) : null;
+        } else if (e.target.name === 'username') {
+            const usernameError = formValidators.name.validator(e.target.value) ? '' : formValidators.name.message;
+            setValidationErrors({ ...validationErrors, username: usernameError });
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+            e.target.value === '' ? setValidationErrors({ ...validationErrors, username: '' }) : null;
         }
         
         dispatch(setError(null));
@@ -72,7 +78,8 @@ export  const Register = () => {
                     type="text" 
                     name="username" 
                     placeholder="Введите имя" 
-                    handleChangeInput={handleChangeInput} />
+                    handleChangeInput={handleChangeInput}
+                    error={validationErrors.username} />
                 <Input 
                     label="Email" 
                     type="email" 
@@ -94,7 +101,7 @@ export  const Register = () => {
             </div>
             <div className={styles.buttons}>
                 <Link to="/login" replace className={styles.link}>Войти</Link>
-                <FormButton text="Зарегистрироваться" disabled={!userData.password || !userData.username || validationErrors.email !== '' || validationErrors.password !== '' || (error ? true : false)} />
+                <FormButton text="Зарегистрироваться" disabled={!userData.password || !userData.username || validationErrors.email !== '' || validationErrors.password !== '' || validationErrors.username !== '' || (error ? true : false)} />
             </div>
             {error && <span className={styles.error}>{error}</span>}
         </form>

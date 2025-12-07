@@ -5,7 +5,6 @@ import { store } from '../../../services/store';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { loadFromStorage, resetSurvey } from '../../../services/surveySlice';
 import { storage } from '../../../utils/storage';
-import { getCookie } from '../../../utils/surveyAPI';
 import Chat from '../Chat/Chat';
 import styles from './SurveyWidget.module.css';
 import { logoutUser } from '../../../services/auth/action';
@@ -74,6 +73,7 @@ const SurveyWidgetInner: React.FC = () => {
           if(isOpen && user) dispatch(logoutUser());
           setIsOpen(!isOpen)
           if (!isOpen) {
+            // Отправляем сообщение в родительское окно, чтобы отлавливать событие из ifraim
             window.parent.postMessage({ type: "openChat" }, "*");
           } else {
             window.parent.postMessage({ type: "closeChat" }, "*");

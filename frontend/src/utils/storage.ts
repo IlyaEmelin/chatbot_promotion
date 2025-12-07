@@ -1,5 +1,4 @@
 import { StoredState } from '../types';
-import { getCookie } from '../utils/surveyAPI';
 
 export const STORAGE_KEY = 'survey_chat_bot_state';
 

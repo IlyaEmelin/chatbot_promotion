@@ -1,8 +1,8 @@
 @font-face {
   font-family: 'Giphurs';
-  src: url('../public/giphurs/fonts/variable/Giphurs[wght].ttf') format('truetype'),
-    url('../public/giphurs/fonts/variable/Giphurs[wght].woff') format('woff'),
-    url('../public/giphurs/fonts/variable/Giphurs[wght].woff2') format('woff2');
+  src: url('/giphurs/fonts/variable/Giphurs[wght].ttf') format('truetype'),
+    url('/giphurs/fonts/variable/Giphurs[wght].woff') format('woff'),
+    url('/giphurs/fonts/variable/Giphurs[wght].woff2') format('woff2');
   font-weight: 300 800;
   font-style: normal;
 }

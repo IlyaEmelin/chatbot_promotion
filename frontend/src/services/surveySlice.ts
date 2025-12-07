@@ -310,4 +310,3 @@ export const surveySlice = createSlice({
 });
 
 export const { addMessage, clearError, resetSurvey, loadFromStorage } = surveySlice.actions;
-// export default surveySlice.reducer;

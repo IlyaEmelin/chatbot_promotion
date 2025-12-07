@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { startSurveyAsync, clearError, loadExistingSurveysAsync } from '../../../services/surveySlice';
-import { getCookie } from '../../../utils/surveyAPI';
 import Header from '../Header/Header';
 import Messages from '../Messages/Messages';
 import Input from '../Input/Input';
