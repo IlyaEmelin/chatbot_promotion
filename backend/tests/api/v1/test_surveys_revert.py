@@ -92,6 +92,7 @@ class TestSurveyRevert:
             "status": "new",
             "revert_success": True,
         }
+
         survey_with_custom_answer_second_step.refresh_from_db()
         assert (
             survey_with_custom_answer_second_step.current_question == question
