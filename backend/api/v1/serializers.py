@@ -451,6 +451,53 @@ class SurveyRevertSerializer(ModelSerializer):
             "answers",
         )
 
+    @staticmethod
+    def _get_last_question(instance: Survey) -> Question:
+        """
+        Получить прошлый вопрос
+
+        Args:
+            instance: опрос
+
+        Returns:
+            Question: прошлый вопрос
+        """
+        last_question = None
+        if (current_question := instance.current_question) and (
+            result := instance.result
+        ):
+            question_text, answer_text = result[-2], result[-1]
+            if previous_answers := current_question.previous_answers.all():
+
+                name_match_previous_answer = tuple(
+                    previous_answer
+                    for previous_answer in previous_answers
+                    if (
+                        previous_answer.answer == answer_text
+                        and previous_answer.current_question.text
+                        == question_text
+                    )
+                )
+                if len(name_match_previous_answer) == 1:
+                    last_question = name_match_previous_answer[
+                        0
+                    ].current_question
+                else:
+                    none_match_previous_answer = tuple(
+                        previous_answer
+                        for previous_answer in previous_answers
+                        if (
+                            previous_answer.answer is None
+                            and previous_answer.current_question.text
+                            == question_text
+                        )
+                    )
+                    if len(none_match_previous_answer) == 1:
+                        last_question = none_match_previous_answer[
+                            0
+                        ].current_question
+        return last_question
+
     def get_answers(self, obj: Survey) -> list[str | None]:
         """
         Получить варианты ответа на текущий вопрос
@@ -485,58 +532,31 @@ class SurveyRevertSerializer(ModelSerializer):
             Survey: обновляемый объект
 
         """
-        revert_success = False
+        last_question = self._get_last_question(instance)
 
-        if (current_question := instance.current_question) and (
-            result := instance.result
-        ):
-            question_text, answer_text = result[-2], result[-1]
-            if previous_answers := current_question.previous_answers.all():
-                new_question = None
-                for previous_answer in previous_answers:
-                    if (
-                        previous_answer.answer == answer_text
-                        and (
-                            new_question := previous_answer.current_question
-                        ).text
-                        == question_text
-                    ):
-                        break
-                else:
-                    for previous_answer in previous_answers:
-                        if (
-                            previous_answer.answer is None
-                            and (
-                                new_question := previous_answer.current_question
-                            ).text
-                            == question_text
-                        ):
-                            break
+        if last_question:
+            instance.status = SurveyStatus.NEW.value
+            instance.result = instance.result[:-2]
 
-                if new_question:
-                    instance.current_question = new_question
-                    instance.status = SurveyStatus.NEW.value
-                    instance.result = result[:-2]
+            logger.debug(
+                "Откат добавления последнего UUID "
+                "так раза применение xor одного и того же значения 2 "
+                "дает начальное число."
+            )
+            instance.questions_version_uuid = UUID(
+                int=(
+                    instance.questions_version_uuid.int
+                    ^ instance.current_question.updated_uuid.int
+                )
+            )
+            instance.current_question = last_question
+            # TODO поле instance.updated_at пока не обновляет так как
+            #  нам придется пробежать все вопросы включая новый текущий
+            # TODO так же не будет происходить
+            #  откат external_table_field_name
+            instance.save()
 
-                    logger.debug(
-                        "Откат добавления последнего UUID "
-                        "так раза применение xor одного и того же значения 2 "
-                        "дает начальное число."
-                    )
-                    instance.questions_version_uuid = UUID(
-                        int=(
-                            instance.questions_version_uuid.int
-                            ^ current_question.updated_uuid.int
-                        )
-                    )
-                    # TODO поле instance.updated_at пока не обновляет так как
-                    #  нам придется пробежать все вопросы включая новый текущий
-                    # TODO так же не будет происходить
-                    #  откат external_table_field_name
-                    instance.save()
-                    revert_success = True
-
-        self.context["revert_success"] = revert_success
+        self.context["revert_success"] = bool(last_question)
         return instance
 
     def to_representation(self, instance):
