@@ -61,8 +61,8 @@ export  const Register = () => {
         if (!user) {
             return;
         }
-        navigate('/');
         window.parent.postMessage({ type: "modalClosed" }, "*");
+        navigate('/');
     }
     
     useEffect(() => {
