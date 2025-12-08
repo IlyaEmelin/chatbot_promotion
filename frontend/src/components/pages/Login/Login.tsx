@@ -37,6 +37,7 @@ export const Login = () => {
             return;
         }
         navigate('/');
+        window.parent.postMessage({ type: "modalClosed" }, "*");
     }
 
     useEffect(() => {
