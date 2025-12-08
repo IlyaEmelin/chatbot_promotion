@@ -64,7 +64,8 @@ const SurveyWidgetInner: React.FC = () => {
     <div className={styles.container}>
       {isOpen && <Chat onClose={() => {
         setIsOpen(false);
-        if(isOpen && user) dispatch(logoutUser())
+        if(isOpen && user) dispatch(logoutUser());
+        window.parent.postMessage({ type: "closeChat" }, "*");
       }} />}
       
       <button
