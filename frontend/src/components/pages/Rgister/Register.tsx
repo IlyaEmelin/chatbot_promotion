@@ -62,6 +62,7 @@ export  const Register = () => {
             return;
         }
         navigate('/');
+        window.parent.postMessage({ type: "modalClosed" }, "*");
     }
     
     useEffect(() => {
