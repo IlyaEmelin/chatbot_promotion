@@ -1,4 +1,3 @@
-import { getCookie } from "./cookie";
 import type { TLoginData, TRegisterData } from "./types";
 
 const URL = import.meta.env.VITE_API_URL || 'https://pro-dvizhenie.ddns.net/api';

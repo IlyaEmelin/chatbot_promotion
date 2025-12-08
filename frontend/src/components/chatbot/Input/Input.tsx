@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Send, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { addMessage, submitAnswerAsync } from '../../../services/surveySlice';
-import { surveyAPI, getCookie } from '../../../utils/surveyAPI';
+import { surveyAPI } from '../../../utils/surveyAPI';
 import FileUpload from '../FileUpload/FileUpload';
 import styles from './Input.module.css';
 import { getUser } from '../../../services/auth/slice';

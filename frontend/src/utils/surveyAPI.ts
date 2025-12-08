@@ -8,13 +8,6 @@ import {
   ProcessingRequest
 } from '../types';
 
-function getCookie(name: string): string | undefined {
-  const matches = document.cookie.match(
-    new RegExp('(?:^|; )' + name.replace(/([$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
-  );
-  return matches ? decodeURIComponent(matches[1]) : undefined;
-}
-
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 function getAuthHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
@@ -216,4 +209,4 @@ export const surveyAPI = {
   },
 };
 
-export { getCookie, getAuthHeaders };
+export { getAuthHeaders };

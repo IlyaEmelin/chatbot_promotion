@@ -5,7 +5,6 @@ import { store } from '../../store';
 import { useAppDispatch } from '../../hooks/redux';
 import { loadFromStorage, resetSurvey } from '../../store/surveySlice';
 import { storage } from '../../utils/storage';
-import { getCookie } from '../../api/surveyAPI';
 import Chat from '../Chat/Chat';
 import styles from './SurveyWidget.module.css';
 
