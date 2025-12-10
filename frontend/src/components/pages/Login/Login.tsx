@@ -5,7 +5,7 @@ import styles from './Login.module.css';
 import { loginUser } from '../../../services/auth/action';
 import { getError, getUser, setError } from '../../../services/auth/slice';
 import { Input } from '../../Input/Input';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FormButton } from '../../FormButton/FormButton';
 
 export const Login = () => {
@@ -17,7 +17,6 @@ export const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const error = useSelector(getError);
     const user = useSelector(getUser);
-    const navigate = useNavigate();
 
     const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserData({
@@ -36,8 +35,6 @@ export const Login = () => {
         if (!user) {
             return;
         }
-        window.parent.postMessage({ type: "modalClosed" }, "*");
-        setTimeout(() => navigate('/'), 0);
     }
 
     useEffect(() => {
