@@ -21,6 +21,7 @@ export const ProtectedRoute: FC<TProtectedRouteProps> = ({
 
   if (onlyUnAuth && user) {
     const { from } = location.state ?? { from: { pathname: '/' } };
+    window.parent.postMessage({ type: "modalClosed" }, "*");
     return <Navigate to={from} />;
   }
 

@@ -5,7 +5,7 @@ import styles from "./Register.module.css";
 import { getError, getUser, setError } from "../../../services/auth/slice";
 import { registerUser } from "../../../services/auth/action";
 import { FormButton } from "../../FormButton/FormButton";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { formValidators } from "../../../utils/formValidators";
 
 export  const Register = () => {
@@ -24,7 +24,6 @@ export  const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const error = useSelector(getError);
     const user = useSelector(getUser);
-    const navigate = useNavigate();
 
     const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUserData({
@@ -61,8 +60,6 @@ export  const Register = () => {
         if (!user) {
             return;
         }
-        window.parent.postMessage({ type: "modalClosed" }, "*");
-        setTimeout(() => navigate('/'), 0);
     }
     
     useEffect(() => {
