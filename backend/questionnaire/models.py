@@ -79,24 +79,32 @@ class Question(Model):
         ordering = ("id",)
 
     def __str__(self) -> str:
-        return f"{self.text[:MAX_LEN_STRING-10]} ({self.type})"
+        return f"{self.text[:MAX_LEN_STRING-10]} ({self.type}, PK:{self.pk})"
 
 
 class AnswerChoiceManager(models.Manager):
     def get_queryset(self):
         from django.db.models import Case, When, Value, IntegerField
 
-        return super().get_queryset().annotate(
-            sort_order=Case(
-                # 1. current_question.type == "start"
-                When(current_question__type="start", then=Value(1)),
-                # 2. current_question == next_question (рекурсивные)
-                When(current_question=models.F('next_question'), then=Value(2)),
-                # 3. Все остальные
-                default=Value(3),
-                output_field=IntegerField(),
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                sort_order=Case(
+                    # 1. current_question.type == "start"
+                    When(current_question__type="start", then=Value(1)),
+                    # 2. current_question == next_question (рекурсивные)
+                    When(
+                        current_question=models.F("next_question"),
+                        then=Value(2),
+                    ),
+                    # 3. Все остальные
+                    default=Value(3),
+                    output_field=IntegerField(),
+                )
             )
-        ).order_by('sort_order', 'current_question_id', 'id')
+            .order_by("sort_order", "current_question_id", "id")
+        )
 
 
 class AnswerChoice(Model):
@@ -155,7 +163,9 @@ class AnswerChoice(Model):
         answer_text = (
             self.answer[:MAX_LEN_STRING] if self.answer else "Пользовательский"
         )
-        return f"{answer_text} от {last_q_text} к {next_q_text}"
+        return (
+            f"{answer_text} от {last_q_text} к {next_q_text} (PK: {self.pk})"
+        )
 
 
 class Survey(Model):
