@@ -1,5 +1,4 @@
 import logging
-import asyncio
 
 from django.conf import settings
 from telegram import Update
@@ -19,6 +18,15 @@ from .survey_handlers import (
 logger = logging.getLogger(__name__)
 
 
+def text_filter(msg) -> bool:
+    if text := msg.text:
+        return text in (
+            TelegramCommand.START.get_button_text(),
+            TelegramCommand.START.get_call_name(),
+        )
+    return False
+
+
 class TelegramBot:
 
     def __init__(self):
@@ -28,26 +36,33 @@ class TelegramBot:
 
     def setup_handlers(self):
         self.application.add_handler(
-            CommandHandler(TelegramCommand.START.value, start_command),
-        )
-        self.application.add_handler(
-            CommandHandler(TelegramCommand.STATUS.value, status_command)
-        )
-        self.application.add_handler(
-            CommandHandler(TelegramCommand.HELP.value, help_command),
+            MessageHandler(
+                filters.Text(
+                    TelegramCommand.START.get_all_select_command(),
+                ),
+                start_command,
+            ),
         )
         self.application.add_handler(
             MessageHandler(
-                filters.Regex(f'^{TelegramCommand.PROCESSING.get_button_text()}$'),
-                processing_command
+                filters.Text(TelegramCommand.STATUS.get_all_select_command()),
+                status_command,
             )
         )
-        # self.application.add_handler(
-        #     CommandHandler(
-        #         TelegramCommand.PROCESSING.value,
-        #         processing_command,
-        #     ),
-        # )
+        self.application.add_handler(
+            MessageHandler(
+                filters.Text(TelegramCommand.HELP.get_all_select_command()),
+                help_command,
+            )
+        )
+        self.application.add_handler(
+            MessageHandler(
+                filters.Text(
+                    TelegramCommand.PROCESSING.get_all_select_command()
+                ),
+                processing_command,
+            )
+        )
         self.application.add_handler(
             CommandHandler(
                 TelegramCommand.LOG.value,

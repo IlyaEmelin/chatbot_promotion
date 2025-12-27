@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Final, Tuple
 from enum import Enum, StrEnum
 
 MAX_LEN_STRING: Final = 60
@@ -56,6 +56,19 @@ class TelegramCommand(Enum):
             str: текст для отображения на кнопке
         """
         return self.__help_msg
+
+    def get_all_select_command(self) -> Tuple[str, str]:
+        """
+        Вернуть список команд которые будет проходить опрос
+
+        Returns:
+            str: имя кнопки
+            sta: имя команды
+        """
+        return (
+            self.get_button_text(),
+            self.get_call_name(),
+        )
 
 
 class SurveyStatus(Enum):
