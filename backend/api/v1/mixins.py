@@ -11,6 +11,7 @@ class SurveyQuestionStartMixin:
     """
     Миксин стартового вопроса
     """
+
     @staticmethod
     def _get_question_start() -> Question:
         """
