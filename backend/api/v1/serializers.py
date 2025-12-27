@@ -358,7 +358,7 @@ class SurveyUpdateSerializer(
         return SurveyReadSerializer(instance, context=self.context).data
 
 
-class SurveyRevertSerializer(ModelSerializer):
+class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
     """Сериализатор отката действия в опросе"""
 
     current_question_text = SerializerMethodField(read_only=True)
@@ -421,24 +421,6 @@ class SurveyRevertSerializer(ModelSerializer):
                             0
                         ].current_question
         return last_question
-
-    def get_answers(self, obj: Survey) -> list[str | None]:
-        """
-        Получить варианты ответа на текущий вопрос
-
-        Args:
-            obj: опрос
-
-        Returns:
-            list[str|None]: варианты ответа
-        """
-        if current_question := obj.current_question:
-            return list(
-                current_question.answers.all().values_list(
-                    "answer",
-                    flat=True,
-                )
-            )
 
     def update(
         self,
