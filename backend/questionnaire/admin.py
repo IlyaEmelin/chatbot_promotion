@@ -1,6 +1,5 @@
 import logging
 
-from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -10,6 +9,8 @@ from django.utils.html import format_html
 from django.urls import path, reverse
 from rest_framework.authtoken.models import TokenProxy
 from unfold.admin import ModelAdmin
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 
 from questionnaire.constant import SurveyStatus
 from questionnaire.models import (
@@ -337,6 +338,24 @@ class SurveyAdmin(ModelAdmin):
         html += "</div>"
         return format_html(html)
 
+    def has_module_permission(self, request):
+        """
+        Показывать раздел только персоналу и суперпользователям
+        """
+        return request.user.is_staff or request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+    def has_add_permission(self, request):
+        return self.has_module_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
 
 @admin.register(Document)
 class DocumentAdmin(ModelAdmin):
@@ -348,6 +367,13 @@ class DocumentAdmin(ModelAdmin):
         "file_type",
     )
     list_select_related = ("survey",)  # Добавляем для оптимизации запросов
+
+    def has_module_permission(self, request):
+        """Показывать раздел только персоналу"""
+        return request.user.is_staff or request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_module_permission(request)
 
     def has_add_permission(self, request):
         return False
@@ -447,6 +473,10 @@ class QuestionAdmin(ModelAdmin):
         "updated_uuid",
     )
 
+    def has_module_permission(self, request):
+        """Только суперпользователи видят раздел Вопросы"""
+        return request.user.is_superuser
+
 
 @admin.register(AnswerChoice)
 class AnswerChoiceAdmin(ModelAdmin):
@@ -459,6 +489,10 @@ class AnswerChoiceAdmin(ModelAdmin):
         "answer",
         "new_status",
     )
+
+    def has_module_permission(self, request):
+        """Только суперпользователи видят раздел Ответы"""
+        return request.user.is_superuser
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -487,13 +521,28 @@ class UserAdmin(ModelAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
 
+    def has_module_permission(self, request):
+        """Только суперпользователи видят раздел Пользователи"""
+        return request.user.is_superuser
+
     # При создании пользователя показываем форму с паролем и подтверждением
     add_fieldsets = (
         (
             None,
             {
                 "classes": ("wide",),
-                "fields": ("username", "password1", "password2"),
+                "fields": (
+                    "username",
+                    "password1",
+                    "password2",
+                    "first_name",
+                    "last_name",
+                    "patronymic",
+                    "birthday",
+                    "phone_number",
+                    "is_staff",
+                    "is_superuser",
+                ),
             },
         ),
     )
@@ -585,6 +634,22 @@ class CommentAdmin(ModelAdmin):
     readonly_fields = ("user_info", "created_at_formatted")
     exclude = ["created_at"]
     list_filter = ("survey", "user", "created_at")
+
+    def has_module_permission(self, request):
+        """Показывать раздел только персоналу"""
+        return request.user.is_staff or request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+    def has_add_permission(self, request):
+        return self.has_module_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return self.has_module_permission(request)
 
     def get_readonly_fields(self, request, obj=None):
         """Делаем поле пользователя readonly при редактировании."""
