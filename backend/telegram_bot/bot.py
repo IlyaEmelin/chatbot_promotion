@@ -18,15 +18,6 @@ from .survey_handlers import (
 logger = logging.getLogger(__name__)
 
 
-def text_filter(msg) -> bool:
-    if text := msg.text:
-        return text in (
-            TelegramCommand.START.get_button_text(),
-            TelegramCommand.START.get_call_name(),
-        )
-    return False
-
-
 class TelegramBot:
 
     def __init__(self):
