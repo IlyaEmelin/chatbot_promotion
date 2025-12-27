@@ -23,6 +23,7 @@ from common.utils.yadisk import YandexDiskUploader
 from questionnaire.models import Comment, Document, Question, Survey
 from questionnaire.constant import SurveyStatus
 from users.models import User
+from .mixins import SurveyQuestionStartMixin, SurveyQuestionAnswers
 
 
 logger = logging.getLogger(__name__)
@@ -31,45 +32,16 @@ logger = logging.getLogger(__name__)
 DECODE_ERROR = "Ошибка кодировки изображения - {}"
 
 
-class QuestionSerializer(ModelSerializer):
-    class Meta:
-        fields = "__all__"
-
-
 # Survey
-class SurveyReadSerializer(ModelSerializer):
+class SurveyReadSerializer(SurveyQuestionAnswers, ModelSerializer):
     """Сериализатор для чтения опроса"""
 
-    current_question_text = SlugRelatedField(
-        source="current_question",
-        slug_field="text",
-        read_only=True,
-    )
-    answers = SerializerMethodField()
+    current_question_text = SerializerMethodField(read_only=True)
+    answers = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Survey
         fields = ("id", "current_question_text", "answers", "result", "status")
-
-    def get_answers(self, obj) -> list[str | None]:
-        """
-        Варианты ответа
-
-        Args:
-            obj: объект
-
-        Returns:
-            list[str| None]: варианты ответа None произвольный ответ
-        """
-        if current_question := obj.current_question:
-            return list(
-                current_question.answers.all().values_list(
-                    "answer",
-                    flat=True,
-                )
-            )
-        else:
-            return []
 
 
 class SurveyRevertReadSerializer(SurveyReadSerializer):
@@ -93,8 +65,15 @@ class SurveyRevertReadSerializer(SurveyReadSerializer):
         return self.context.get("revert_success", False)
 
 
-class SurveyCreateSerializer(ModelSerializer):
+class SurveyCreateSerializer(
+    SurveyQuestionAnswers,
+    SurveyQuestionStartMixin,
+    ModelSerializer,
+):
     """Сериализатор для создания опроса"""
+
+    current_question_text = SerializerMethodField(read_only=True)
+    answers = SerializerMethodField(read_only=True)
 
     restart_question = BooleanField(
         required=False,
@@ -108,26 +87,13 @@ class SurveyCreateSerializer(ModelSerializer):
             "status",
             "result",
             "questions_version_uuid",
+            "current_question_text",
+            "answers",
         )
-
-    @staticmethod
-    def __get_question_start() -> Question:
-        """
-        Получить стартовый вопрос
-
-        Returns:
-            Question: стартовый вопрос
-        """
-        question_start = Question.objects.filter(type="start").first()
-        if not question_start:
-            text = "Не существует стартового вопроса для опроса."
-            logger.error(text)
-            raise ValidationError(text)
-        return question_start
 
     def create(self, validated_data):
         restart_question = validated_data.pop("restart_question", False)
-        question_start = self.__get_question_start()
+        question_start = self._get_question_start()
 
         survey_obj, created = Survey.objects.get_or_create(
             user=validated_data.get("user"),
@@ -140,7 +106,7 @@ class SurveyCreateSerializer(ModelSerializer):
             },
         )
         if created:
-            logger.debug("Создан опрос %", survey_obj)
+            logger.debug("Создан опрос %s", survey_obj)
         elif (
             restart_question
             and (
@@ -168,7 +134,11 @@ class SurveyCreateSerializer(ModelSerializer):
         return SurveyReadSerializer(instance, context=self.context).data
 
 
-class SurveyUpdateSerializer(ModelSerializer):
+class SurveyUpdateSerializer(
+    SurveyQuestionAnswers,
+    SurveyQuestionStartMixin,
+    ModelSerializer,
+):
     """Сериализатор для обновления опроса"""
 
     answer = CharField(required=False, allow_blank=True, allow_null=True)
@@ -188,52 +158,6 @@ class SurveyUpdateSerializer(ModelSerializer):
             "answers",
         )
         read_only_fields = ("current_question_text", "answers")
-
-    @staticmethod
-    def __get_question_start() -> Question:
-        """
-        Получить стартовый вопрос
-
-        Returns:
-            Question: стартовый вопрос
-        """
-        question_start = Question.objects.filter(type="start").first()
-        if not question_start:
-            text = "Не существует стартового вопроса для опроса."
-            logger.error(text)
-            raise ValidationError(text)
-        return question_start
-
-    def get_current_question_text(self, obj: Survey) -> str:
-        """
-        Получить текст текущего вопроса
-
-        Args:
-            obj: опрос
-
-        Returns:
-            str: текст текущего вопроса
-        """
-        return obj.current_question.text if obj.current_question else None
-
-    def get_answers(self, obj: Survey) -> list[str | None]:
-        """
-        Получить варианты ответа для текущего вопроса
-
-        Args:
-            obj: опрос
-
-        Returns:
-            list[str|None]: варианты ответа
-        """
-        if current_question := obj.current_question:
-            return list(
-                current_question.answers.all().values_list(
-                    "answer",
-                    flat=True,
-                )
-            )
-        return []
 
     def update(
         self,
@@ -256,7 +180,7 @@ class SurveyUpdateSerializer(ModelSerializer):
         )
         current_question = instance.current_question
         if current_question is None:
-            current_question = self.__get_question_start()
+            current_question = self._get_question_start()
             instance.current_question = current_question
             instance.status = SurveyStatus.NEW.value
             instance.result = []
@@ -434,15 +358,20 @@ class SurveyUpdateSerializer(ModelSerializer):
         return SurveyReadSerializer(instance, context=self.context).data
 
 
-class SurveyRevertSerializer(ModelSerializer):
+class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
     """Сериализатор отката действия в опросе"""
 
     current_question_text = SerializerMethodField(read_only=True)
     answers = SerializerMethodField(read_only=True)
+    add_telegram = BooleanField(
+        required=False,
+        default=True,
+    )
 
     class Meta:
         model = Survey
         fields = (
+            "add_telegram",
             "current_question_text",
             "answers",
         )
@@ -452,7 +381,7 @@ class SurveyRevertSerializer(ModelSerializer):
         )
 
     @staticmethod
-    def _get_last_question(instance: Survey) -> Question:
+    def _get_last_question(instance: Survey, validated_data) -> Question:
         """
         Получить прошлый вопрос
 
@@ -466,8 +395,19 @@ class SurveyRevertSerializer(ModelSerializer):
         if (current_question := instance.current_question) and (
             result := instance.result
         ):
+            add_telegram = validated_data.pop("add_telegram", True)
             question_text, answer_text = result[-2], result[-1]
             if previous_answers := current_question.previous_answers.all():
+                if not add_telegram and previous_answers:
+                    previous_answers = set(
+                        (
+                            previous_answer.current_question.previous_answers.first()
+                            if previous_answer.current_question.external_table_field_name
+                            == "User.telegram_username"
+                            else previous_answer
+                        )
+                        for previous_answer in previous_answers
+                    )
 
                 name_match_previous_answer = tuple(
                     previous_answer
@@ -498,24 +438,6 @@ class SurveyRevertSerializer(ModelSerializer):
                         ].current_question
         return last_question
 
-    def get_answers(self, obj: Survey) -> list[str | None]:
-        """
-        Получить варианты ответа на текущий вопрос
-
-        Args:
-            obj: опрос
-
-        Returns:
-            list[str|None]: варианты ответа
-        """
-        if current_question := obj.current_question:
-            return list(
-                current_question.answers.all().values_list(
-                    "answer",
-                    flat=True,
-                )
-            )
-
     def update(
         self,
         instance: Survey,
@@ -532,7 +454,7 @@ class SurveyRevertSerializer(ModelSerializer):
             Survey: обновляемый объект
 
         """
-        last_question = self._get_last_question(instance)
+        last_question = self._get_last_question(instance, validated_data)
 
         if last_question:
             instance.status = SurveyStatus.NEW.value

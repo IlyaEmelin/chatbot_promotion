@@ -99,7 +99,7 @@ def revert_survey_data(
     """
     serializer = SurveyRevertSerializer(
         instance=survey_obj,
-        data={},
+        data={"add_telegram": False},
         partial=True,
     )
     serializer.is_valid(raise_exception=True)
