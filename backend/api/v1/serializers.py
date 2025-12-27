@@ -23,6 +23,7 @@ from common.utils.yadisk import YandexDiskUploader
 from questionnaire.models import Comment, Document, Question, Survey
 from questionnaire.constant import SurveyStatus
 from users.models import User
+from .mixins import SurveyQuestionStartMixin
 
 
 logger = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ class SurveyRevertReadSerializer(SurveyReadSerializer):
         return self.context.get("revert_success", False)
 
 
-class SurveyCreateSerializer(ModelSerializer):
+class SurveyCreateSerializer(SurveyQuestionStartMixin, ModelSerializer):
     """Сериализатор для создания опроса"""
 
     restart_question = BooleanField(
@@ -110,24 +111,9 @@ class SurveyCreateSerializer(ModelSerializer):
             "questions_version_uuid",
         )
 
-    @staticmethod
-    def __get_question_start() -> Question:
-        """
-        Получить стартовый вопрос
-
-        Returns:
-            Question: стартовый вопрос
-        """
-        question_start = Question.objects.filter(type="start").first()
-        if not question_start:
-            text = "Не существует стартового вопроса для опроса."
-            logger.error(text)
-            raise ValidationError(text)
-        return question_start
-
     def create(self, validated_data):
         restart_question = validated_data.pop("restart_question", False)
-        question_start = self.__get_question_start()
+        question_start = self._get_question_start()
 
         survey_obj, created = Survey.objects.get_or_create(
             user=validated_data.get("user"),
@@ -168,7 +154,7 @@ class SurveyCreateSerializer(ModelSerializer):
         return SurveyReadSerializer(instance, context=self.context).data
 
 
-class SurveyUpdateSerializer(ModelSerializer):
+class SurveyUpdateSerializer(SurveyQuestionStartMixin, ModelSerializer):
     """Сериализатор для обновления опроса"""
 
     answer = CharField(required=False, allow_blank=True, allow_null=True)
@@ -188,21 +174,6 @@ class SurveyUpdateSerializer(ModelSerializer):
             "answers",
         )
         read_only_fields = ("current_question_text", "answers")
-
-    @staticmethod
-    def __get_question_start() -> Question:
-        """
-        Получить стартовый вопрос
-
-        Returns:
-            Question: стартовый вопрос
-        """
-        question_start = Question.objects.filter(type="start").first()
-        if not question_start:
-            text = "Не существует стартового вопроса для опроса."
-            logger.error(text)
-            raise ValidationError(text)
-        return question_start
 
     def get_current_question_text(self, obj: Survey) -> str:
         """
@@ -256,7 +227,7 @@ class SurveyUpdateSerializer(ModelSerializer):
         )
         current_question = instance.current_question
         if current_question is None:
-            current_question = self.__get_question_start()
+            current_question = self._get_question_start()
             instance.current_question = current_question
             instance.status = SurveyStatus.NEW.value
             instance.result = []
