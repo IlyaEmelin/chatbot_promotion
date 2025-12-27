@@ -339,6 +339,28 @@ def answer_choice_phone(
     )
 
 
+@pytest.fixture
+def answer_choice_user_set(
+    question: Question,
+    second_question: Question,
+) -> AnswerChoice:
+    """
+    Вариант ответа пользовательский
+
+    Args:
+        question: первый вопрос
+        second_question: второй вопрос
+
+    Returns:
+        AnswerChoice: пользовательский вариант ответа
+    """
+    return AnswerChoice.objects.create(
+        current_question=question,
+        next_question=second_question,
+        answer=None,  # Пользовательский ответ
+    )
+
+
 # survey
 @pytest.fixture
 def survey(user, question) -> Survey:

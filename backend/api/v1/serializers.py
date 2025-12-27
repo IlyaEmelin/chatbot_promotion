@@ -66,7 +66,9 @@ class SurveyRevertReadSerializer(SurveyReadSerializer):
 
 
 class SurveyCreateSerializer(
-    SurveyQuestionAnswers, SurveyQuestionStartMixin, ModelSerializer
+    SurveyQuestionAnswers,
+    SurveyQuestionStartMixin,
+    ModelSerializer,
 ):
     """Сериализатор для создания опроса"""
 
@@ -133,7 +135,7 @@ class SurveyCreateSerializer(
 
 
 class SurveyUpdateSerializer(
-    SurveyReadSerializer,
+    SurveyQuestionAnswers,
     SurveyQuestionStartMixin,
     ModelSerializer,
 ):
