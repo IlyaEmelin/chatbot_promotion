@@ -363,10 +363,15 @@ class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
 
     current_question_text = SerializerMethodField(read_only=True)
     answers = SerializerMethodField(read_only=True)
+    add_telegram = BooleanField(
+        required=False,
+        default=True,
+    )
 
     class Meta:
         model = Survey
         fields = (
+            "add_telegram",
             "current_question_text",
             "answers",
         )
@@ -376,7 +381,7 @@ class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
         )
 
     @staticmethod
-    def _get_last_question(instance: Survey) -> Question:
+    def _get_last_question(instance: Survey, validated_data) -> Question:
         """
         Получить прошлый вопрос
 
@@ -390,8 +395,19 @@ class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
         if (current_question := instance.current_question) and (
             result := instance.result
         ):
+            add_telegram = validated_data.pop("add_telegram", True)
             question_text, answer_text = result[-2], result[-1]
             if previous_answers := current_question.previous_answers.all():
+                if not add_telegram and previous_answers:
+                    previous_answers = set(
+                        (
+                            previous_answer.current_question.previous_answers.first()
+                            if previous_answer.current_question.external_table_field_name
+                            == "User.telegram_username"
+                            else previous_answer
+                        )
+                        for previous_answer in previous_answers
+                    )
 
                 name_match_previous_answer = tuple(
                     previous_answer
@@ -438,7 +454,7 @@ class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
             Survey: обновляемый объект
 
         """
-        last_question = self._get_last_question(instance)
+        last_question = self._get_last_question(instance, validated_data)
 
         if last_question:
             instance.status = SurveyStatus.NEW.value
