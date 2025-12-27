@@ -12,12 +12,12 @@
 
 #### Эндпоинты
 
-**Главная страница** - https://pro-dvizhenie.ddns.net \
-**Админ-панель** - https://pro-dvizhenie.ddns.net/pro-admin-dvizh \
+**Главная страница** - https://prodvizh.duckdns.org \
+**Админ-панель** - https://prodvizh.duckdns.org/pro-admin-dvizh \
 (Тестовый пользователь: login: **admin** password: **admin123**) \
-**АПИ** - https://pro-dvizhenie.ddns.net/api/v1 \
-**REDOC** - https://pro-dvizhenie.ddns.net/redoc \
-**Swagger** - https://pro-dvizhenie.ddns.net/swagger \
+**АПИ** - https://prodvizh.duckdns.org/api/v1 \
+**REDOC** - https://prodvizh.duckdns.org/redoc \
+**Swagger** - https://prodvizh.duckdns.org/swagger \
 **ТГ-Бот** - https://t.me/ProDvizhenie_5Bot
 
 <a name="anchor-about"></a>
@@ -73,7 +73,7 @@ DEBUG=true
 CSRF_TRUSTED=http://51.250.113.76:580,http://localhost:3000/
 
 # frontend
-VITE_API_URL=https://pro-dvizhenie.ddns.net/api/
+VITE_API_URL=https://prodvizh.duckdns.org/api/
 REACT_APP_DEBUG=true
 
 #db settings
