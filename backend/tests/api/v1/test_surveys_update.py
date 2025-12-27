@@ -551,6 +551,7 @@ class TestSurveyUpdate:
         self,
         authenticated_client: APIClient,
         survey: Survey,
+        question: Question,
     ):
         """Тест завершения опроса (когда next_question = None)"""
         # Создаем AnswerChoice без next_question для завершения
@@ -574,7 +575,7 @@ class TestSurveyUpdate:
         completed_survey = Survey.objects.get(id=survey.id)
         assert completed_survey.current_question is None
         assert completed_survey.status == SurveyStatus.WAITING_DOCS.value
-        assert len(completed_survey.result) == 2
+        assert completed_survey.result == [question.text, "final_answer"]
 
     def test_update_survey_unauthenticated(self, api_client, survey):
         """Тест обновления опроса без аутентификации"""
