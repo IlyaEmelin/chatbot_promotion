@@ -1,5 +1,5 @@
-from typing import Final, Tuple
-from enum import Enum, StrEnum
+from typing import Final
+from enum import Enum
 
 MAX_LEN_STRING: Final = 60
 STATUS_LEN: Final = 25
@@ -57,7 +57,7 @@ class TelegramCommand(Enum):
         """
         return self.__help_msg
 
-    def get_all_select_command(self) -> Tuple[str, str]:
+    def get_all_select_command(self) -> tuple[str, str]:
         """
         Вернуть список команд которые будет проходить опрос
 
