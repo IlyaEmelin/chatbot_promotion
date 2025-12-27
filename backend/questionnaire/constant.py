@@ -1,7 +1,7 @@
 from typing import Final
 from enum import Enum, StrEnum
 
-MAX_LEN_STRING: Final = 40
+MAX_LEN_STRING: Final = 60
 STATUS_LEN: Final = 25
 ANSWER_LEN: Final = 30
 QUESTION_TYPE_LEN: Final = 30
