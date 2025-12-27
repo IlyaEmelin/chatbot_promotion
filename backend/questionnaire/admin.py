@@ -1,5 +1,7 @@
 import logging
 
+from django import forms
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -459,9 +461,43 @@ class AnswerChoiceAdmin(ModelAdmin):
     )
 
 
+class CustomUserCreationForm(UserCreationForm):
+    """Форма для создания пользователя с поддержкой кастомных полей"""
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "password1", "password2")
+
+
+class CustomUserChangeForm(UserChangeForm):
+    """Форма для изменения пользователя"""
+
+    class Meta:
+        model = User
+        fields = "__all__"
+
+
 @admin.register(User)
 class UserAdmin(ModelAdmin):
-    model = User
+    """Админка пользователей"""
+
+    # model = User
+
+    # Используем правильные формы
+    add_form = CustomUserCreationForm
+    form = CustomUserChangeForm
+
+    # При создании пользователя показываем форму с паролем и подтверждением
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("username", "password1", "password2"),
+            },
+        ),
+    )
+
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (
@@ -503,13 +539,42 @@ class UserAdmin(ModelAdmin):
             },
         ),
     )
+
     list_display = (
         "username",
+        "email",
         "first_name",
         "last_name",
-        "email",
-        "telegram_username",
+        "is_active",
+        "is_staff",
+        "is_superuser",
     )
+
+    list_filter = ("is_staff", "is_superuser", "is_active")
+    search_fields = ("username", "first_name", "last_name", "email")
+    ordering = ("username",)
+
+    def get_fieldsets(self, request, obj=None):
+        """
+        Используем разные fieldset для создания и редактирования
+        """
+        if not obj:
+            # При создании нового пользователя
+            return self.add_fieldsets
+        return super().get_fieldsets(request, obj)
+
+    def get_form(self, request, obj=None, **kwargs):
+        """
+        Используем разные формы для создания и редактирования
+        """
+        defaults = {}
+        if obj is None:
+            defaults["form"] = self.add_form
+        else:
+            defaults["form"] = self.form
+
+        defaults.update(kwargs)
+        return super().get_form(request, obj, **defaults)
 
 
 @admin.register(Comment)
