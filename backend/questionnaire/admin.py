@@ -509,6 +509,7 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
         fields = "__all__"
+        read_only_fields = ("date_joined", "last_login")
 
 
 @admin.register(User)
@@ -520,6 +521,8 @@ class UserAdmin(ModelAdmin):
     # Используем правильные формы
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
+
+    readonly_fields = ["date_joined", "last_login"]
 
     def has_module_permission(self, request):
         """Только суперпользователи видят раздел Пользователи"""
@@ -584,7 +587,7 @@ class UserAdmin(ModelAdmin):
                     "is_staff",
                     "date_joined",
                     "last_login",
-                )
+                ),
             },
         ),
     )
