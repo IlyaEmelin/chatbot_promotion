@@ -50,13 +50,25 @@ export const submitAnswerAsync = createAsyncThunk(
     try {
       const response = await surveyAPI.submitAnswer(surveyId, answer);
       
-      // После отправки ответа получаем обновленную информацию об опросе
-      const surveys = await surveyAPI.getSurveys();
-      const currentSurvey = surveys.find(s => s.id === surveyId);
+      // Если PUT вернул обновлённый объект опроса — используем его, иначе делаем GET как fallback
+      let updatedSurvey: any = null;
+      if (response && (
+        Object.prototype.hasOwnProperty.call(response, 'current_question_text') ||
+        Object.prototype.hasOwnProperty.call(response, 'status') ||
+        Object.prototype.hasOwnProperty.call(response, 'answers') ||
+        Object.prototype.hasOwnProperty.call(response, 'result')
+      )) {
+        updatedSurvey = response as any;
+        console.log('🔍 submitAnswerAsync: using PUT response as updated survey');
+      } else {
+        const surveys = await surveyAPI.getSurveys();
+        updatedSurvey = surveys.find(s => s.id === surveyId);
+        console.log('🔍 submitAnswerAsync: fallback to GET /v1/surveys/ to obtain updated survey');
+      }
       
       return {
         submitResponse: response,
-        updatedSurvey: currentSurvey
+        updatedSurvey
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Unknown error');
@@ -85,6 +97,7 @@ const initialState: SurveyState = {
   answers: [],
   result: {},
   questionsVersionUuid: null,
+  status: undefined
 };
 
 export const surveySlice = createSlice({
@@ -98,6 +111,7 @@ export const surveySlice = createSlice({
         timestamp: new Date(),
       };
       state.messages.push(message);
+      state.status = 'processing'; // Обновляем статус при добавлении сообщения
     },
     
     clearError: (state) => {
@@ -130,6 +144,8 @@ export const surveySlice = createSlice({
         state.currentQuestion = currentSurvey.current_question_text;
         state.answers = currentSurvey.answers;
         state.result = currentSurvey.result;
+        // Сохраняем статус опроса, пришедший с бэкенда
+        state.status = currentSurvey.status || createResponse.status;
         
         // При рестарте очищаем историю сообщений
         if (isRestart) {
@@ -200,6 +216,8 @@ export const surveySlice = createSlice({
           state.currentQuestion = updatedSurvey.current_question_text;
           state.answers = updatedSurvey.answers;
           state.result = updatedSurvey.result;
+          // Обновляем статус опроса при получении обновлённого survey
+          state.status = updatedSurvey.status;
         }
         
         const isCompleted = !submitResponse.current_question_text || 
@@ -258,6 +276,8 @@ export const surveySlice = createSlice({
           state.currentQuestion = lastSurvey.current_question_text;
           state.answers = lastSurvey.answers;
           state.result = lastSurvey.result;
+          // Сохраняем статус опроса при загрузке существующего
+          state.status = lastSurvey.status;
           
           if (Array.isArray(lastSurvey.result) && lastSurvey.result.length > 0) {
             const messages: Message[] = [];
