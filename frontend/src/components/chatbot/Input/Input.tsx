@@ -10,7 +10,7 @@ import { useSelector } from '../../../hooks/store';
 
 export const Input: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isLoading, surveyId, isCompleted, messages } = useAppSelector(state => state.survey);
+  const { isLoading, surveyId, isCompleted, messages, status } = useAppSelector(state => state.survey);
   const [inputText, setInputText] = useState('');
   const [uploadedFilesCount, setUploadedFilesCount] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -25,10 +25,8 @@ export const Input: React.FC = () => {
     }
   }, [user]);
 
-  // ПРОВЕРЯЕМ current_question_text НА НАЛИЧИЕ waiting_docs
-  const lastBotMessage = [...messages].reverse().find(m => m.isBot);
-  const isWaitingDocs = lastBotMessage?.text?.includes('загрузим документы') || 
-                        lastBotMessage?.text?.toLowerCase().includes('документ');
+  // ПРОВЕРЯЕМ, НУЖНА ЛИ ЗАГРУЗКА ДОКУМЕНТОВ: используем статус от сервера
+  const isWaitingDocs = status === 'waiting_docs';
 
   // ЗАГРУЖАЕМ СУЩЕСТВУЮЩИЕ ДОКУМЕНТЫ ПРИ МОНТИРОВАНИИ
   useEffect(() => {
