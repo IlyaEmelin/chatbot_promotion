@@ -36,13 +36,13 @@ class TestSurveyCreate:
         assert response_data["current_question_text"] == question.text
         assert response_data["answers"] == []
         assert response_data["result"] == []
-        assert response_data["status"] == SurveyStatus.NEW.value
+        assert response_data["status"] == SurveyStatus.FILLING_SURVEY.value
 
         # Проверяем, что опрос создался в базе
         survey: Survey = Survey.objects.get(id=response_data["id"])
         assert survey.user == user
         assert survey.current_question == question
-        assert survey.status == SurveyStatus.NEW.value
+        assert survey.status == SurveyStatus.FILLING_SURVEY.value
         assert survey.result == []
 
     def test_create2_survey_success(
@@ -66,13 +66,13 @@ class TestSurveyCreate:
         assert response.data["current_question_text"] == question.text
         assert response.data["answers"] == ["вариант ответа"]
         assert response_data["result"] == []
-        assert response_data["status"] == SurveyStatus.NEW.value
+        assert response_data["status"] == SurveyStatus.FILLING_SURVEY.value
 
         # Проверяем, что опрос создался в базе
         survey = Survey.objects.get(id=response.data["id"])
         assert survey.user == user
         assert survey.current_question == question
-        assert survey.status == SurveyStatus.NEW.value
+        assert survey.status == SurveyStatus.FILLING_SURVEY.value
         assert survey.result == []
 
     def test_create_survey_unauthenticated(self, user, api_client, question):

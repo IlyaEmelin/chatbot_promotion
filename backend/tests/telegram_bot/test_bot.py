@@ -107,7 +107,7 @@ class TestKeyboardFunctions:
         """Тест создания клавиатуры помощи"""
 
         # Act
-        keyboard = _get_default_help_keyboard(SurveyStatus.NEW)
+        keyboard = _get_default_help_keyboard(SurveyStatus.FILLING_SURVEY)
 
         # Assert
         assert keyboard is not None

@@ -99,7 +99,7 @@ class SurveyCreateSerializer(
             user=validated_data.get("user"),
             defaults={
                 "current_question": question_start,
-                "status": SurveyStatus.NEW.value,
+                "status": SurveyStatus.FILLING_SURVEY.value,
                 "result": [],
                 "questions_version_uuid": question_start.updated_uuid,
                 "created_at": datetime.now(),
@@ -115,14 +115,14 @@ class SurveyCreateSerializer(
             )
             and survey_obj.status
             in (
-                SurveyStatus.PROCESSING.value,
+                SurveyStatus.SURVEY_COMPLETED.value,
                 SurveyStatus.COMPLETED.value,
                 SurveyStatus.REJECTED.value,
             )
             or survey_obj.current_question is None
         ):
             survey_obj.current_question = question_start
-            survey_obj.status = SurveyStatus.NEW.value
+            survey_obj.status = SurveyStatus.FILLING_SURVEY.value
             survey_obj.result = []
             survey_obj.docs.all().delete()
             survey_obj.created_at = datetime.now()
@@ -182,7 +182,7 @@ class SurveyUpdateSerializer(
         if current_question is None:
             current_question = self._get_question_start()
             instance.current_question = current_question
-            instance.status = SurveyStatus.NEW.value
+            instance.status = SurveyStatus.FILLING_SURVEY.value
             instance.result = []
             instance.questions_version_uuid = current_question.updated_uuid
             instance.created_at = datetime.now()
@@ -457,7 +457,7 @@ class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
         last_question = self._get_last_question(instance, validated_data)
 
         if last_question:
-            instance.status = SurveyStatus.NEW.value
+            instance.status = SurveyStatus.FILLING_SURVEY.value
             instance.result = instance.result[:-2]
 
             logger.debug(

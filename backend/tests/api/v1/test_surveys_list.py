@@ -50,7 +50,7 @@ class TestSurveyList:
         assert len(response.data) == 1
         response_question = response.data[0]
         assert response_question["current_question_text"] == question.text
-        assert response_question["status"] == SurveyStatus.NEW.value
+        assert response_question["status"] == SurveyStatus.FILLING_SURVEY.value
         assert response_question["result"] == []
         assert response_question["answers"] == []
 
@@ -66,7 +66,7 @@ class TestSurveyList:
         user_survey = Survey.objects.create(
             user=user,
             current_question=question,
-            status=SurveyStatus.NEW.value,
+            status=SurveyStatus.FILLING_SURVEY.value,
             result=[],
             questions_version_uuid="12345678-1234-1234-1234-123456789012",
         )
@@ -80,7 +80,7 @@ class TestSurveyList:
         other_survey = Survey.objects.create(
             user=other_user,
             current_question=question,
-            status=SurveyStatus.NEW.value,
+            status=SurveyStatus.FILLING_SURVEY.value,
             result=[],
             questions_version_uuid="32345678-1234-1234-1234-123456789012",
         )

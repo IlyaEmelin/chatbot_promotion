@@ -270,7 +270,7 @@ class TestSurveyUpdateExternalFields:
         survey = Survey.objects.create(
             user=user,
             current_question=question,
-            status=SurveyStatus.NEW.value,
+            status=SurveyStatus.FILLING_SURVEY.value,
             result=[],
             questions_version_uuid="32345678-1234-1234-1234-123456789012",
         )

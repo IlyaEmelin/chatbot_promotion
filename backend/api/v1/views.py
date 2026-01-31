@@ -73,7 +73,7 @@ class SurveyViewSet(
         """
         """Метод смены статуса опроса на <В обработке>."""
         survey = self.get_object()
-        survey.status = SurveyStatus.PROCESSING.value
+        survey.status = SurveyStatus.SURVEY_COMPLETED.value
         survey.save()
         return Response(self.get_serializer(survey).data)
 
