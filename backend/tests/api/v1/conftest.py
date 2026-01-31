@@ -381,7 +381,7 @@ def survey(user, question) -> Survey:
     return Survey.objects.create(
         user=user,
         current_question=question,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[],
         questions_version_uuid=question.updated_uuid,
         updated_at=question.updated_at,
@@ -415,7 +415,7 @@ def survey_with_custom_answer_start_step(
     return Survey.objects.create(
         user=user,
         current_question=question,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[],
         questions_version_uuid=question.updated_uuid,
         updated_at=question.updated_at,
@@ -450,7 +450,7 @@ def survey_with_custom_answer_second_step(
     return Survey.objects.create(
         user=user,
         current_question=second_question,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[question.text, answer_choice.answer],
         questions_version_uuid=(
             UUID(
@@ -490,7 +490,7 @@ def survey_with_custom_answer_second_step_reset(
     return Survey.objects.create(
         user=user,
         current_question=None,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[question.text, answer_choice.answer],
         questions_version_uuid=(
             UUID(
@@ -521,7 +521,7 @@ def survey_other_user(other_user, question) -> Survey:
     return Survey.objects.create(
         user=other_user,
         current_question=question,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[],
         questions_version_uuid=question.updated_uuid,
         updated_at=question.updated_at,
@@ -548,7 +548,7 @@ def survey_with_final_question(
     return Survey.objects.create(
         user=user,
         current_question=question_with_final_answer,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[],
         questions_version_uuid=question_with_final_answer.updated_uuid,
         updated_at=question_with_final_answer.updated_at,
@@ -588,7 +588,7 @@ def survey_with_change_status_question(
     return Survey.objects.create(
         user=user,
         current_question=question,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[],
         questions_version_uuid=question.updated_uuid,
         updated_at=question.updated_at,
@@ -662,7 +662,7 @@ def survey_question_phone(
     return Survey.objects.create(
         user=user,
         current_question=question_phone,
-        status=SurveyStatus.NEW.value,
+        status=SurveyStatus.FILLING_SURVEY.value,
         result=[],
         questions_version_uuid=question_phone.updated_uuid,
         updated_at=question_phone.updated_at,

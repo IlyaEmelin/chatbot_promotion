@@ -482,7 +482,7 @@ class TestSurveyUpdate:
         )
         assert response_data.get("answers") == [answer_choice.answer]
         assert response_data.get("result") == []
-        assert response_data.get("status") == SurveyStatus.NEW.value
+        assert response_data.get("status") == SurveyStatus.FILLING_SURVEY.value
 
         # Опрос не должен измениться
         unchanged_survey = Survey.objects.get(
@@ -527,7 +527,7 @@ class TestSurveyUpdate:
         )
         assert response_data.get("answers") == [answer_choice.answer]
         assert response_data.get("result") == []
-        assert response_data.get("status") == SurveyStatus.NEW.value
+        assert response_data.get("status") == SurveyStatus.FILLING_SURVEY.value
 
         updated_survey = Survey.objects.get(
             id=survey_with_custom_answer_second_step_reset.id

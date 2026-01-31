@@ -159,7 +159,7 @@ def change_processing(survey_obj: Survey) -> None:
     Args:
         survey_obj: объект опроса
     """
-    survey_obj.status = SurveyStatus.PROCESSING.value
+    survey_obj.status = SurveyStatus.SURVEY_COMPLETED.value
     survey_obj.save()
 
 

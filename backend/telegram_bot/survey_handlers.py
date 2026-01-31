@@ -132,14 +132,14 @@ async def _inform_msg(survey_obj: Survey, update) -> None:
         update:
     """
     match survey_obj.status:
-        case SurveyStatus.NEW.value:
+        case SurveyStatus.FILLING_SURVEY.value:
             await update.message.reply_text(
                 "📝 Опрос еще не завершен. "
                 "Пожалуйста, ответьте на все вопросы.\n"
                 f"Используйте {TelegramCommand.START.get_call_name()} для "
                 "продолжение опроса."
             )
-        case SurveyStatus.PROCESSING.value:
+        case SurveyStatus.SURVEY_COMPLETED.value:
             await update.message.reply_text(
                 "✅ Ваша заявка уже находится в обработке.\n"
                 "Ожидайте решения."
@@ -393,7 +393,7 @@ async def handle_message(
         logger.debug(f"Статус опроса: {survey_obj.status}")
         match survey_obj.status:
             case (
-                SurveyStatus.NEW.value
+                SurveyStatus.FILLING_SURVEY.value
                 | SurveyStatus.COMPLETED.value
                 | SurveyStatus.REJECTED.value
             ):

@@ -72,10 +72,10 @@ class TelegramCommand(Enum):
 
 
 class SurveyStatus(Enum):
-    NEW = (
-        "new",
-        "Новая",
-        "🆕",
+    FILLING_SURVEY = (
+        "filling_survey",
+        "Заполнение заявки",
+        "📝",
         (
             TelegramCommand.START,
             TelegramCommand.STATUS,
@@ -93,9 +93,19 @@ class SurveyStatus(Enum):
             TelegramCommand.HELP,
         ),
     )
-    PROCESSING = (
-        "processing",
-        "В обработке",
+    SURVEY_COMPLETED = (
+        "survey_completed",
+        "Опрос пройден",
+        "📥",
+        (
+            TelegramCommand.START,
+            TelegramCommand.STATUS,
+            TelegramCommand.HELP,
+        ),
+    )
+    IN_PROGRESS = (
+        "in_progress",
+        "В работе",
         "⏳",
         (
             TelegramCommand.START,

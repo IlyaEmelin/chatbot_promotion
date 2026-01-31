@@ -57,14 +57,14 @@ class TestSurveyRevert:
             "current_question_text": question.text,
             "answers": [],
             "result": [],
-            "status": "new",
+            "status": SurveyStatus.FILLING_SURVEY.value,
             "revert_success": False,
         }
 
         survey.refresh_from_db()
         assert survey.current_question == question
         assert survey.result == []
-        assert survey.status == SurveyStatus.NEW.value
+        assert survey.status == SurveyStatus.FILLING_SURVEY.value
         assert survey.questions_version_uuid == question.updated_uuid
         assert survey.updated_at == question.updated_at
 
@@ -89,7 +89,7 @@ class TestSurveyRevert:
             "current_question_text": question.text,
             "answers": [answer_choice.answer],
             "result": [],
-            "status": "new",
+            "status": SurveyStatus.FILLING_SURVEY.value,
             "revert_success": True,
         }
 
@@ -100,7 +100,7 @@ class TestSurveyRevert:
         assert survey_with_custom_answer_second_step.result == []
         assert (
             survey_with_custom_answer_second_step.status
-            == SurveyStatus.NEW.value
+            == SurveyStatus.FILLING_SURVEY.value
         )
         assert (
             survey_with_custom_answer_second_step.questions_version_uuid

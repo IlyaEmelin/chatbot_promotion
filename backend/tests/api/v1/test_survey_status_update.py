@@ -45,7 +45,7 @@ class TestSurveyProcessing:
 
         assert response.status_code == HTTP_200_OK
         survey.refresh_from_db()
-        assert survey.status == SurveyStatus.PROCESSING.value
+        assert survey.status == SurveyStatus.SURVEY_COMPLETED.value
 
     @pytest.mark.django_db
     def test_processing_unauthorized(self, api_client, survey):
@@ -88,7 +88,7 @@ class TestSurveyProcessing:
         self, authenticated_client, survey
     ):
         """Тест изменения статуса опроса, который уже в обработке"""
-        survey.status = SurveyStatus.PROCESSING.value
+        survey.status = SurveyStatus.SURVEY_COMPLETED.value
         survey.save()
         url = self.get_url(survey.id)
 
@@ -96,7 +96,7 @@ class TestSurveyProcessing:
 
         assert response.status_code == HTTP_200_OK
         survey.refresh_from_db()
-        assert survey.status == SurveyStatus.PROCESSING.value
+        assert survey.status == SurveyStatus.SURVEY_COMPLETED.value
 
     @pytest.mark.django_db
     def test_processing_different_users_surveys(
