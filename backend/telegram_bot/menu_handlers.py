@@ -136,14 +136,6 @@ async def load_command(
     """
     reply_markup = None
     if load_result is None:
-        #         help_text = f"""
-        # 📋 *Загрузка документов*
-        #
-        # Команды:
-        # {TelegramCommand.PROCESSING.get_button_text()} - завершить загрузку документов
-        # {TelegramCommand.HELP.get_call_name()} - помощь
-        # """
-
         help_text = f"""
 📋 *Загрузка документов*
 
