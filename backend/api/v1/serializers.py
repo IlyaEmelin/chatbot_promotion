@@ -61,10 +61,13 @@ class SurveyCreateSerializer(
 
     current_question_text = SerializerMethodField(read_only=True)
     answers = SerializerMethodField(read_only=True)
-
     restart_question = BooleanField(
         required=False,
         default=False,
+    )
+    add_telegram = BooleanField(
+        required=False,
+        default=True,
     )
 
     class Meta:
@@ -76,6 +79,7 @@ class SurveyCreateSerializer(
             "questions_version_uuid",
             "current_question_text",
             "answers",
+            "add_telegram",
         )
 
     def create(self, validated_data):
