@@ -153,6 +153,12 @@ export const Input: React.FC = () => {
     (isLoading || !inputText.trim()) ? styles.sendButtonDisabled : ''
   }`;
 
+  // НЕ ПОКАЗЫВАЕМ ИНПУТ, ЕСЛИ ЭТО ФИНАЛЬНОЕ СООБЩЕНИЕ О ЗАВЕРШЕНИИ
+  const isFinalMessage = lastMessage?.text === 'Спасибо! Ваша анкета отправлена на обработку. Мы свяжемся с вами в ближайшее время.';
+  if (isFinalMessage) {
+    return null;
+  }
+
   // ПОКАЗЫВАЕМ ПОЛЕ ВВОДА, ЕСЛИ НЕТ ОПЦИЙ ИЛИ ОДИН ИЗ ВАРИАНТОВ ОПЦИЙ = NULL
   const showInput = lastMessage?.options === undefined && !isLoading || lastMessage?.options && lastMessage.options.includes(null) && !isLoading
   

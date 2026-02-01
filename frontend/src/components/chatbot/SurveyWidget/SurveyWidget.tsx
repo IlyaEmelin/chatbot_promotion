@@ -17,48 +17,59 @@ const SurveyWidgetInner: React.FC = () => {
   const user = useAppSelector(getUser);
 
   useEffect(() => {
-    // Проверяем текущего пользователя
-    const authToken = sessionStorage.getItem('auth_token');
-    
-    // Если пользователь изменился - сбрасываем состояние
+    // Проверяем текущий токен авторизации и реагируем на его изменение
+    const authToken = sessionStorage.getItem('auth_token') || null;
+
+    // Если пользователь изменился - сбрасываем состояние и очищаем хранилище
     if (authToken !== currentUser) {
+      console.log('🔄 Auth token changed - clearing stored survey');
       storage.clear();
       dispatch(resetSurvey());
-      setCurrentUser(authToken || null);
-      return;
-    }
-    
-    // Загружаем сохраненное состояние только если пользователь тот же
-    if (authToken) {
-      const savedState = storage.load();
-      if (savedState) {
-        const messagesWithDates = savedState.messages.map(msg => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        }));
-        
-        dispatch(loadFromStorage({
-          ...savedState,
-          messages: messagesWithDates,
-          isLoading: false,
-          error: null
-        }));
+      setCurrentUser(authToken);
+      // Если новый токен есть, пробуем загрузить состояние для него
+      if (authToken) {
+        const savedState = storage.load();
+        if (savedState) {
+          const messagesWithDates = savedState.messages.map(msg => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }));
+
+          dispatch(loadFromStorage({
+            ...savedState,
+            messages: messagesWithDates,
+            isLoading: false,
+            error: null
+          }));
+        }
+      }
+    } else {
+      // Если токен не изменился, при первом монтировании можно загрузить состояние
+      if (authToken && !currentUser) {
+        const savedState = storage.load();
+        if (savedState) {
+          const messagesWithDates = savedState.messages.map(msg => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }));
+
+          dispatch(loadFromStorage({
+            ...savedState,
+            messages: messagesWithDates,
+            isLoading: false,
+            error: null
+          }));
+          setCurrentUser(authToken);
+        }
       }
     }
-  }, [dispatch, currentUser]);
+  }, [dispatch, user]);
 
-  // Следим за изменением токена авторизации
-  useEffect(() => {
-    const checkAuthInterval = setInterval(() => {
-      const authToken = sessionStorage.getItem('auth_token');
-      if (authToken !== currentUser) {
-        console.log('🔄 Auth token changed');
-        setCurrentUser(authToken || null);
-      }
-    }, 1000); // Проверяем каждую секунду
-
-    return () => clearInterval(checkAuthInterval);
-  }, [currentUser]);
+  window.addEventListener("message", (e) => {
+    if (e.data?.type === "openFromTilda") {
+        setIsOpen(true);
+    }
+  });
 
   return (
     <div className={styles.container}>
