@@ -14,10 +14,23 @@ class TestSurveyUpdateExternalFields:
     """
 
     def test_update_survey_saves_user_first_name(
-        self, authenticated_client, survey, question, second_question
+        self,
+        authenticated_client,
+        survey,
+        question,
+        second_question,
     ):
         """
         Тест сохранения имени пользователя через external_table_field_name.
+
+        Args:
+            authenticated_client: аутентифицированный клиент
+            survey: опрос
+            question: вопрос
+            second_question: второй вопрос
+
+        Returns:
+
         """
         # Создаем вопрос с external_table_field_name для сохранения в User
         # first_name

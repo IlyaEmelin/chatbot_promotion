@@ -53,7 +53,7 @@ class TestSurveyUpdate:
         assert response.status_code == HTTP_200_OK
 
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response_data["id"] == str(
             survey_with_custom_answer_start_step.id
         )
@@ -66,6 +66,7 @@ class TestSurveyUpdate:
             answer_choice.answer,
         ]
         assert response_data.get("status") == SurveyStatus.WAITING_DOCS.value
+        assert response_data["revert_success"] is True
 
         # Проверяем обновление опроса в базе
         updated_survey = Survey.objects.get(
@@ -111,7 +112,7 @@ class TestSurveyUpdate:
         assert response.status_code == HTTP_200_OK
 
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response_data["id"] == str(
             survey_with_custom_answer_second_step_reset.id
         )
@@ -124,6 +125,7 @@ class TestSurveyUpdate:
             answer_choice.answer,
         ]
         assert response_data.get("status") == SurveyStatus.WAITING_DOCS.value
+        assert response_data["revert_success"] is True
 
         updated_survey = Survey.objects.get(
             id=survey_with_custom_answer_second_step_reset.id
@@ -172,7 +174,7 @@ class TestSurveyUpdate:
         assert response.status_code == HTTP_200_OK
 
         response_data_change_status = response.data
-        assert len(response_data_change_status) == 5
+        assert len(response_data_change_status) == 6
         assert response_data_change_status["id"] == str(
             survey_with_change_status_question.id
         )
@@ -191,6 +193,7 @@ class TestSurveyUpdate:
             response_data_change_status.get("status")
             == SurveyStatus.REJECTED.value
         )
+        assert response_data_change_status["revert_success"] is True
 
         updated_survey = Survey.objects.get(
             id=survey_with_change_status_question.id
@@ -293,7 +296,7 @@ class TestSurveyUpdate:
 
         assert response.status_code == HTTP_200_OK
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response_data["id"] == str(survey.id)
         assert (
             response_data.get("current_question_text") == second_question.text
@@ -304,6 +307,7 @@ class TestSurveyUpdate:
             "мой_пользовательский_ответ",
         ]
         assert response_data.get("status") == SurveyStatus.WAITING_DOCS.value
+        assert response_data["revert_success"] is True
 
         # Проверяем обновление опроса в базе
         updated_survey = Survey.objects.get(id=survey.id)
@@ -341,7 +345,7 @@ class TestSurveyUpdate:
         assert response.status_code == HTTP_200_OK
 
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response_data["id"] == str(survey_with_final_question.id)
         assert response_data.get("current_question_text") is None
         assert response_data.get("answers") == []
@@ -350,6 +354,7 @@ class TestSurveyUpdate:
             answer_choice_final.answer,
         ]
         assert response_data.get("status") == SurveyStatus.WAITING_DOCS.value
+        assert response_data["revert_success"] is False
 
         updated_survey = Survey.objects.get(id=survey_with_final_question.id)
         assert updated_survey.current_question is None
@@ -391,6 +396,7 @@ class TestSurveyUpdate:
         assert response_set_phone.status_code == HTTP_200_OK
 
         response_data = response_set_phone.data
+        assert len(response_data) == 6
         assert response_data["id"] == str(survey_question_phone.id)
         assert (
             response_data.get("current_question_text") == second_question.text
@@ -401,6 +407,7 @@ class TestSurveyUpdate:
             new_phone_number,
         ]
         assert response_data.get("status") == SurveyStatus.WAITING_DOCS.value
+        assert response_data["revert_success"] is True
 
         updated_survey = Survey.objects.get(id=survey_question_phone.id)
         assert updated_survey.current_question == second_question
@@ -472,7 +479,7 @@ class TestSurveyUpdate:
         assert response.status_code == HTTP_200_OK
 
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response_data["id"] == str(
             survey_with_custom_answer_start_step.id
         )
@@ -483,6 +490,7 @@ class TestSurveyUpdate:
         assert response_data.get("answers") == [answer_choice.answer]
         assert response_data.get("result") == []
         assert response_data.get("status") == SurveyStatus.FILLING_SURVEY.value
+        assert response_data["revert_success"] is False
 
         # Опрос не должен измениться
         unchanged_survey = Survey.objects.get(
@@ -517,7 +525,7 @@ class TestSurveyUpdate:
         assert response.status_code == HTTP_200_OK
 
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response_data["id"] == str(
             survey_with_custom_answer_second_step_reset.id
         )
@@ -528,6 +536,7 @@ class TestSurveyUpdate:
         assert response_data.get("answers") == [answer_choice.answer]
         assert response_data.get("result") == []
         assert response_data.get("status") == SurveyStatus.FILLING_SURVEY.value
+        assert response_data["revert_success"] is False
 
         updated_survey = Survey.objects.get(
             id=survey_with_custom_answer_second_step_reset.id

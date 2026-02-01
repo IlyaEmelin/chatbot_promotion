@@ -38,31 +38,18 @@ class SurveyReadSerializer(SurveyQuestionAnswers, ModelSerializer):
 
     current_question_text = SerializerMethodField(read_only=True)
     answers = SerializerMethodField(read_only=True)
+    revert_success = SerializerMethodField()
 
     class Meta:
         model = Survey
-        fields = ("id", "current_question_text", "answers", "result", "status")
-
-
-class SurveyRevertReadSerializer(SurveyReadSerializer):
-    """Сериализатор для чтения отката"""
-
-    revert_success = SerializerMethodField()
-
-    class Meta(SurveyReadSerializer.Meta):
-        fields = SurveyReadSerializer.Meta.fields + ("revert_success",)
-
-    def get_revert_success(self, obj: Survey) -> bool:
-        """
-        Успешность отката
-
-        Args:
-            obj: опрос
-
-        Returns:
-            bool: успешность отката
-        """
-        return self.context.get("revert_success", False)
+        fields = (
+            "id",
+            "current_question_text",
+            "answers",
+            "result",
+            "status",
+            "revert_success",
+        )
 
 
 class SurveyCreateSerializer(
@@ -128,6 +115,8 @@ class SurveyCreateSerializer(
             survey_obj.created_at = datetime.now()
             survey_obj.save()
 
+        last_question = self._get_last_question(survey_obj, validated_data)
+        self.context["revert_success"] = bool(last_question)
         return survey_obj
 
     def to_representation(self, instance):
@@ -241,6 +230,9 @@ class SurveyUpdateSerializer(
                 instance.updated_at = next_question.updated_at
 
             instance.save()
+
+        last_question = self._get_last_question(instance, validated_data)
+        self.context["revert_success"] = bool(last_question)
         return instance
 
     @staticmethod
@@ -380,64 +372,6 @@ class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
             "answers",
         )
 
-    @staticmethod
-    def _get_last_question(instance: Survey, validated_data) -> Question:
-        """
-        Получить прошлый вопрос
-
-        Args:
-            instance: опрос
-
-        Returns:
-            Question: прошлый вопрос
-        """
-        last_question = None
-        if (current_question := instance.current_question) and (
-            result := instance.result
-        ):
-            add_telegram = validated_data.pop("add_telegram", True)
-            question_text, answer_text = result[-2], result[-1]
-            if previous_answers := current_question.previous_answers.all():
-                if not add_telegram and previous_answers:
-                    previous_answers = set(
-                        (
-                            previous_answer.current_question.previous_answers.first()
-                            if previous_answer.current_question.external_table_field_name
-                            == "User.telegram_username"
-                            else previous_answer
-                        )
-                        for previous_answer in previous_answers
-                    )
-
-                name_match_previous_answer = tuple(
-                    previous_answer
-                    for previous_answer in previous_answers
-                    if (
-                        previous_answer.answer == answer_text
-                        and previous_answer.current_question.text
-                        == question_text
-                    )
-                )
-                if len(name_match_previous_answer) == 1:
-                    last_question = name_match_previous_answer[
-                        0
-                    ].current_question
-                else:
-                    none_match_previous_answer = tuple(
-                        previous_answer
-                        for previous_answer in previous_answers
-                        if (
-                            previous_answer.answer is None
-                            and previous_answer.current_question.text
-                            == question_text
-                        )
-                    )
-                    if len(none_match_previous_answer) == 1:
-                        last_question = none_match_previous_answer[
-                            0
-                        ].current_question
-        return last_question
-
     def update(
         self,
         instance: Survey,
@@ -482,7 +416,7 @@ class SurveyRevertSerializer(SurveyQuestionAnswers, ModelSerializer):
         return instance
 
     def to_representation(self, instance):
-        return SurveyRevertReadSerializer(instance, context=self.context).data
+        return SurveyReadSerializer(instance, context=self.context).data
 
 
 class Base64ImageField(ImageField):
