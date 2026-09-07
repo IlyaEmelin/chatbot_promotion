@@ -12,7 +12,12 @@ from django.db.models import (
     TextField,
     UniqueConstraint,
     UUIDField,
+    IntegerField,
+    Case,
+    When,
+    Value,
 )
+
 from django.contrib.auth import get_user_model
 from uuid import uuid4
 
@@ -84,8 +89,6 @@ class Question(Model):
 
 class AnswerChoiceManager(models.Manager):
     def get_queryset(self):
-        from django.db.models import Case, When, Value, IntegerField
-
         return (
             super()
             .get_queryset()
