@@ -31,12 +31,13 @@ class TestSurveyCreate:
         assert response.status_code == HTTP_201_CREATED
 
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response_data["id"] is not None
         assert response_data["current_question_text"] == question.text
         assert response_data["answers"] == []
         assert response_data["result"] == []
         assert response_data["status"] == SurveyStatus.FILLING_SURVEY.value
+        assert response_data["revert_success"] is False
 
         # Проверяем, что опрос создался в базе
         survey: Survey = Survey.objects.get(id=response_data["id"])
@@ -61,12 +62,13 @@ class TestSurveyCreate:
         assert response.status_code == HTTP_201_CREATED
 
         response_data = response.data
-        assert len(response_data) == 5
+        assert len(response_data) == 6
         assert response.data["id"] is not None
         assert response.data["current_question_text"] == question.text
         assert response.data["answers"] == ["вариант ответа"]
         assert response_data["result"] == []
         assert response_data["status"] == SurveyStatus.FILLING_SURVEY.value
+        assert response_data["revert_success"] is False
 
         # Проверяем, что опрос создался в базе
         survey = Survey.objects.get(id=response.data["id"])
